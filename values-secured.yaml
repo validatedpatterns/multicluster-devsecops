@@ -31,7 +31,7 @@ clusterGroup:
     project: config-demo
     path: charts/all/config-demo
 
-  - name: acs-secured-cluster
+  - name: acs-secured
     namespace: stackrox
     project: secured
     path: common/acs/secured

@@ -47,7 +47,7 @@ clusterGroup:
     project: hub
     path: common/acs/central
 
-  - name: acs-secured-cluster
+  - name: acs-secured
     namespace: stackrox
     project: hub
     path: common/acs/secured
