@@ -6,9 +6,6 @@ metadata:
   name: stackrox-secured-cluster-services
   namespace: stackrox
 spec:
-  # TO-DO change to using findSecret Future API  
-  # clusterName: |
-  #   {{ fromSecret "open-cluster-management-agent" "hub-kubeconfig-secret" "cluster-name" | base64dec }}
   clusterName: {{ .Values.clusterGroup.clusterName }}                            
   auditLogs:
     collection: Auto
