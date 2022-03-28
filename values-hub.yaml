@@ -1,26 +1,38 @@
 clusterGroup:
   name: hub
   isHubCluster: true
+  # WH-TO-DO remove the following line once we figure out clusterName
+  clusterName: wh-central
 
-  namespaces:
+  namespaces:    
   - open-cluster-management
   - vault
   - golang-external-secrets
   - config-demo
-
-  subscriptions:
+  - rhacs-operator
+  - stackrox
+  - policies
+  
+  subscriptions:  #name -> packageName
   - name: advanced-cluster-management
     namespace: open-cluster-management
     channel: release-2.4
     csv: advanced-cluster-management.v2.4.1
 
-  projects:
+  - name: rhacs-operator  #packageName
+    namespace: openshift-operators # operator namespace
+    channel: rhacs-3.68
+    csv: rhacs-operator.v3.68.1
+
+# add the top level 
+# OpenShiftGitOps
+  projects:   
   - hub
   - config-demo
   - golang-external-secrets
 
-  applications:
-  - name: acm
+  applications:  
+  - name: acm   #aibitary
     namespace: open-cluster-management
     project: hub
     path: common/acm
@@ -29,6 +41,16 @@ clusterGroup:
       kind: ManagedClusterInfo
       jsonPointers:
         - /spec/loggingCA
+
+  - name: acs-central
+    namespace: stackrox
+    project: hub
+    path: common/acs/central
+
+  - name: acs-secured-cluster
+    namespace: stackrox
+    project: hub
+    path: common/acs/secured
 
   - name: vault
     namespace: vault
@@ -67,13 +89,17 @@ clusterGroup:
     path: charts/all/config-demo
 
   managedClusterGroups:
-  - name: region-one
+  - name: secured
     helmOverrides:
     - name: clusterGroup.isHubCluster
       value: false
     clusterSelector:
       matchLabels:
-        clusterGroup: region-one
+        clusterGroup: secured
+
+# I don't think this is needed but let's check
+#main:
+#  clusterGroupName: hub
 
 #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
 #
