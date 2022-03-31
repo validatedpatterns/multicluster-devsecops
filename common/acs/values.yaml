@@ -1,1 +1,2 @@
-# Unused for now
+global:
+  localClusterName: AUTOMATIC
