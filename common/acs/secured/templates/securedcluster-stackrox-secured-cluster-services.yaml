@@ -6,7 +6,7 @@ metadata:
   name: stackrox-secured-cluster-services
   namespace: stackrox
 spec:
-  clusterName: '{{ `{{ (lookup "cluster.open-cluster-management.io/v1" "ClusterClaims" "name").spec.value }}` }}'
+  clusterName: {{ .Values.global.localClusterName }}
   auditLogs:
     collection: Auto
   admissionControl:
