@@ -1,2 +1,2 @@
 global:
-  localClusterName: SECURED
+  localClusterName: acs-secured
