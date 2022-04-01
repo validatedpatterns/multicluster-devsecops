@@ -12,7 +12,7 @@ spec:
   disabled: false
   policy-templates:
     - objectDefinition:
-        apiVersion: policy.open-cluster-management.io/v1alpha1
+        apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
           name: {{ .name }}-clustergroup-config
