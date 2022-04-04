@@ -1,0 +1,38 @@
+global:
+  options:
+    useCSV: False
+    syncPolicy: Automatic
+    installPlanApproval: Automatic
+
+clusterGroup:
+  name: secured
+  isHubCluster: false
+  clusterName: wh-secured
+
+  namespaces:
+    - config-demo
+    - rhacs-operator
+    - stackrox
+    - policies
+
+  subscriptions:
+  - name: rhacs-operator  #packageName
+    namespace: openshift-operators # operator namespace
+    channel: rhacs-3.68
+    csv: rhacs-operator.v3.68.1
+
+  projects:
+    - config-demo
+    - secured
+
+  applications:
+  - name: config-demo
+    namespace: config-demo
+    project: config-demo
+    path: charts/all/config-demo
+
+  - name: acs-secured
+    namespace: stackrox
+    project: secured
+    path: common/acs/secured
+
