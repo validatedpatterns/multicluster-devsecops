@@ -1,8 +1,10 @@
 clusterGroup:
   name: hub
   isHubCluster: true
-  # WH-TO-DO remove the following line once we figure out clusterName
-  clusterName: wh-central
+
+  proposedOptions:
+    manageGitops: True
+    isHubCluster: True
 
   namespaces:    
   - open-cluster-management
