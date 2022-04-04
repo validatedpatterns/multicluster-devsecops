@@ -92,7 +92,7 @@ clusterGroup:
   - name: pipelines
     namespace: devsecops-ci
     project: hub
-    path: charts/datacenter/pipelines
+    path: charts/hub/pipelines
 
   - name: config-demo
     namespace: config-demo
