@@ -128,6 +128,8 @@ spec:
           value: hub.example.com
         - name: global.localClusterDomain
           value: region.example.com
+        - name: global.localClusterName
+          value: AUTOMATIC
   ignoreDifferences: [
   {
     "group": "internal.open-cluster-management.io",
@@ -176,6 +178,8 @@ spec:
           value: hub.example.com
         - name: global.localClusterDomain
           value: region.example.com
+        - name: global.localClusterName
+          value: AUTOMATIC
   syncPolicy:
     automated: {}
     #  selfHeal: true
