@@ -87,10 +87,10 @@ clusterGroup:
     project: golang-external-secrets
     path: charts/hub/golang-external-secrets
 
-#  - name: pipelines
-#    namespace: devsecops-ci
-#    project: hub
-#    path: charts/datacenter/pipelines
+  - name: pipelines
+    namespace: devsecops-ci
+    project: hub
+    path: charts/datacenter/pipelines
 
   - name: config-demo
     namespace: config-demo
