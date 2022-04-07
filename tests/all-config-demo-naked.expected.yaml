@@ -17,7 +17,7 @@ data:
           <body>
             <h1>
             Hub Cluster domain is 'hub.example.com' <br>
-            Pod is running on Local Cluster Domain 'region.example.com' <br>
+            Pod is running on Local Cluster Domain 'region-one.example.com' <br>
             </h1>
             <h2>
             The secret is <a href="/secret/secret">secret</a>
