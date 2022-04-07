@@ -8,7 +8,7 @@ configdemosecret:
 
 global:
   hubClusterDomain: hub.example.com
-  localClusterDomain: region-one.example.com
+  localClusterDomain: region.example.com
 
 clusterGroup:
   isHubCluster: true

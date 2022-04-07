@@ -1,8 +1,6 @@
 clusterGroup:
   name: hub
   isHubCluster: true
-  # WH-TO-DO remove the following line once we figure out clusterName
-  clusterName: wh-central
 
   namespaces:    
   - open-cluster-management
@@ -11,6 +9,7 @@ clusterGroup:
   - config-demo
   - rhacs-operator
   - stackrox
+  - devsecops-ci
   - policies
   
   subscriptions:  #name -> packageName
@@ -23,6 +22,9 @@ clusterGroup:
     namespace: openshift-operators # operator namespace
     channel: rhacs-3.68
     csv: rhacs-operator.v3.68.1
+
+  - name: openshift-pipelines-operator-rh
+    csv: redhat-openshift-pipelines.v1.5.2
 
 # add the top level 
 # OpenShiftGitOps
@@ -82,6 +84,11 @@ clusterGroup:
     namespace: golang-external-secrets
     project: golang-external-secrets
     path: charts/hub/golang-external-secrets
+
+  - name: pipelines
+    namespace: devsecops-ci
+    project: hub
+    path: charts/hub/pipelines
 
   - name: config-demo
     namespace: config-demo
