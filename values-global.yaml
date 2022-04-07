@@ -7,5 +7,17 @@ global:
     syncPolicy: Automatic
     installPlanApproval: Automatic
 
+  imageregistry:
+    account: PLAINTEXT
+    hostname: quay.io
+    type: quay
+
+  git:
+    hostname: github.com
+    account: PLAINTEXT
+    username: PLAINTEXT
+    email: SOMEWHERE@EXAMPLE.COM
+    dev_revision: main
+
 main:
   clusterGroupName: hub
