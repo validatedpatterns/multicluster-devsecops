@@ -1,0 +1,8 @@
+---
+# Source: pipelines/templates/environment.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: environment
+data:
+  DESCRIPTION: "Config keys for openshift-pipelines"
