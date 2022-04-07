@@ -2,10 +2,6 @@ clusterGroup:
   name: hub
   isHubCluster: true
 
-  proposedOptions:
-    manageGitops: True
-    isHubCluster: True
-
   namespaces:    
   - open-cluster-management
   - vault
