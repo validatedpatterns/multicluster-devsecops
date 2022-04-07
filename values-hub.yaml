@@ -11,6 +11,7 @@ clusterGroup:
   - stackrox
   - devsecops-ci
   - policies
+  - quay-enterprise
   
   subscriptions:  #name -> packageName
   - name: advanced-cluster-management
@@ -25,6 +26,11 @@ clusterGroup:
 
   - name: openshift-pipelines-operator-rh
     csv: redhat-openshift-pipelines.v1.5.2
+
+  - name: quay-operator
+    namespace: openshift-operators
+    channel: stable-3.6
+    csv: quay-operator.v3.6.4
 
 # add the top level 
 # OpenShiftGitOps
