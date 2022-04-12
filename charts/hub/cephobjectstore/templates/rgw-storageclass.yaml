@@ -1,0 +1,13 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: {{ .Values.ocs.storageClass.name }}
+  annotations:
+    description: Provides Object Bucket Claims (OBCs) using the RGW
+provisioner: openshift-storage.ceph.rook.io/bucket
+parameters:
+  objectStoreName: {{ .Values.ocs.storageClass.objectStoreName }}
+  objectStoreNamespace: {{ .Values.ocs.namespace }}
+  region: {{ .Values.ocs.storageClass.region }}
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
