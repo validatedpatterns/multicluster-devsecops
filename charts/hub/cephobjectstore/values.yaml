@@ -29,7 +29,7 @@ ocs:
       storageClassName: gp2
   storageClass:
     name: ocs-storagecluster-ceph-rgw
-    region: {{ .Values.hub.region }}
+    region: {{ .Values.global.hub.region }}
     objectStoreName: ocs-storagecluster-cephobjectstore
 
 toolbox:
