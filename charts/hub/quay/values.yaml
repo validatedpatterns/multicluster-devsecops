@@ -10,6 +10,16 @@ quay:
       managed: true
     - name: monitoring
       managed: true
+    - kind: postgres  
+      managed: true 
+    - kind: redis 
+      managed: true 
+    - kind: objectstorage 
+      managed: true 
+    - kind: route 
+      managed: true 
+    - kind: tls 
+      managed: true
   configBundleSecret:
     deploy: false
     name: quay-init-config-bundle-secret
