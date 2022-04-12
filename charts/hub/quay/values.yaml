@@ -10,15 +10,15 @@ quay:
       managed: true
     - name: monitoring
       managed: true
-    - kind: postgres  
+    - name: postgres  
       managed: true 
-    - kind: redis 
+    - name: redis 
       managed: true 
-    - kind: objectstorage 
+    - name: objectstorage 
       managed: true 
-    - kind: route 
+    - name: route 
       managed: true 
-    - kind: tls 
+    - name: tls 
       managed: true
   configBundleSecret:
     deploy: false
