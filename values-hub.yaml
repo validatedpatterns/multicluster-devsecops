@@ -107,6 +107,11 @@ clusterGroup:
     project: hub
     path: charts/hub/cephobjectstore
 
+  - name: quay-registry
+    namespace: quay-enterprise
+    project: hub
+    path: charts/hub/quay
+
   - name: config-demo
     namespace: config-demo
     project: config-demo
