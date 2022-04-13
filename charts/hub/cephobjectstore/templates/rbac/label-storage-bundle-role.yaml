@@ -4,7 +4,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
   name: label-storage-nodes
-  namespace: stackrox
+  namespace: {{ .Values.ocs.namespace }}
 rules:
   - apiGroups:
       - ""
@@ -14,14 +14,5 @@ rules:
       - get
       - list
       - create
-      - patch
-      - update
-  - apiGroups:
-      - platform.stackrox.io
-    resources:
-      - securedclusters
-    verbs:
-      - get
-      - list
       - patch
       - update
