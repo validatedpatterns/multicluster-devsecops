@@ -8,8 +8,8 @@ global:
     installPlanApproval: Automatic
 
   hub:
-    region: us-west-2 #us-east-1
-    clustername: wh-hub #OpenShift clusterName
+    region: us-west-2
+    clustername: wh-hub
     domain: blueprints.rhecoeng.com
 
   secure-registry:
