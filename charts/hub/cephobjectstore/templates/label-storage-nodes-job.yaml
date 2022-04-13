@@ -14,6 +14,7 @@ spec:
             - -c
             - |
               #!/usr/bin/env bash
+              set -e
               #if oc get nodes -l cluster.ocs.openshift.io/openshift-storage= &> /dev/null; then
               if oc get nodes -l cluster.ocs.openshift.io/openshift-storage= ; then
                  echo "Worker nodes already labeled for storage"
