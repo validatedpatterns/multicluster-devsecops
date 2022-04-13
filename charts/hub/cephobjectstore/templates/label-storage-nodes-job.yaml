@@ -3,7 +3,7 @@ kind: Job
 metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "2"
-  name: label-storage-nodes
+  name: label-storage-nodes-bundle
 spec:
   template:
     spec:
@@ -28,9 +28,9 @@ spec:
                 echo "Worker nodes labeled for storage"
               fi
           imagePullPolicy: Always
-          name: label-storage-nodes
+          name: label-storage-nodes-bundle
       dnsPolicy: ClusterFirst
       restartPolicy: Never
-#      serviceAccount: label-storage-nodes
-#      serviceAccountName: label-storage-nodes
+      serviceAccount: label-storage-nodes
+      serviceAccountName: label-storage-nodes
       terminationGracePeriodSeconds: 30
