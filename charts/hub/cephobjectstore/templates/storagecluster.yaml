@@ -1,0 +1,47 @@
+apiVersion: ocs.openshift.io/v1
+kind: StorageCluster
+metadata:
+  namespace: {{ .Values.ocs.namespace }}
+  name: ocs-storagecluster
+spec:
+  manageNodes: false
+  resources:
+    mon:
+      requests:
+        cpu: {{ .Values.ocs.mon.requests.cpu }}
+        memory: {{ .Values.ocs.mon.requests.memory }}
+    mds:
+      requests:
+        cpu: {{ .Values.ocs.mds.requests.cpu }}
+        memory: {{ .Values.ocs.mds.requests.memory }}
+    mgr:
+      requests:
+        cpu: {{ .Values.ocs.mgr.requests.cpu }}
+        memory: {{ .Values.ocs.mgr.requests.memory }}
+    noobaa-core:
+      requests:
+        cpu: {{ .Values.ocs.noobaacore.requests.cpu }}
+        memory: {{ .Values.ocs.noobaacore.requests.memory }}
+    noobaa-db:
+      requests:
+        cpu: {{ .Values.ocs.noobaadb.requests.cpu }}
+        memory: {{ .Values.ocs.noobaadb.requests.memory }}
+  storageDeviceSets:
+  - name: ocs-deviceset
+    count: 1
+    replica: 3
+    resources:
+      requests:
+        cpu: {{ .Values.ocs.osd.requests.cpu }}
+        memory: {{ .Values.ocs.osd.requests.memory }}
+    placement: {}
+    dataPVCTemplate:
+      spec:
+        storageClassName: {{ .Values.ocs.osd.pvc.storageClassName }}
+        accessModes:
+        - ReadWriteOnce
+        volumeMode: Block
+        resources:
+          requests:
+            storage: {{ .Values.ocs.osd.pvc.storage }}
+    portable: true

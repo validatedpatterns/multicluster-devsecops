@@ -11,6 +11,7 @@ clusterGroup:
   - stackrox
   - devsecops-ci
   - policies
+  - openshift-storage
   - quay-enterprise
   
   subscriptions:  #name -> packageName
@@ -26,6 +27,11 @@ clusterGroup:
 
   - name: openshift-pipelines-operator-rh
     csv: redhat-openshift-pipelines.v1.5.2
+
+  - name: odf-operator
+    namespace: openshift-storage
+    channel: stable-4.9
+    csv: odf-operator.v4.9.5
 
   - name: quay-operator
     namespace: openshift-operators
@@ -95,6 +101,16 @@ clusterGroup:
     namespace: devsecops-ci
     project: hub
     path: charts/hub/pipelines
+
+  - name: storage
+    namespace: openshift-storage
+    project: hub
+    path: charts/hub/cephobjectstore
+
+  - name: quay-registry
+    namespace: quay-enterprise
+    project: hub
+    path: charts/hub/quay
 
   - name: config-demo
     namespace: config-demo

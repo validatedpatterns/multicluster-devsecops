@@ -1,0 +1,238 @@
+---
+# Source: acs/templates/rbac/cluster-init-bundle-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: create-cluster-init
+  namespace: stackrox
+---
+# Source: acs/templates/rbac/cluster-init-bundle-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  name: create-cluster-init
+  namespace: stackrox
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - create
+      - patch
+      - update
+  - apiGroups:
+      - platform.stackrox.io
+    resources:
+      - securedclusters
+    verbs:
+      - get
+      - list
+      - patch
+      - update
+---
+# Source: acs/templates/rbac/cluster-init-bundle-rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: create-cluster-init
+  namespace: stackrox
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: create-cluster-init
+subjects:
+  - kind: ServiceAccount
+    name: create-cluster-init
+    namespace: stackrox
+---
+# Source: acs/templates/create-cluster-init-bundle-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  name: create-cluster-init-bundle
+spec:
+  template:
+    spec:
+      containers:
+        - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+          env:
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: central-htpasswd
+                  key: password
+          command:
+            - /bin/bash
+            - -c
+            - |
+              #!/usr/bin/env bash
+              if kubectl get secret/sensor-tls &> /dev/null; then
+                echo "cluster-init bundle has already been configured, doing nothing"
+                exit 0
+              else
+
+                # Wait for central to be ready
+                attempt_counter=0
+                max_attempts=20
+                echo "Waiting for central to be available..."
+                until $(curl -k --output /dev/null --silent --head --fail https://central); do
+                    if [ ${attempt_counter} -eq ${max_attempts} ];then
+                      echo "Max attempts reached"
+                      exit 1
+                    fi
+
+                    printf '.'
+                    attempt_counter=$(($attempt_counter+1))
+                    echo "Made attempt $attempt_counter, waiting..."
+                    sleep 5
+                done
+
+                echo "Configuring cluster-init bundle"
+                export DATA={\"name\":\"local-cluster\"}
+                curl -k -o /tmp/bundle.json -X POST -u "admin:$PASSWORD" -H "Content-Type: application/json" --data $DATA https://central/v1/cluster-init/init-bundles
+
+                echo "Bundle received"
+                cat /tmp/bundle.json
+
+                echo "Applying bundle"
+                # No jq in container, python to the rescue
+                cat /tmp/bundle.json | python3 -c "import sys, json; print(json.load(sys.stdin)['kubectlBundle'])" | base64 -d | oc apply -f -
+                # Touch SecuredCluster to force operator to reconcile
+                oc label SecuredCluster local-cluster cluster-init-job-status=created
+
+                echo "ACS Cluster init bundle generated and applied"
+              fi
+          imagePullPolicy: Always
+          name: create-cluster-init-bundle
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      serviceAccount: create-cluster-init
+      serviceAccountName: create-cluster-init
+      terminationGracePeriodSeconds: 30
+---
+# Source: acs/templates/central-stackrox-central-services.yaml
+apiVersion: platform.stackrox.io/v1alpha1
+kind: Central
+metadata:
+  namespace: stackrox
+  name: stackrox-central-services
+spec:
+  central:
+    exposure:
+      loadBalancer:
+        enabled: false
+        port: 443
+      nodePort:
+        enabled: false
+      route:
+        enabled: true
+    persistence:
+      persistentVolumeClaim:
+        claimName: stackrox-db
+  egress:
+    connectivityPolicy: Online
+  scanner:
+    analyzer:
+      scaling:
+        autoScaling: Enabled
+        maxReplicas: 5
+        minReplicas: 2
+        replicas: 3
+    scannerComponent: Enabled
+---
+# Source: acs/templates/policy/secured-cluster-secret-placement-binding.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: secured-cluster-secret-placement-binding
+  namespace: stackrox
+placementRef:
+  name: secured-cluster-secret-placement
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: secured-cluster-secret-policy
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+# Source: acs/templates/policy/secured-cluster-secret-placement-rule.yaml
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: secured-cluster-secret-placement
+  namespace: stackrox
+spec:
+  # This will go to all managed clusters
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
+---
+# Source: acs/templates/policy/secured-cluster-secret-policy.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: secured-cluster-secret-policy
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: secured-cluster-secret
+          annotations:
+            apps.open-cluster-management.io/deployables: "secret"
+        spec:
+          remediationAction: enforce
+          severity: med
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - rhacs-operator
+              - stackrox
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                kind: Secret
+                type: Opaque
+                metadata:
+                  name: admission-control-tls
+                  namespace: stackrox
+                apiVersion: v1
+                data:
+                  admission-control-cert.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "admission-control-tls").data "admission-control-cert.pem" hub}}'
+                  admission-control-key.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "admission-control-tls").data "admission-control-key.pem" hub}}'
+                  ca.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "admission-control-tls").data "ca.pem" hub}}'
+            - complianceType: musthave
+              objectDefinition:
+                kind: Secret
+                type: Opaque
+                metadata:
+                  name: sensor-tls
+                  namespace: stackrox
+                apiVersion: v1
+                data:
+                  sensor-cert.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "sensor-tls").data "sensor-cert.pem" hub}}'
+                  sensor-key.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "sensor-tls").data "sensor-key.pem" hub}}'
+                  ca.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "sensor-tls").data "ca.pem" hub}}'
+            - complianceType: musthave
+              objectDefinition:
+                kind: Secret
+                type: Opaque
+                metadata:
+                  name: collector-tls
+                  namespace: stackrox
+                apiVersion: v1
+                data:
+                  collector-cert.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "collector-tls").data "collector-cert.pem" hub}}'
+                  collector-key.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "collector-tls").data "collector-key.pem" hub}}'
+                  ca.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "collector-tls").data "ca.pem" hub}}'

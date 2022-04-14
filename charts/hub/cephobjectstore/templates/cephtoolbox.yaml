@@ -1,0 +1,7 @@
+apiVersion: ocs.openshift.io/v1
+kind: OCSInitialization
+metadata:
+  name: {{ .Values.toolbox.name }}
+  namespace: {{ .Values.ocs.namespace }}
+spec:
+  enableCephTools: {{ .Values.toolbox.enableCephTools }}

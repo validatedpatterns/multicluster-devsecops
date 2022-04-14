@@ -1,0 +1,25 @@
+quay:
+  namespace: quay-enterprise
+  adminuser: quayadmin
+  component:
+    - name: clair
+      managed: true
+    - name: horizontalpodautoscaler
+      managed: true
+    - name: mirror
+      managed: true
+    - name: monitoring
+      managed: true
+    - name: postgres  
+      managed: true 
+    - name: redis 
+      managed: true 
+    - name: objectstorage 
+      managed: true 
+    - name: route 
+      managed: true 
+    - name: tls 
+      managed: true
+  configBundleSecret:
+    deploy: false
+    name: quay-init-config-bundle-secret

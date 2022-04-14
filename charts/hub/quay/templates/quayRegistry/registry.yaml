@@ -1,0 +1,14 @@
+apiVersion: quay.redhat.com/v1
+kind: QuayRegistry
+metadata:
+  name: quay-registry
+  namespace: quay-enterprise
+spec:
+  components:
+{{- range .Values.quay.component }}
+    - kind: {{ .name }}
+      managed: {{ .managed | default "false" }}
+{{- end }}
+{{- if .Values.quay.configBundleSecret.deploy }}
+  configBundleSecret: {{ .Values.quay.configBundleSecret.name }}
+{{- end }}
