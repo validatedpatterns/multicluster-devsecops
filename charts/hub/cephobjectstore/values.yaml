@@ -35,3 +35,7 @@ ocs:
 toolbox:
   name: ocsinit
   enableCephTools: true
+
+global:
+  hub:
+    region: us-west-1
