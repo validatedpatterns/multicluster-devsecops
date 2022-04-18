@@ -25,14 +25,14 @@ global:
       bucketBaseName: "wh-my-bucket"
 
   imageregistry:
-    account: ipbabble
+    account: PLAINTEXT
     hostname: quay.io
     type: quay
 
   git:
     hostname: github.com
-    account: ipbabble
-    username: ipbabble
+    account: PLAINTEXT
+    username: PLAINTEXT
     email: SOMEWHERE@EXAMPLE.COM
     dev_revision: main
 
