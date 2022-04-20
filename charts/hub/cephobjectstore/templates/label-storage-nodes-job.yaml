@@ -32,5 +32,5 @@ spec:
       dnsPolicy: ClusterFirst
       restartPolicy: Never
       serviceAccount: openshift-gitops-argocd-application-controller
-      serviceAccountName: lopenshift-gitops-argocd-application-controller
+      serviceAccountName: openshift-gitops-argocd-application-controller
       terminationGracePeriodSeconds: 30
