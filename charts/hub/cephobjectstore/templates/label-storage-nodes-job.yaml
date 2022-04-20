@@ -2,7 +2,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
   name: label-storage-nodes-bundle
 spec:
   template:
@@ -30,6 +31,6 @@ spec:
           name: label-storage-nodes-bundle
       dnsPolicy: ClusterFirst
       restartPolicy: Never
-      serviceAccount: label-storage-nodes
-      serviceAccountName: label-storage-nodes
+      serviceAccount: openshift-gitops-argocd-application-controller
+      serviceAccountName: lopenshift-gitops-argocd-application-controller
       terminationGracePeriodSeconds: 30
