@@ -1,0 +1,11 @@
+apiVersion: quay.redhat.com/v1
+kind: QuayIntegration
+metadata:
+ name: quay
+spec:
+ clusterID: openshift
+ credentialsSecret:
+   name: quay-integration
+   namespace: openshift-operators
+ insecureRegistry: false
+ quayHostname: 'https://quay-quay-openshift-storage.apps.ocp1.openshift.fr'
