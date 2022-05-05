@@ -8,3 +8,4 @@ spec:
    name: quay-integration
    namespace: openshift-operators
  insecureRegistry: false
+ quayHostname: https://quay-registry-quay-quay-enterprise.apps.wh-hub.blueprints.rhecoeng.com
