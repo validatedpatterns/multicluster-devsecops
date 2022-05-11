@@ -30,8 +30,8 @@ clusterGroup:
 
   - name: odf-operator
     namespace: openshift-storage
-    channel: stable-4.9
-    csv: odf-operator.v4.9.5
+    channel: stable-4.10
+    csv: odf-operator.v4.10.1
 
   - name: quay-operator
     namespace: openshift-operators
