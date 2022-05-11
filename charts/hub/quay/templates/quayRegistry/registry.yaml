@@ -3,6 +3,8 @@ kind: QuayRegistry
 metadata:
   name: local-registry
   namespace: quay-enterprise
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
 spec:
   components:
 {{- range .Values.quay.component }}
