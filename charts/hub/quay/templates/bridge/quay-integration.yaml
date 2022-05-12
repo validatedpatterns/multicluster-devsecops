@@ -1,0 +1,13 @@
+apiVersion: quay.redhat.com/v1
+kind: QuayIntegration
+metadata:
+ name: quay
+ annotations:
+   argocd.argoproj.io/sync-wave: "7"
+spec:
+ clusterID: openshift
+ credentialsSecret:
+   name: quay-integration
+   namespace: openshift-operators
+ insecureRegistry: false
+ quayHostname: https://local-registry-quay-quay-enterprise.apps.wh-hub.blueprints.rhecoeng.com

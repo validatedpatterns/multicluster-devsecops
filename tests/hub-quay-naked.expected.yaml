@@ -1,17 +1,12 @@
 ---
-# Source: quay/templates/namespace/ns.yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: quay-enterprise
-spec: {}
----
 # Source: quay/templates/secret/secret.yaml
 apiVersion: v1
 kind: Secret
 metadata:
   name: quay-init-config-bundle-secret
   namespace: quay-enterprise
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
 type: Opaque
 stringData:
   config.yaml: |
@@ -19,7 +14,7 @@ stringData:
     BROWSER_API_CALLS_XHR_ONLY: false
     SUPER_USERS:
     - quayadmin
-    FEATURE_USER_CREATION: false
+    FEATURE_USER_CREATION: true
     ALLOW_PULLS_WITHOUT_STRICT_LOGGING: false
     AUTHENTICATION_TYPE: Database
     DEFAULT_TAG_EXPIRATION: 2w
@@ -29,18 +24,35 @@ stringData:
     FEATURE_MAILING: false
     REGISTRY_TITLE: Quay
     REGISTRY_TITLE_SHORT: Quay
-    SETUP_COMPLETE: true
+    SETUP_COMPLETE: false
     TAG_EXPIRATION_OPTIONS:
     - 2w
     TEAM_RESYNC_STALE_TIME: 60m
     TESTING: false
 ---
+# Source: quay/templates/bridge/quay-integration.yaml
+apiVersion: quay.redhat.com/v1
+kind: QuayIntegration
+metadata:
+ name: quay
+ annotations:
+   argocd.argoproj.io/sync-wave: "7"
+spec:
+ clusterID: openshift
+ credentialsSecret:
+   name: quay-integration
+   namespace: openshift-operators
+ insecureRegistry: false
+ quayHostname: https://local-registry-quay-quay-enterprise.apps.wh-hub.blueprints.rhecoeng.com
+---
 # Source: quay/templates/quayRegistry/registry.yaml
 apiVersion: quay.redhat.com/v1
 kind: QuayRegistry
 metadata:
-  name: quay-registry
+  name: local-registry
   namespace: quay-enterprise
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
 spec:
   components:
     - kind: clair
@@ -61,3 +73,4 @@ spec:
       managed: true
     - kind: tls
       managed: true
+  configBundleSecret: quay-init-config-bundle-secret
