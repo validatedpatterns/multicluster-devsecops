@@ -58,7 +58,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+#    argocd.argoproj.io/hook: PreSync
+#    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "3"
   name: label-storage-nodes-bundle
 spec:
   template:
@@ -89,6 +91,25 @@ spec:
       serviceAccount: label-storage-nodes
       serviceAccountName: label-storage-nodes
       terminationGracePeriodSeconds: 30
+---
+# Source: cephobjectstore/templates/noobaa-pv-backing-store.yaml
+apiVersion: noobaa.io/v1alpha1
+kind: BackingStore
+metadata:
+  finalizers:
+  - noobaa.io/finalizer
+  labels:
+    app: noobaa
+  name: noobaa-pv-backing-store
+  namespace: openshift-storage
+spec:
+  pvPool:
+    numVolumes: 1
+    resources:
+      requests:
+        storage: 50Gi 
+    storageClass: gp2 
+  type: pv-pool
 ---
 # Source: cephobjectstore/templates/cephobjectstore.yaml
 apiVersion: v1
@@ -181,6 +202,23 @@ kind: List
 metadata:
   resourceVersion: ""
   selfLink: ""
+---
+# Source: cephobjectstore/templates/noobaa.yaml
+apiVersion: noobaa.io/v1alpha1
+kind: NooBaa
+metadata:
+  name: noobaa
+  namespace: openshift-storage
+spec:
+ dbResources:
+   requests:
+     cpu: '0.1'
+     memory: 1Gi
+ dbType: postgres
+ coreResources:
+   requests:
+     cpu: '0.1'
+     memory: 1Gi
 ---
 # Source: cephobjectstore/templates/cephtoolbox.yaml
 apiVersion: ocs.openshift.io/v1
