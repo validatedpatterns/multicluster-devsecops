@@ -5,6 +5,8 @@ kind: ServiceAccount
 metadata:
   name: label-storage-nodes
   namespace: openshift-storage
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 ---
 # Source: cephobjectstore/templates/rgw-storageclass.yaml
 kind: StorageClass
@@ -102,6 +104,8 @@ metadata:
     app: noobaa
   name: noobaa-pv-backing-store
   namespace: openshift-storage
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   pvPool:
     numVolumes: 1
@@ -209,6 +213,8 @@ kind: NooBaa
 metadata:
   name: noobaa
   namespace: openshift-storage
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
 spec:
  dbResources:
    requests:
