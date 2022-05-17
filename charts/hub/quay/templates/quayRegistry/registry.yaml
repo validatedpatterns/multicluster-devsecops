@@ -1,10 +1,10 @@
 apiVersion: quay.redhat.com/v1
 kind: QuayRegistry
 metadata:
-  name: local-registry
+  name: quay-registry
   namespace: quay-enterprise
   annotations:
-    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   components:
 {{- range .Values.quay.component }}

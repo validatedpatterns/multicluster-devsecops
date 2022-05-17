@@ -10,7 +10,6 @@ clusterGroup:
   - rhacs-operator
   - stackrox
   - devsecops-ci
-  - policies
   - openshift-storage
   - quay-enterprise
   

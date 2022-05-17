@@ -1,0 +1,22 @@
+site:
+  name: example
+
+global:
+  pattern: multicluster-devsecops
+  repoURL: "https://github.com/pattern-clone/multicluster-devsecops"
+  targetRevision: main
+
+  git:
+    hostname: github.com
+    account: PLAINTEXT
+    username: PLAINTEXT
+    email: SOMEWHERE@EXAMPLE.COM
+    dev_revision: main
+
+  imageregistry:
+    account: PLAINTEXT
+    hostname: quay.io
+    type: quay
+
+clusterGroup:
+  name: testgroup
