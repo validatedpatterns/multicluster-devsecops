@@ -23,3 +23,6 @@ quay:
   configBundleSecret:
     deploy: true
     name: quay-init-config-bundle-secret
+
+job:
+  image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
