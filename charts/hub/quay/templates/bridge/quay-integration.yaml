@@ -10,4 +10,4 @@ spec:
    name: quay-integration
    namespace: openshift-operators
  insecureRegistry: false
- quayHostname: https://quay-registry-quay-enterprise.apps.{{ .Values.global.hub.clustername}}.{{ .Values.global.hub.domain}}
+ quayHostname: https://quay-registry-quay-quay-enterprise.apps.{{ .Values.global.hub.clustername}}.{{ .Values.global.hub.domain}}
