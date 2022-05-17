@@ -1,4 +1,13 @@
 ---
+# Source: quay/templates/rbac/quay-admin-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: quay-admin-sa
+  namespace: quay-enterprise
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+---
 # Source: quay/templates/secret/secret.yaml
 apiVersion: v1
 kind: Secret
@@ -30,6 +39,65 @@ stringData:
     TEAM_RESYNC_STALE_TIME: 60m
     TESTING: false
 ---
+# Source: quay/templates/rbac/quay-admin-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  name: quay-admin-role
+rules:
+  - apiGroups:
+      - "apps/v1"
+    resources:
+      - deployment
+    verbs:
+      - get
+      - list
+      - patch
+      - update
+---
+# Source: quay/templates/rbac/quay-admin-rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: quay-admin-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: quay-admin-role
+subjects:
+  - kind: ServiceAccount
+    name: quay-admin-sa
+    namespace: quay-enterprise
+---
+# Source: quay/templates/quayRegistry/job-noobaa-wait.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "-5"
+  name: wait-for-noobaa-deployment
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers: 
+      - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          oc wait --for=condition=available deploy/noobaa-endpoint -n openshift-storage --timeout=900s
+        name: noobaa-deployment-pause
+      dnsPolicy: ClusterFirst
+      activeDeadlineSeconds: 900
+      restartPolicy: Never
+      serviceAccount: openshift-gitops-argocd-application-controller
+      serviceAccountName: openshift-gitops-argocd-application-controller
+      terminationGracePeriodSeconds: 60
+---
 # Source: quay/templates/bridge/quay-integration.yaml
 apiVersion: quay.redhat.com/v1
 kind: QuayIntegration
@@ -43,16 +111,16 @@ spec:
    name: quay-integration
    namespace: openshift-operators
  insecureRegistry: false
- quayHostname: https://local-registry-quay-quay-enterprise.apps.wh-hub.blueprints.rhecoeng.com
+ quayHostname: https://quay-registry-quay-quay-enterprise.apps.NAME.DOMAIN
 ---
 # Source: quay/templates/quayRegistry/registry.yaml
 apiVersion: quay.redhat.com/v1
 kind: QuayRegistry
 metadata:
-  name: local-registry
+  name: quay-registry
   namespace: quay-enterprise
   annotations:
-    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   components:
     - kind: clair
