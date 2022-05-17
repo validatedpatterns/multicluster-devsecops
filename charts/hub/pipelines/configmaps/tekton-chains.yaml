@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chains-config
+  namespace: openshift-pipelines
+data:
+  artifacts:
+    oci:
+      storage:
+    taskrun:
+      format: tekton
+      storage: tekton
