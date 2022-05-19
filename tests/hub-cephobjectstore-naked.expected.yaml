@@ -8,21 +8,6 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 ---
-# Source: cephobjectstore/templates/rgw-storageclass.yaml
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: ocs-storagecluster-ceph-rgw
-  annotations:
-    description: Provides Object Bucket Claims (OBCs) using the RGW
-provisioner: openshift-storage.ceph.rook.io/bucket
-parameters:
-  objectStoreName: ocs-storagecluster-cephobjectstore
-  objectStoreNamespace: openshift-storage
-  region: us-west-1
-reclaimPolicy: Delete
-volumeBindingMode: Immediate
----
 # Source: cephobjectstore/templates/rbac/label-storage-bundle-role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -60,8 +45,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-#    argocd.argoproj.io/hook: PreSync
-#    argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "3"
   name: label-storage-nodes-bundle
 spec:
@@ -94,192 +77,31 @@ spec:
       serviceAccountName: label-storage-nodes
       terminationGracePeriodSeconds: 30
 ---
-# Source: cephobjectstore/templates/noobaa-pv-backing-store.yaml
-apiVersion: noobaa.io/v1alpha1
-kind: BackingStore
-metadata:
-  finalizers:
-  - noobaa.io/finalizer
-  labels:
-    app: noobaa
-  name: noobaa-pv-backing-store
-  namespace: openshift-storage
-  annotations:
-    argocd.argoproj.io/sync-wave: "4"
-spec:
-  pvPool:
-    numVolumes: 1
-    resources:
-      requests:
-        storage: 50Gi 
-    storageClass: gp2 
-  type: pv-pool
----
-# Source: cephobjectstore/templates/cephobjectstore.yaml
-apiVersion: v1
-items:
-- apiVersion: ceph.rook.io/v1
-  kind: CephObjectStore
-  metadata:
-    name: ocs-storagecluster-cephobjectstore
-    namespace: openshift-storage
-  spec:
-    dataPool:
-      crushRoot: ""
-      deviceClass: ""
-      erasureCoded:
-        algorithm: ""
-        codingChunks: 0
-        dataChunks: 0
-      failureDomain: zone
-      replicated:
-        size: 3
-    gateway:
-      #allNodes: false
-      instances: 2
-      placement:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: cluster.ocs.openshift.io/openshift-storage
-                operator: Exists
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - rook-ceph-rgw
-              topologyKey: kubernetes.io/hostname
-            weight: 100
-        tolerations:
-        - effect: NoSchedule
-          key: node.ocs.openshift.io/storage
-          operator: Equal
-          value: "true"
-      port: 80
-      resources:
-        limits:
-          cpu: "2"
-          memory: 4Gi
-        requests:
-          cpu: "1"
-          memory: 4Gi
-      securePort: 0
-      sslCertificateRef: ""
-    metadataPool:
-      crushRoot: ""
-      deviceClass: ""
-      erasureCoded:
-        algorithm: ""
-        codingChunks: 0
-        dataChunks: 0
-      failureDomain: zone
-      replicated:
-        size: 3
-- kind: Route
-  apiVersion: route.openshift.io/v1
-  metadata:
-    name: s3-rgw
-    namespace: openshift-storage
-    labels:
-      app: rook-ceph-rgw
-      ceph_daemon_id: ocs-storagecluster-cephobjectstore
-      rgw: ocs-storagecluster-cephobjectstore
-      rook_cluster: openshift-storage
-      rook_object_store: ocs-storagecluster-cephobjectstore
-  spec:
-    to:
-      kind: Service
-      name: rook-ceph-rgw-ocs-storagecluster-cephobjectstore
-      weight: 100
-    port:
-      targetPort: http
-    tls:
-      termination: edge
-      insecureEdgeTerminationPolicy: Allow
-    wildcardPolicy: None
-kind: List
-metadata:
-  resourceVersion: ""
-  selfLink: ""
----
-# Source: cephobjectstore/templates/noobaa.yaml
-apiVersion: noobaa.io/v1alpha1
-kind: NooBaa
-metadata:
-  name: noobaa
-  namespace: openshift-storage
-  annotations:
-    argocd.argoproj.io/sync-wave: "4"
-spec:
- dbResources:
-   requests:
-     cpu: '0.1'
-     memory: 1Gi
- dbType: postgres
- coreResources:
-   requests:
-     cpu: '0.1'
-     memory: 1Gi
----
-# Source: cephobjectstore/templates/cephtoolbox.yaml
-apiVersion: ocs.openshift.io/v1
-kind: OCSInitialization
-metadata:
-  name: ocsinit
-  namespace: openshift-storage
-spec:
-  enableCephTools: true
----
 # Source: cephobjectstore/templates/storagecluster.yaml
 apiVersion: ocs.openshift.io/v1
 kind: StorageCluster
 metadata:
-  namespace: openshift-storage
+  annotations:
+    uninstall.ocs.openshift.io/cleanup-policy: delete
+    uninstall.ocs.openshift.io/mode: graceful
+  finalizers:
+  - storagecluster.ocs.openshift.io
   name: ocs-storagecluster
+  namespace: openshift-storage
 spec:
-  manageNodes: false
-  resources:
-    mon:
-      requests:
-        cpu: 1
-        memory: 2Gi
-    mds:
-      requests:
-        cpu: 3
-        memory: 8Gi
-    mgr:
-      requests:
-        cpu: 1
-        memory: 3Gi
-    noobaa-core:
-      requests:
-        cpu: 1
-        memory: 4Gi
-    noobaa-db:
-      requests:
-        cpu: 1
-        memory: 4Gi
-  storageDeviceSets:
-  - name: ocs-deviceset
-    count: 1
-    replica: 3
-    resources:
-      requests:
-        cpu: 2
-        memory: 5Gi
-    placement: {}
-    dataPVCTemplate:
-      spec:
-        storageClassName: gp2
-        accessModes:
-        - ReadWriteOnce
-        volumeMode: Block
-        resources:
-          requests:
-            storage: 2Ti
-    portable: true
+  arbiter: {}
+  encryption:
+    kms: {}
+  externalStorage: {}
+  managedResources:
+    cephBlockPools: {}
+    cephCluster: {}
+    cephConfig: {}
+    cephDashboard: {}
+    cephFilesystems: {}
+    cephObjectStoreUsers: {}
+    cephObjectStores: {}
+  mirroring: {}
+  multiCloudGateway:
+    dbStorageClassName: gp2
+    reconcileStrategy: standalone
