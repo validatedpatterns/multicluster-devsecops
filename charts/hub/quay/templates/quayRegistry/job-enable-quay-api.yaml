@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "6"
+  name: enable-quay-api
+  namespace: openshift-gitops
+spec:
+  template:
+    spec:
+      containers: 
+      - image: {{ .Values.job.image }}
+        command:
+        - /bin/bash
+        - -c
+        - |
+          curl -X POST -k  https://quay-registry-quay-quay-enterprise.apps.{{ .Values.global.hub.clustername }}.{{ .Values.global.hub.domain }}/api/v1/user/initialize --header 'Content-Type: application/json' --data '{ "username": "{{ .Values.global.imageregistry.account }}", "password":"{{ .Values.global.imageregistry.password }}", "email": "{{ .Values.global.imageregistry.email }}", "access_token": true}'
+        name: quay-api-enablement
+      dnsPolicy: ClusterFirst
+      activeDeadlineSeconds: 900
+      restartPolicy: Never
+      serviceAccount: openshift-gitops-argocd-application-controller
+      serviceAccountName: openshift-gitops-argocd-application-controller
+      terminationGracePeriodSeconds: 60

@@ -31,3 +31,7 @@ global:
   hub:
     clustername: NAME
     domain: DOMAIN
+
+  imageregistry:
+    account: quayadmin
+    password: quayadmin123
