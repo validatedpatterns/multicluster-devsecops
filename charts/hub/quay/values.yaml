@@ -32,6 +32,7 @@ global:
     clustername: NAME
     domain: DOMAIN
 
-  imageregistry:
+  quay:
     account: quayadmin
     password: quayadmin123
+    email: quayadmin@example.com
