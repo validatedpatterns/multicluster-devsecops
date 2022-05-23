@@ -15,8 +15,10 @@ spec:
         - /bin/bash
         - -c
         - |
+          # Invoke API and add quay user to the API - initiates API
           JSONTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.apps.{{ .Values.global.hub.clustername }}.{{ .Values.global.hub.domain }}/api/v1/user/initialize --header 'Content-Type: application/json' --data '{ "username": "{{ .Values.global.quay.account }}", "password":"{{ .Values.global.quay.password }}", "email": "{{ .Values.global.quay.email }}", "access_token": true}') && \
           oc create secret generic quay-temp-token --from-literal=token=$JSONTOKEN
+          # Now extract the token and store in the Quay Integration secret in openshift-operators namespace
           TOKEN=$(oc extract secret/quay-temp-token --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}') && \
           oc create secret -n openshift-operators generic quay-integration --from-literal=token=$TOKEN
         name: quay-api-enablement

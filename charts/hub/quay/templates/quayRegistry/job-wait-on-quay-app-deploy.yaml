@@ -4,7 +4,7 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/sync-wave: "6"
-  name: wait-for-quay-app
+  name: wait-for-quay-app-deploy
   namespace: {{ .Values.quay.namespace }}
 spec:
   template:
