@@ -40,6 +40,22 @@ subjects:
     name: label-storage-nodes
     namespace: openshift-storage
 ---
+# Source: cephobjectstore/templates/rbac/quay-noobaa-deploy-rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: quay-noobaa-deploy-role
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: quay-admin-role
+subjects:
+  - kind: ServiceAccount
+    name: quay-admin-sa
+    namespace: openshift-storage
+---
 # Source: cephobjectstore/templates/label-storage-nodes-job.yaml
 apiVersion: batch/v1
 kind: Job
