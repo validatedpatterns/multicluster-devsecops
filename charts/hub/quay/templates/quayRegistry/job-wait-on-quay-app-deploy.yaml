@@ -15,7 +15,7 @@ spec:
         - /bin/bash
         - -c
         - |
-          oc wait --for=jsonpath='{.status.ingress[].conditions[].status}'=True route/quay-registry-quay -n {{ .Values.quay.namespace }} --timeout=300s 
+          oc wait --for=condition=available deploy/quay-registry-quay-app -n {{ .Values.quay.namespace }} --timeout=300s 
         name: wait-for-quay-route
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900

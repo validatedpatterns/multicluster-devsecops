@@ -2,8 +2,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/sync-wave: "7"
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/sync-wave: "15"
   name: enable-quay-api
   namespace: {{ .Values.quay.namespace }}
 spec:
@@ -15,11 +15,10 @@ spec:
         - /bin/bash
         - -c
         - |
-          JSONTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.apps.{{ .Values.global.hub.clustername }}.{{ .Values.global.hub.domain }}/api/v1/user/initialize --header 'Content-Type: application/json' --data '{ "username": "{{ .Values.global.quay.account }}", "password":"{{ .Values.global.quay.password }}", "email": "{{ .Values.global.quay.email }}", "access_token": true}')
-          oc create secret generic quaytoken --from-literal=token=$JSONTOKEN
-          TOKEN=$(oc extract secret/quaytoken --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}')
+          JSONTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.apps.{{ .Values.global.hub.clustername }}.{{ .Values.global.hub.domain }}/api/v1/user/initialize --header 'Content-Type: application/json' --data '{ "username": "{{ .Values.global.quay.account }}", "password":"{{ .Values.global.quay.password }}", "email": "{{ .Values.global.quay.email }}", "access_token": true}') && \
+          oc create secret generic quay-temp-token --from-literal=token=$JSONTOKEN
+          TOKEN=$(oc extract secret/quay-temp-token --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}') && \
           oc create secret -n openshift-operators generic quay-integration --from-literal=token=$TOKEN
-
         name: quay-api-enablement
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900
