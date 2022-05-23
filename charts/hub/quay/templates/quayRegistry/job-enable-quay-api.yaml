@@ -15,7 +15,7 @@ spec:
         - /bin/bash
         - -c
         - |
-          oc wait --for=jsonpath='{.status.ingress[].conditions[].status}'=True route/quay-registry-quay -n quay-enterprise --timeout=300s
+          oc wait --for=jsonpath='{.status.ingress[].conditions[].status}'=True route/quay-registry-quay -n quay-enterprise --timeout=300s && \
           TOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.apps.{{ .Values.global.hub.clustername }}.{{ .Values.global.hub.domain }}/api/v1/user/initialize --header 'Content-Type: application/json' --data '{ "username": "{{ .Values.global.quay.account }}", "password":"{{ .Values.global.quay.password }}", "email": "{{ .Values.global.quay.email }}", "access_token": true}')
           oc create secret generic quaytoken --from-literal=token=$TOKEN
           echo $TOKEN
