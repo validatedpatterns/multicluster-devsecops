@@ -3,7 +3,7 @@ kind: Job
 metadata:
   annotations:
     argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-wave: "7"
   name: enable-quay-api
   namespace: {{ .Values.quay.namespace }}
 spec:
@@ -15,9 +15,9 @@ spec:
         - /bin/bash
         - -c
         - |
-          oc wait --for=jsonpath='{.status.ingress[].conditions[].status}'=True route/quay-registry-quay -n {{ .Values.quay.namespace }} --timeout=300s && \
           TOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.apps.{{ .Values.global.hub.clustername }}.{{ .Values.global.hub.domain }}/api/v1/user/initialize --header 'Content-Type: application/json' --data '{ "username": "{{ .Values.global.quay.account }}", "password":"{{ .Values.global.quay.password }}", "email": "{{ .Values.global.quay.email }}", "access_token": true}')
-          oc create secret generic quaytoken --from-literal=token=$TOKEN
+          echo ${TOKEN} | grep access_token | cut -d : -f2 | awk -F\" '{print $2}')
+          oc create secret generic quaytoken --from-literal=token=$(TOKEN=$(oc extract secret/quaytoken --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}'))
           echo $TOKEN
         name: quay-api-enablement
       dnsPolicy: ClusterFirst
