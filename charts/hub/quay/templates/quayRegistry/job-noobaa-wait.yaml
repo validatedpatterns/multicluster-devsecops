@@ -5,7 +5,7 @@ metadata:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/sync-wave: "-1"
   name: wait-for-noobaa-deployment
-  namespace: openshift-gitops
+  namespace: quay-enterprise
 spec:
   template:
     spec:
@@ -20,6 +20,5 @@ spec:
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900
       restartPolicy: Never
-      serviceAccount: openshift-gitops-argocd-application-controller
-      serviceAccountName: openshift-gitops-argocd-application-controller
+      serviceAccountName: quay-admin-sa
       terminationGracePeriodSeconds: 60
