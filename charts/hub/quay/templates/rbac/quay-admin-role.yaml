@@ -6,7 +6,7 @@ metadata:
   name: quay-admin-role
 rules:
   - apiGroups:
-      - "apps/v1"
+      - "apps"
     resources:
       - deployment
     verbs:
@@ -23,12 +23,4 @@ rules:
       - get
       - create
       - list
-  - apiGroups:
-      - "route.openshift.io"
-    resources:
-      - routes
-    verbs:
-      - get
-      - list
-      - watch
 
