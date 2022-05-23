@@ -16,7 +16,7 @@ rules:
       - patch
       - update
   - apiGroups:
-      - "v1"
+      - ""
     resources:
       - secrets
     verbs:
