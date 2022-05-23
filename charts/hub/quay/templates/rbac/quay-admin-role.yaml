@@ -8,13 +8,14 @@ rules:
   - apiGroups:
       - "apps"
     resources:
-      - deployment
+      - deployments
     verbs:
       - get
       - create
       - list
       - patch
       - update
+      - watch
   - apiGroups:
       - ""
     resources:
