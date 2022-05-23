@@ -7,10 +7,15 @@ metadata:
 rules:
   - apiGroups:
       - "apps/v1"
+      - "v1"
+      - "route.openshift.io/v1"
     resources:
       - deployment
+      - secrets
+      - route
     verbs:
       - get
+      - create
       - list
       - patch
       - update
