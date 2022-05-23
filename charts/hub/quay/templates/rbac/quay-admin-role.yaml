@@ -24,10 +24,11 @@ rules:
       - create
       - list
   - apiGroups:
-      - "route.openshift.io/v1"
+      - "route.openshift.io"
     resources:
       - routes
     verbs:
       - get
       - list
+      - watch
 
