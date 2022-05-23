@@ -12,7 +12,7 @@ rules:
     resources:
       - deployment
       - secrets
-      - route
+      - routes
     verbs:
       - get
       - create
