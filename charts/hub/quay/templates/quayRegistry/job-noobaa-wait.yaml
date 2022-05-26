@@ -15,6 +15,8 @@ spec:
         - /bin/bash
         - -c
         - |
+          # We need to wait on noobaa and we know it takes about 30 seconds
+          sleep 30 
           oc wait --for=condition=available deploy/noobaa-endpoint -n openshift-storage --timeout=900s
         name: noobaa-deployment-pause
       dnsPolicy: ClusterFirst

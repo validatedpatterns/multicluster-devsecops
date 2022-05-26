@@ -1,0 +1,22 @@
+name: cli-tools
+
+build:
+  source:
+    git:
+      uri: https://github.com/hybrid-cloud-patterns/s2i-cli-tools
+    contextDir: containerfiles
+  strategy:
+    dockerStrategy:
+      from:
+        namespace: openshift
+        name: cli:latest
+  output:
+    to: 
+      name: cli-tools:latest
+
+imageStream:
+  namespace: openshift
+  tags:
+    name: latest
+    from:
+      name: openshift/cli

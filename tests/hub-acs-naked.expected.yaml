@@ -1,0 +1,25 @@
+---
+# Source: acs-integrations/templates/stackrox-api-token.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+  name: get-stackrox-api-token
+  namespace: stackrox
+spec:
+  template:
+    spec:
+      containers: 
+      - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          curl -sk -u "admin:$(oc extract secret/central-htpasswd --keys=password --to=-)" "https://central-stackrox.apps.wh-hub.blueprints.rhecoeng.com/v1/apitokens/generate" -d '{"name":"token name", "role": "Admin"}' | jq -r '.token'
+        name: stackrox-api-token
+      dnsPolicy: ClusterFirst
+      activeDeadlineSeconds: 300
+      restartPolicy: Never
+      serviceAccountName: create-cluster-init
+      terminationGracePeriodSeconds: 60
