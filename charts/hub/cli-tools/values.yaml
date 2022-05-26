@@ -19,4 +19,4 @@ imageStream:
   tags:
     name: latest
     from:
-      name: openshift/cli
+      name: image-registry.openshift-image-registry.svc:5000/openshift/cli
