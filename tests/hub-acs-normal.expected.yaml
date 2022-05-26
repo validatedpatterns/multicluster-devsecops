@@ -1,5 +1,5 @@
 ---
-# Source: acs-integrations/templates/stackrox-api-token.yaml
+# Source: acs-integrations/templates/job-stackrox-api-token.yaml
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -11,7 +11,7 @@ spec:
   template:
     spec:
       containers: 
-      - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+      - image: image-registry.openshift-image-registry.svc:5000/openshift/cli-tools:latest
         command:
         - /bin/bash
         - -c
