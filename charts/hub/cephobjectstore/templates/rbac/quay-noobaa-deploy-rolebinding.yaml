@@ -1,9 +1,9 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: quay-admin-binding
+  name: quay-noobaa-deploy-role
   annotations:
-    argocd.argoproj.io/sync-wave: "-5"
+    argocd.argoproj.io/sync-wave: "2"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -11,5 +11,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: quay-admin-sa
-    namespace: {{ .Values.quay.namespace }}
-
+    namespace: {{ .Values.ocs.namespace }}

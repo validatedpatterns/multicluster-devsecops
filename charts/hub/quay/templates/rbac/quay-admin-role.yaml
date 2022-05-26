@@ -2,15 +2,26 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "-5"
   name: quay-admin-role
 rules:
   - apiGroups:
-      - "apps/v1"
+      - "apps"
     resources:
-      - deployment
+      - deployments
     verbs:
       - get
+      - create
       - list
       - patch
       - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - create
+      - list
+

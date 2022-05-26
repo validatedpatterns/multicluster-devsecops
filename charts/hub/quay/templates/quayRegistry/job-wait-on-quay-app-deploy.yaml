@@ -3,9 +3,9 @@ kind: Job
 metadata:
   annotations:
     argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/sync-wave: "-1"
-  name: wait-for-noobaa-deployment
-  namespace: quay-enterprise
+    argocd.argoproj.io/sync-wave: "6"
+  name: wait-for-quay-app-deploy
+  namespace: {{ .Values.quay.namespace }}
 spec:
   template:
     spec:
@@ -15,10 +15,9 @@ spec:
         - /bin/bash
         - -c
         - |
-          # We need to wait on noobaa and we know it takes about 30 seconds
-          sleep 30 
-          oc wait --for=condition=available deploy/noobaa-endpoint -n openshift-storage --timeout=900s
-        name: noobaa-deployment-pause
+          oc wait --for=condition=available deploy/quay-registry-quay-app -n {{ .Values.quay.namespace }} --timeout=300s 
+          sleep 10
+        name: wait-for-quay-app
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900
       restartPolicy: Never

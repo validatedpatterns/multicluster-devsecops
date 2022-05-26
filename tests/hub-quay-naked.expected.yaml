@@ -6,7 +6,7 @@ metadata:
   name: quay-admin-sa
   namespace: quay-enterprise
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "-5"
 ---
 # Source: quay/templates/secret/secret.yaml
 apiVersion: v1
@@ -41,24 +41,36 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "-5"
   name: quay-admin-role
 rules:
   - apiGroups:
-      - "apps/v1"
+      - "apps"
     resources:
-      - deployment
+      - deployments
     verbs:
       - get
+      - create
       - list
       - patch
       - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - create
+      - list
 ---
 # Source: quay/templates/rbac/quay-admin-rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: quay-admin-binding
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -68,15 +80,15 @@ subjects:
     name: quay-admin-sa
     namespace: quay-enterprise
 ---
-# Source: quay/templates/quayRegistry/job-noobaa-wait.yaml
+# Source: quay/templates/quayRegistry/job-enable-quay-api.yaml
 apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
     argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/sync-wave: "-5"
-  name: wait-for-noobaa-deployment
-  namespace: openshift-gitops
+    argocd.argoproj.io/sync-wave: "15"
+  name: enable-quay-api
+  namespace: quay-enterprise
 spec:
   template:
     spec:
@@ -86,13 +98,72 @@ spec:
         - /bin/bash
         - -c
         - |
+          # Invoke API and add quay user to the API - initiates API
+          JSONTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.apps.NAME.DOMAIN/api/v1/user/initialize --header 'Content-Type: application/json' --data '{ "username": "quayadmin", "password":"quayadmin123", "email": "quayadmin@example.com", "access_token": true}') && \
+          oc create secret generic quay-temp-token --from-literal=token=$JSONTOKEN
+          # Now extract the token and store in the Quay Integration secret in openshift-operators namespace
+          TOKEN=$(oc extract secret/quay-temp-token --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}') && \
+          oc create secret -n openshift-operators generic quay-integration --from-literal=token=$TOKEN
+        name: quay-api-enablement
+      dnsPolicy: ClusterFirst
+      activeDeadlineSeconds: 900
+      restartPolicy: Never
+      serviceAccountName: quay-admin-sa
+      terminationGracePeriodSeconds: 60
+---
+# Source: quay/templates/quayRegistry/job-noobaa-wait.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "-1"
+  name: wait-for-noobaa-deployment
+  namespace: quay-enterprise
+spec:
+  template:
+    spec:
+      containers: 
+      - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          # We need to wait on noobaa and we know it takes about 30 seconds
+          sleep 30 
           oc wait --for=condition=available deploy/noobaa-endpoint -n openshift-storage --timeout=900s
         name: noobaa-deployment-pause
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900
       restartPolicy: Never
-      serviceAccount: openshift-gitops-argocd-application-controller
-      serviceAccountName: openshift-gitops-argocd-application-controller
+      serviceAccountName: quay-admin-sa
+      terminationGracePeriodSeconds: 60
+---
+# Source: quay/templates/quayRegistry/job-wait-on-quay-app-deploy.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "6"
+  name: wait-for-quay-app-deploy
+  namespace: quay-enterprise
+spec:
+  template:
+    spec:
+      containers: 
+      - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          oc wait --for=condition=available deploy/quay-registry-quay-app -n quay-enterprise --timeout=300s 
+          sleep 10
+        name: wait-for-quay-app
+      dnsPolicy: ClusterFirst
+      activeDeadlineSeconds: 900
+      restartPolicy: Never
+      serviceAccountName: quay-admin-sa
       terminationGracePeriodSeconds: 60
 ---
 # Source: quay/templates/bridge/quay-integration.yaml
@@ -101,7 +172,7 @@ kind: QuayIntegration
 metadata:
  name: quay
  annotations:
-   argocd.argoproj.io/sync-wave: "7"
+   argocd.argoproj.io/sync-wave: "8"
 spec:
  clusterID: openshift
  credentialsSecret:

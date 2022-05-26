@@ -31,3 +31,8 @@ global:
   hub:
     clustername: NAME
     domain: DOMAIN
+
+  quay:
+    account: quayadmin
+    password: quayadmin123
+    email: quayadmin@example.com
