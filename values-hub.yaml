@@ -107,7 +107,7 @@ clusterGroup:
     path: charts/hub/pipelines
 
   - name: cli-tools
-    namespace: openshift-gitops
+    namespace: openshift
     project: hub
     path: charts/hub/cli-tools
 

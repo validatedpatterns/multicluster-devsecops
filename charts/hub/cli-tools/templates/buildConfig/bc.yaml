@@ -2,6 +2,7 @@ apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
   name: {{ .Values.name }}
+  namespace: openshift
   labels:
     app: {{ .Values.name }}
 spec:
