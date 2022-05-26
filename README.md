@@ -9,6 +9,7 @@ for additional context and installation instructions
 * Red Hat OpenShift GitOps
 * Red Hat Advanced Cluster Management
 * Red Hat Advanced Cluster Security
+* Red Hat Open Data Foundation
 * Red Hat Quay
 * Red Hat OpenShift Pipelines
 * Hashicorp Vault (Community)
