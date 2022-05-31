@@ -15,8 +15,10 @@ spec:
         - /bin/bash
         - -c
         - |
-          oc wait --for=condition=available deploy/quay-registry-quay-app -n {{ .Values.quay.namespace }} --timeout=300s 
-          sleep 10
+          #oc wait --for=condition=available deploy/quay-registry-quay-app -n {{ .Values.quay.namespace }} --timeout=300s 
+          #sleep 10
+          # wait for the operator Quay Registry CR
+          oc wait QuayRegistry quay-registry --for=condition=Available=true
         name: wait-for-quay-app
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900
