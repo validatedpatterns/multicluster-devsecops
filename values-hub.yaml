@@ -134,6 +134,13 @@ clusterGroup:
     clusterSelector:
       matchLabels:
         clusterGroup: secured
+  - name: devel
+    helmOverrides:
+    - name: clusterGroup.isHubCluster
+      value: false
+    clusterSelector:
+      matchLabels:
+        clusterGroup: devel
 
 # I don't think this is needed but let's check
 #main:
