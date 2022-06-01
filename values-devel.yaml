@@ -7,7 +7,7 @@ global:
 clusterGroup:
   name: devel
   isHubCluster: false
-  clusterName: wh-devel
+  clusterName: wh-new-devel
 
   namespaces:
     - stackrox
