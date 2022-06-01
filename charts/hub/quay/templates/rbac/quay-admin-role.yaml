@@ -6,17 +6,6 @@ metadata:
   name: quay-admin-role
 rules:
   - apiGroups:
-      - "apps"
-    resources:
-      - deployments
-    verbs:
-      - get
-      - create
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
       - quay.redhat.com
     resources:
       - quayregistries
