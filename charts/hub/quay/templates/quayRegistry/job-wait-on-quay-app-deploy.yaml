@@ -16,7 +16,7 @@ spec:
         - -c
         - |
           #oc wait --for=condition=available deploy/quay-registry-quay-app -n {{ .Values.quay.namespace }} --timeout=300s 
-          # wait for the operator QuayRegistry CR
+          # wait for the operator QuayRegistry CR to be available
           oc wait QuayRegistry quay-registry --for=condition=Available=true
         name: wait-for-quay-app
       dnsPolicy: ClusterFirst
