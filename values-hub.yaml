@@ -127,13 +127,6 @@ clusterGroup:
     path: charts/hub/acs
 
   managedClusterGroups:
-  - name: secured
-    helmOverrides:
-    - name: clusterGroup.isHubCluster
-      value: false
-    clusterSelector:
-      matchLabels:
-        clusterGroup: secured
   - name: devel
     helmOverrides:
     - name: clusterGroup.isHubCluster
@@ -141,6 +134,14 @@ clusterGroup:
     clusterSelector:
       matchLabels:
         clusterGroup: devel
+  - name: secured
+    helmOverrides:
+    - name: clusterGroup.isHubCluster
+      value: false
+    clusterSelector:
+      matchLabels:
+        clusterGroup: secured
+
 
 # I don't think this is needed but let's check
 #main:
