@@ -13,6 +13,7 @@ clusterGroup:
     - stackrox
     - devsecops-ci
     - policies
+    - rhacs-operator
   
   subscriptions:
   - name: rhacs-operator  #packageName
