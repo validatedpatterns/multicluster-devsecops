@@ -11,6 +11,7 @@ clusterGroup:
 
   namespaces:
     - stackrox
+    - devsecops-ci
   
   subscriptions:
   - name: rhacs-operator  #packageName
