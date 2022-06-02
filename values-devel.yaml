@@ -44,11 +44,6 @@ clusterGroup:
     project: devel
     path: charts/hub/pipelines
 
-  - name: acs-integrations
-    namespace: stackrox
-    project: devel
-    path: charts/hub/acs
-
   - name: quay-integration
     namespace: openshift-operators
     project: secured
