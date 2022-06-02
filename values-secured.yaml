@@ -41,3 +41,7 @@ clusterGroup:
     project: secured
     path: common/acs/secured
 
+  - name: quay-integration
+    namespace: openshift-operators
+    project: secured
+    path: charts/region/quay
