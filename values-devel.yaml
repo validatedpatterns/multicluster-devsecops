@@ -7,11 +7,10 @@ global:
 clusterGroup:
   name: devel
   isHubCluster: false
-  clusterName: wh-new-devel
+  clusterName: wh-devel
 
   namespaces:
     - stackrox
-    - devsecops-ci
     - policies
     - rhacs-operator
   
