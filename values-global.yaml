@@ -9,7 +9,7 @@ global:
 
   hub:
     region: us-west-2
-    clustername: wh-hub
+    clustername: wh-central
     domain: blueprints.rhecoeng.com
 
   secure-registry:
