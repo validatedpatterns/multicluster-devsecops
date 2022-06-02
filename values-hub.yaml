@@ -130,17 +130,28 @@ clusterGroup:
   - name: devel
     helmOverrides:
     - name: clusterGroup.isHubCluster
-      value: false
+      value: "false"
     clusterSelector:
       matchLabels:
         clusterGroup: devel
+      matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
+
   - name: secured
     helmOverrides:
     - name: clusterGroup.isHubCluster
-      value: false
+      value: "false"
     clusterSelector:
       matchLabels:
         clusterGroup: secured
+      matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
 
 
 # I don't think this is needed but let's check
