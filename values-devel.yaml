@@ -5,21 +5,23 @@ global:
     installPlanApproval: Automatic
 
 clusterGroup:
-  name: secured
+  name: devel
   isHubCluster: false
-  clusterName: wh-secured
+  clusterName: wh-devel
 
   namespaces:
-    - config-demo
-    - rhacs-operator
     - stackrox
     - policies
-
+    - rhacs-operator
+  
   subscriptions:
   - name: rhacs-operator  #packageName
     namespace: openshift-operators # operator namespace
     channel: rhacs-3.68
     csv: rhacs-operator.v3.68.1
+
+  - name: openshift-pipelines-operator-rh
+    csv: redhat-openshift-pipelines.v1.5.2
 
   - name: quay-bridge-operator
     namespace: openshift-operators
@@ -27,21 +29,22 @@ clusterGroup:
     csv: quay-bridge-operator.v3.6.6
 
   projects:
-    - config-demo
     - secured
+    - devel
 
   applications:
-  - name: config-demo
-    namespace: config-demo
-    project: config-demo
-    path: charts/all/config-demo
-
   - name: acs-secured
     namespace: stackrox
     project: secured
     path: common/acs/secured
 
+  - name: pipelines
+    namespace: devsecops-ci
+    project: devel
+    path: charts/hub/pipelines
+
   - name: quay-integration
     namespace: openshift-operators
     project: secured
     path: charts/region/quay
+

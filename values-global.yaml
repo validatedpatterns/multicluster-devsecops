@@ -7,11 +7,6 @@ global:
     syncPolicy: Automatic
     installPlanApproval: Automatic
 
-  hub:
-    region: us-west-2
-    clustername: wh-hub
-    domain: blueprints.rhecoeng.com
-
   secure-registry:
     namespace: "openshift-storage"
 

@@ -14,7 +14,7 @@ spec:
         - /bin/bash
         - -c
         - |
-          curl -sk -u "admin:$(oc extract secret/central-htpasswd --keys=password --to=-)" "https://central-stackrox.apps.wh-hub.blueprints.rhecoeng.com/v1/apitokens/generate" -d '{"name":"token name", "role": "Admin"}' | jq -r '.token'
+          curl -sk -u "admin:$(oc extract secret/central-htpasswd --keys=password --to=-)" "https://central-stackrox.{{ .Values.global.hubClusterDomain }}/v1/apitokens/generate" -d '{"name":"token name", "role": "Admin"}' | jq -r '.token'
         name: stackrox-api-token
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 300

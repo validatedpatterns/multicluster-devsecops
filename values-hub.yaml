@@ -37,11 +37,6 @@ clusterGroup:
     channel: stable-3.6
     csv: quay-operator.v3.6.4
 
-  - name: quay-bridge-operator
-    namespace: openshift-operators
-    channel: stable-3.6
-    csv: quay-bridge-operator.v3.6.6
-
 # add the top level 
 # OpenShiftGitOps
   projects:   
@@ -132,13 +127,32 @@ clusterGroup:
     path: charts/hub/acs
 
   managedClusterGroups:
+  - name: devel
+    helmOverrides:
+    - name: clusterGroup.isHubCluster
+      value: "false"
+    clusterSelector:
+      matchLabels:
+        clusterGroup: devel
+      matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
+
   - name: secured
     helmOverrides:
     - name: clusterGroup.isHubCluster
-      value: false
+      value: "false"
     clusterSelector:
       matchLabels:
         clusterGroup: secured
+      matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
+
 
 # I don't think this is needed but let's check
 #main:
