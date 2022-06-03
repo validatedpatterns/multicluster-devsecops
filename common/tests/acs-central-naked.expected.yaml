@@ -179,6 +179,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
   name: secured-cluster-secret-policy
+  namespace: stackrox
 spec:
   remediationAction: enforce
   disabled: false
