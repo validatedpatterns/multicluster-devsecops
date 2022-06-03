@@ -49,3 +49,7 @@ clusterGroup:
     project: secured
     path: charts/region/quay
 
+  - name: acs-integrations
+    namespace: stackrox
+    project: hub
+    path: charts/hub/acs
