@@ -51,5 +51,5 @@ clusterGroup:
 
   - name: acs-integrations
     namespace: stackrox
-    project: hub
+    project: devel
     path: charts/hub/acs
