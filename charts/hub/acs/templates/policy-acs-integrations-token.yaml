@@ -1,7 +1,7 @@
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: policy-acs-integrations-secret
+  name: policy-acs-integrations-token
   annotations:
     argocd.argoproj.io/sync-wave: "7"
 spec:
@@ -12,7 +12,7 @@ spec:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: rox-api-token
+          name: acs-api-token-configpolicy
           annotations:
             apps.open-cluster-management.io/deployables: "secret"
         spec:
@@ -29,22 +29,22 @@ spec:
                 kind: Secret
                 type: Opaque
                 metadata:
-                  name: rox-api-token
+                  name: acs-api-token
                   namespace: stackrox
                 apiVersion: v1
                 data:
-                  application.properties: '{{ `{{hub (lookup "v1" "Secret" "stackrox" "rox-api-token").data.token hub}}` }}'
+                  application.properties: '{{ `{{hub (lookup "v1" "Secret" "stackrox" "acs-api-token").data.token hub}}` }}'
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
-  name: acs-integrations-secret-placement-binding
+  name: acs-integrations-token-placement-binding
 placementRef:
-  name: acs-integrations-secret-placement
+  name: acs-integrations-token-placement
   kind: PlacementRule
   apiGroup: apps.open-cluster-management.io
 subjects:
-  - name: policy-acs-integrations-secret
+  - name: policy-acs-integrations-token
     kind: Policy
     apiGroup: policy.open-cluster-management.io
 ---
@@ -52,7 +52,7 @@ subjects:
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
-  name: acs-integrations-secret-placement
+  name: acs-integrations-token-placement
 spec:
   # This will go to all clusters
   clusterConditions:

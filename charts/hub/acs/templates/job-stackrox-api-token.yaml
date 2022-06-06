@@ -15,8 +15,7 @@ spec:
         - -c
         - |
           ACSTOKEN=$(curl -sk -u "admin:$(oc extract secret/central-htpasswd --keys=password --to=-)" "https://central-stackrox.{{ .Values.global.hubClusterDomain }}/v1/apitokens/generate" -d '{"name":"token name", "role": "Admin"}' | jq -r '.token')
-          echo $ACSTOKEN
-          oc create secret -n stackrox generic rox-api-token --from-literal=token=$ACSTOKEN
+          oc create secret -n stackrox generic acs-api-token --from-literal=token=$ACSTOKEN
         name: stackrox-api-token
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 300
