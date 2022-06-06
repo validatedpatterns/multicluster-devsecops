@@ -59,6 +59,13 @@ clusterGroup:
     namespace: stackrox
     project: hub
     path: common/acs/central
+    ignoreDifferences:
+    - group: internal.open-cluster-management.io
+      kind: Policy
+      jsonPointers:
+        - /metadata
+        - /spec 
+        - /status  
 
   - name: acs-secured
     namespace: stackrox
@@ -125,6 +132,13 @@ clusterGroup:
     namespace: stackrox
     project: hub
     path: charts/hub/acs
+    ignoreDifferences:
+    - group: internal.open-cluster-management.io
+      kind: Policy
+      jsonPointers:
+        - /metadata
+        - /spec 
+        - /status 
 
   managedClusterGroups:
   - name: devel
