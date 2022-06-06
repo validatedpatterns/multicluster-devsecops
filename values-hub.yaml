@@ -60,10 +60,11 @@ clusterGroup:
     project: hub
     path: common/acs/central
     ignoreDifferences:
-    - group: internal.open-cluster-management.io
-      kind: ManagedClusterInfo
-      jsonPointers:
-        - /spec/loggingCA
+    - group: *
+      kind: *
+      managedFieldsManagers:
+      - governance-policy-status-sync
+      - governance-policy-propagator
 
   - name: acs-secured
     namespace: stackrox
