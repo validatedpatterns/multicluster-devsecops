@@ -48,8 +48,3 @@ clusterGroup:
     namespace: openshift-operators
     project: secured
     path: charts/region/quay
-
-  - name: acs-integrations
-    namespace: stackrox
-    project: devel
-    path: charts/hub/acs
