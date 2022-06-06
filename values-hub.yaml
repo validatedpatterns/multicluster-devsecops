@@ -61,13 +61,9 @@ clusterGroup:
     path: common/acs/central
     ignoreDifferences:
     - group: internal.open-cluster-management.io
-      name: secured-cluster-secret-policy
-      namespace: stackrox
-      kind: Policy
+      kind: ManagedClusterInfo
       jsonPointers:
-        - /metadata
-        - /spec/loggingCA 
-        - /status  
+        - /spec/loggingCA
 
   - name: acs-secured
     namespace: stackrox
