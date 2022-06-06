@@ -60,8 +60,8 @@ clusterGroup:
     project: hub
     path: common/acs/central
     ignoreDifferences:
-    - group: "*"
-      kind: "*"
+    - group: internal.open-cluster-management.io
+      kind: Policy
       managedFieldsManagers:
       - governance-policy-status-sync
       - governance-policy-propagator
