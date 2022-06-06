@@ -33,7 +33,7 @@ spec:
                   namespace: stackrox
                 apiVersion: v1
                 data:
-                  application.properties: '{{ `{{hub (lookup "v1" "Secret" "stackrox" "acs-api-token").data.token hub}}` }}'
+                  token: '{{ `{{hub (lookup "v1" "Secret" "stackrox" "acs-api-token").data.token hub}}` }}'
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
