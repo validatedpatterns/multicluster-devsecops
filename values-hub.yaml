@@ -134,12 +134,9 @@ clusterGroup:
     ignoreDifferences:
     - group: internal.open-cluster-management.io
       kind: Policy
-      name: policy-acs-integrations-token
-      namespace: stackrox
-      jsonPointers:
-        - /metadata
-        - /spec/loggingCA 
-        - /status 
+      managedFieldsManagers:
+      - governance-policy-status-sync
+      - governance-policy-propagator
 
   managedClusterGroups:
   - name: devel
