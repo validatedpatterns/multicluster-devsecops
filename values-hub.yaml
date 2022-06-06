@@ -64,7 +64,7 @@ clusterGroup:
       kind: Policy
       jsonPointers:
         - /metadata
-        - /spec 
+        - /spec/loggingCA 
         - /status  
 
   - name: acs-secured
@@ -137,7 +137,7 @@ clusterGroup:
       kind: Policy
       jsonPointers:
         - /metadata
-        - /spec 
+        - /spec/loggingCA 
         - /status 
 
   managedClusterGroups:
