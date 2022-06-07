@@ -26,8 +26,12 @@ clusterGroup:
 
   - name: quay-bridge-operator
     namespace: openshift-operators
-    channel: stable-3.6
-    csv: quay-bridge-operator.v3.6.6
+    channel: stable-3.7
+    csv: quay-bridge-operator.v3.7
+
+  - name: openshiftartifactoryha-operator
+    channel: alpha
+    cvs: artifactory-ha-operator.v1.1.20
 
   projects:
     - secured

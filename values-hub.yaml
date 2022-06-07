@@ -24,9 +24,6 @@ clusterGroup:
     channel: rhacs-3.68
     csv: rhacs-operator.v3.68.1
 
-  - name: openshift-pipelines-operator-rh
-    csv: redhat-openshift-pipelines.v1.5.2
-
   - name: odf-operator
     namespace: openshift-storage
     channel: stable-4.10
