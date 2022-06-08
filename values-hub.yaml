@@ -99,11 +99,6 @@ clusterGroup:
     project: golang-external-secrets
     path: common/golang-external-secrets
 
-  - name: pipelines
-    namespace: devsecops-ci
-    project: hub
-    path: charts/hub/pipelines
-
   - name: cli-tools
     namespace: openshift
     project: hub
