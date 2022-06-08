@@ -31,8 +31,8 @@ clusterGroup:
 
   - name: quay-operator
     namespace: openshift-operators
-    channel: stable-3.6
-    csv: quay-operator.v3.6.4
+    channel: stable-3.7
+    csv: quay-operator.v3.7
 
 # add the top level 
 # OpenShiftGitOps
