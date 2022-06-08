@@ -32,7 +32,6 @@ clusterGroup:
 
   - name: openshiftartifactoryha-operator
     namespace: artifactory
-    channel: alpha
     cvs: artifactory-ha-operator.v1.1.20
 
   projects:
