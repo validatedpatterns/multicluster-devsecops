@@ -19,6 +19,7 @@ spec:
           oc wait QuayRegistry quay-registry --for=condition=Available=true
         name: wait-for-quay-app
       dnsPolicy: ClusterFirst
+      initialDelaySeconds: 240
       activeDeadlineSeconds: 900
       restartPolicy: Never
       serviceAccountName: quay-admin-sa
