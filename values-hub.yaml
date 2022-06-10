@@ -16,16 +16,13 @@ clusterGroup:
   subscriptions:  #name -> packageName
   - name: advanced-cluster-management
     namespace: open-cluster-management
-    channel: release-2.4
-    csv: advanced-cluster-management.v2.4.1
+    channel: release-2.5
+    csv: advanced-cluster-management.v2.5
 
   - name: rhacs-operator  #packageName
     namespace: openshift-operators # operator namespace
     channel: rhacs-3.68
     csv: rhacs-operator.v3.68.1
-
-  - name: openshift-pipelines-operator-rh
-    csv: redhat-openshift-pipelines.v1.5.2
 
   - name: odf-operator
     namespace: openshift-storage
@@ -34,8 +31,8 @@ clusterGroup:
 
   - name: quay-operator
     namespace: openshift-operators
-    channel: stable-3.6
-    csv: quay-operator.v3.6.4
+    channel: stable-3.7
+    csv: quay-operator.v3.7
 
 # add the top level 
 # OpenShiftGitOps
@@ -59,6 +56,12 @@ clusterGroup:
     namespace: stackrox
     project: hub
     path: common/acs/central
+    ignoreDifferences:
+    - group: internal.open-cluster-management.io
+      kind: Policy
+      managedFieldsManagers:
+      - governance-policy-status-sync
+      - governance-policy-propagator
 
   - name: acs-secured
     namespace: stackrox
@@ -96,11 +99,6 @@ clusterGroup:
     project: golang-external-secrets
     path: common/golang-external-secrets
 
-  - name: pipelines
-    namespace: devsecops-ci
-    project: hub
-    path: charts/hub/pipelines
-
   - name: cli-tools
     namespace: openshift
     project: hub
@@ -109,7 +107,7 @@ clusterGroup:
   - name: storage
     namespace: openshift-storage
     project: hub
-    path: charts/hub/cephobjectstore
+    path: charts/hub/odf
 
   - name: quay-registry
     namespace: quay-enterprise
@@ -125,6 +123,12 @@ clusterGroup:
     namespace: stackrox
     project: hub
     path: charts/hub/acs
+    ignoreDifferences:
+    - group: internal.open-cluster-management.io
+      kind: Policy
+      managedFieldsManagers:
+      - governance-policy-status-sync
+      - governance-policy-propagator
 
   managedClusterGroups:
   - name: devel

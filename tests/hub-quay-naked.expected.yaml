@@ -95,12 +95,21 @@ spec:
         - /bin/bash
         - -c
         - |
-          # Invoke API and add quay user to the API - initiates API
-          JSONTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise./api/v1/user/initialize --header 'Content-Type: application/json' --data '{ "username": "quayadmin", "password":"quayadmin123", "email": "quayadmin@example.com", "access_token": true}') && \
-          oc create secret generic quay-temp-token --from-literal=token=$JSONTOKEN
-          # Now extract the token and store in the Quay Integration secret in openshift-operators namespace
-          TOKEN=$(oc extract secret/quay-temp-token --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}') && \
-          oc create secret -n openshift-operators generic quay-integration --from-literal=token=$TOKEN
+          oc get secret quay-temp-token
+          if [ $? -ne 0 ]; then
+            echo "Quay default user not created. Creating ..."  
+            # Invoke API and add quay user to the API - initiates API
+            JSONTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise./api/v1/user/initialize --header 'Content-Type: application/json' --data '{ "username": "quayadmin", "password":"quayadmin123", "email": "quayadmin@example.com", "access_token": true}') && \
+            oc create secret generic quay-temp-token --from-literal=token=$JSONTOKEN
+          fi
+          oc get secret -n openshift-operators quay-integration
+          if [ $? -ne 0 ]; then
+            echo "quay-integration secret not created. Creating ..."  
+            # Now extract the token and store in the Quay Integration secret in openshift-operators namespace
+            TOKEN=$(oc extract secret/quay-temp-token --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}') && \
+            oc create secret -n openshift-operators generic quay-integration --from-literal=token=$TOKEN
+          fi
+          echo "Job finished" 
         name: quay-api-enablement
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900
