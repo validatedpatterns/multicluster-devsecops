@@ -3,6 +3,8 @@ kind: Policy
 metadata:
   name: policy-acs-integrations-token
   annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: SkipPrune
     argocd.argoproj.io/sync-wave: "7"
 spec:
   remediationAction: enforce
@@ -33,7 +35,7 @@ spec:
                   namespace: stackrox
                 apiVersion: v1
                 data:
-                  token: '{{ `{{hub (lookup "v1" "Secret" "stackrox" "acs-api-token").data.token hub}}` }}'
+                  token: '{{ `{{hub fromSecret "stackrox" "acs-api-token" "token" hub}}` }}'
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
