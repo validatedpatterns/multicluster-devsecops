@@ -58,3 +58,22 @@ clusterGroup:
     namespace: openshift-operators
     project: secured
     path: charts/region/quay
+
+  #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
+#
+#  - name: pipelines
+#    namespace: production
+#    project: datacenter
+#    path: applications/pipeline
+#    repoURL: https://github.com/you/applications.git
+#    targetRevision: stable
+#    overrides:
+#    - name: myparam
+#      value: myparam
+#
+#  - name: pipelines
+#    namespace: staging
+#    project: datacenter
+#    path: applications/pipeline
+#    repoURL: https://github.com/you/applications.git
+#    targetRevision: main
