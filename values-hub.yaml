@@ -9,6 +9,7 @@ clusterGroup:
   - config-demo
   - rhacs-operator
   - stackrox
+  - policies
   - devsecops-ci
   - openshift-storage
   - quay-enterprise
