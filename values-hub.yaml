@@ -107,7 +107,7 @@ clusterGroup:
   - name: storage
     namespace: openshift-storage
     project: hub
-    path: charts/hub/cephobjectstore
+    path: charts/hub/odf
 
   - name: quay-registry
     namespace: quay-enterprise

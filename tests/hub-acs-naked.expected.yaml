@@ -16,10 +16,75 @@ spec:
         - /bin/bash
         - -c
         - |
-          curl -sk -u "admin:$(oc extract secret/central-htpasswd --keys=password --to=-)" "https://central-stackrox.AUTOMATIC/v1/apitokens/generate" -d '{"name":"token name", "role": "Admin"}' | jq -r '.token'
+          ACSTOKEN=$(curl -sk -u "admin:$(oc extract secret/central-htpasswd --keys=password --to=-)" "https://central-stackrox.AUTOMATIC/v1/apitokens/generate" -d '{"name":"token name", "role": "Admin"}' | jq -r '.token')
+          oc create secret -n stackrox generic acs-api-token --from-literal=token=$ACSTOKEN
         name: stackrox-api-token
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 300
       restartPolicy: Never
       serviceAccountName: create-cluster-init
       terminationGracePeriodSeconds: 60
+---
+# Source: acs-integrations/templates/policy-acs-integrations-token.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: acs-integrations-token-placement-binding
+placementRef:
+  name: acs-integrations-token-placement
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: policy-acs-integrations-token
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+# Source: acs-integrations/templates/policy-acs-integrations-token.yaml
+# We need to run this on any managed cluster but not on the HUB
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: acs-integrations-token-placement
+spec:
+  # This will go to all clusters
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
+---
+# Source: acs-integrations/templates/policy-acs-integrations-token.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-acs-integrations-token
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: acs-api-token-configpolicy
+          annotations:
+            apps.open-cluster-management.io/deployables: "secret"
+        spec:
+          remediationAction: enforce
+          severity: med
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - default
+          object-templates:
+            - complianceType: mustonlyhave
+              objectDefinition:
+                kind: Secret
+                type: Opaque
+                metadata:
+                  name: acs-api-token
+                  namespace: stackrox
+                apiVersion: v1
+                data:
+                  token: '{{hub (lookup "v1" "Secret" "stackrox" "acs-api-token").data.token hub}}'
