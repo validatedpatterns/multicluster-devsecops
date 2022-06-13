@@ -4,7 +4,7 @@ global:
     syncPolicy: Automatic
     installPlanApproval: Automatic
 
-clustergroup:
+clusterGroup:
   name: devel
   isHubCluster: false
   clusterName: wh-devel
