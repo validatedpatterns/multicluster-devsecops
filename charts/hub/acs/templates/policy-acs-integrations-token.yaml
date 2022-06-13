@@ -57,6 +57,9 @@ metadata:
   name: acs-integrations-token-placement
 spec:
   # This will go to all clusters
+  clusterSelector:
+    matchLabels:
+      clustergroup: devel 
   clusterConditions:
     - status: 'True'
       type: ManagedClusterConditionAvailable
