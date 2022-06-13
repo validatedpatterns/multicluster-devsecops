@@ -4,7 +4,7 @@ kind: Namespace
 metadata:
   labels:
     name: {{ default "pattern" $.Release.name }}
-    argocd.argoproj.io/managed-by: {{ $.Values.global.pattern }}-{{ $.Values.clusterGroup.name }}
+    argocd.argoproj.io/managed-by: {{ $.Values.global.pattern }}-{{ $.Values.clustergroup.name }}
   name: {{ . }}
 spec:
 ---
