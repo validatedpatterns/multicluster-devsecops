@@ -126,7 +126,7 @@ clusterGroup:
       value: "false"
     clusterSelector:
       matchLabels:
-        clusterGroup: devel
+        clustergroup: devel
       matchExpressions:
       - key: vendor
         operator: In
@@ -139,7 +139,7 @@ clusterGroup:
       value: "false"
     clusterSelector:
       matchLabels:
-        clusterGroup: secured
+        clustergroup: secured
       matchExpressions:
       - key: vendor
         operator: In
