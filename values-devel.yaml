@@ -14,6 +14,7 @@ clusterGroup:
     - policies
     - rhacs-operator
     - devsecops-ci
+    - config-demo
   
   subscriptions:
   - name: rhacs-operator  #packageName
@@ -58,6 +59,11 @@ clusterGroup:
     namespace: openshift-operators
     project: secured
     path: charts/region/quay
+
+  - name: config-demo-test
+    namespace: config-demo
+    project: config-demo
+    path: charts/all/config-demo
 
   #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
 #
