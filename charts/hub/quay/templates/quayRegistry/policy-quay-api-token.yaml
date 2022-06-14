@@ -35,7 +35,7 @@ spec:
                   namespace: openshift-operators
                 apiVersion: v1
                 data:
-                  token: '{{ `{{hub fromSecret "quay-enterprise" "quay-integration" "token" hub}}` }}'
+                  token: '{{ `{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}` }}'
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
