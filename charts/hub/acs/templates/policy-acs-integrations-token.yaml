@@ -56,7 +56,7 @@ kind: PlacementRule
 metadata:
   name: acs-integrations-token-placement
 spec:
-  # This will go to all clusters
+  # This will go to all devel clusters
   clusterSelector:
     matchLabels:
       clustergroup: devel 
