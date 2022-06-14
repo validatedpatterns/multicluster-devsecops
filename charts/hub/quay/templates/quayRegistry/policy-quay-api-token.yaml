@@ -14,7 +14,7 @@ spec:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: acs-api-token-configpolicy
+          name: quay-api-token-configpolicy
           annotations:
             apps.open-cluster-management.io/deployables: "secret"
         spec:
@@ -31,7 +31,7 @@ spec:
                 kind: Secret
                 type: Opaque
                 metadata:
-                  name: acs-api-token
+                  name: quay-api-token
                   namespace: stackrox
                 apiVersion: v1
                 data:
