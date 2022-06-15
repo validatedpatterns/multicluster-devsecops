@@ -42,6 +42,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   name: quay-api-token-placement-binding
+  namespace: openshift-operators
 placementRef:
   name: quay-api-token-placement
   kind: PlacementRule
@@ -56,6 +57,7 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   name: quay-api-token-placement
+  namespace: openshift-operators
 spec:
   clusterConditions:
     - status: 'True'
