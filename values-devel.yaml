@@ -43,6 +43,7 @@ clusterGroup:
   projects:
     - secured
     - ci
+    - test-app
 
   applications:
   - name: acs-secured
@@ -62,7 +63,7 @@ clusterGroup:
 
   - name: config-demo-test
     namespace: config-demo
-    project: config-demo
+    project: test-app
     path: charts/all/config-demo
 
   #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate

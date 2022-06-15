@@ -65,6 +65,8 @@ spec:
       - key: clustergroup
         operator: In
         values:
+          - devel
+          - prod
   clusterConditions:
     - status: 'True'
       type: ManagedClusterConditionAvailable
