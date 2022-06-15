@@ -25,7 +25,6 @@ spec:
               - kube-*
             include:
               - default
-              - openshift-operators
           object-templates:
             - complianceType: mustonlyhave
               objectDefinition:
@@ -33,7 +32,7 @@ spec:
                 type: Opaque
                 metadata:
                   name: quay-api-token
-                  namespace: quay-enterprise
+                  namespace: openshift-operators
                 apiVersion: v1
                 data:
                   token: '{{ `{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}` }}'
@@ -42,7 +41,6 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   name: quay-api-token-placement-binding
-  namespace: quay-enterprise
 placementRef:
   name: quay-api-token-placement
   kind: PlacementRule
@@ -57,7 +55,6 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   name: quay-api-token-placement
-  namespace: quay-enterprise
 spec:
   clusterConditions:
     - status: 'True'
