@@ -54,6 +54,7 @@ subjects:
 # We need to run this on any managed cluster but not on the HUB
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
+namespace: quay-enterprise
 metadata:
   name: quay-api-token-placement
 spec:
