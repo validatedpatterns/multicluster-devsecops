@@ -42,6 +42,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   name: quay-api-token-placement-binding
+  namespace: quay-enterprise
 placementRef:
   name: quay-api-token-placement
   kind: PlacementRule
@@ -54,9 +55,9 @@ subjects:
 # We need to run this on any managed cluster but not on the HUB
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
-namespace: quay-enterprise
 metadata:
   name: quay-api-token-placement
+  namespace: quay-enterprise
 spec:
   clusterConditions:
     - status: 'True'
