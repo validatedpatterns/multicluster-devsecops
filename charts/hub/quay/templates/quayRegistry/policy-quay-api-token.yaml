@@ -15,6 +15,7 @@ spec:
         kind: ConfigurationPolicy
         metadata:
           name: quay-api-token-configpolicy
+          namespace: openshift-operators
           annotations:
             apps.open-cluster-management.io/deployables: "secret"
         spec:
