@@ -58,6 +58,7 @@ metadata:
 spec:
   # This will go to all devel clusters
   clusterSelector:
+    # Using matchLabels because I need it in only one clustergroup
     matchLabels:
       clustergroup: devel 
   clusterConditions:

@@ -58,13 +58,13 @@ metadata:
   name: quay-api-token-placement
   namespace: openshift-operators
 spec:
+  # This will go to both devel and secured clusters
   clusterSelector:
+    # Using matchExpression because I need it in more than one clustergroup
     matchExpressions:
       - key: clustergroup
         operator: In
         values:
-          - devel
-          - secured
   clusterConditions:
     - status: 'True'
       type: ManagedClusterConditionAvailable

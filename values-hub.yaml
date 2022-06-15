@@ -39,6 +39,7 @@ clusterGroup:
 # OpenShiftGitOps
   projects:   
   - hub
+  - opp
   - config-demo
   - golang-external-secrets
 
@@ -55,12 +56,12 @@ clusterGroup:
 
   - name: acs-central
     namespace: stackrox
-    project: hub
+    project: opp
     path: common/acs/central
 
   - name: acs-secured
     namespace: stackrox
-    project: hub
+    project: opp
     path: common/acs/secured
 
   - name: vault
@@ -101,12 +102,12 @@ clusterGroup:
 
   - name: storage
     namespace: openshift-storage
-    project: hub
+    project: opp
     path: charts/hub/odf
 
   - name: quay-registry
     namespace: quay-enterprise
-    project: hub
+    project: opp
     path: charts/hub/quay
 
   - name: config-demo
