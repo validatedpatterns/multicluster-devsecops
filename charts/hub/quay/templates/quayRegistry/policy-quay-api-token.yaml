@@ -25,6 +25,7 @@ spec:
               - kube-*
             include:
               - default
+              - openshift-operators
           object-templates:
             - complianceType: mustonlyhave
               objectDefinition:
