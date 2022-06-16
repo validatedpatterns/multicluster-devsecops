@@ -23,8 +23,10 @@ clusterGroup:
     csv: rhacs-operator.v3.68.1
 
   - name: openshift-pipelines-operator-rh
-    csv: redhat-openshift-pipelines.v1.7
-
+    namespace: openshift-pipelines
+    channel: pipelines-1.7
+    csv: redhat-openshift-pipelines.v1.7.1
+    
   - name: quay-bridge-operator
     namespace: openshift-operators
     channel: stable-3.7
