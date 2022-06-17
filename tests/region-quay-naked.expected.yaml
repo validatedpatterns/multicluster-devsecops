@@ -1,0 +1,15 @@
+---
+# Source: quay/templates/bridge/quay-integration.yaml
+apiVersion: quay.redhat.com/v1
+kind: QuayIntegration
+metadata:
+ name: quay
+ annotations:
+   argocd.argoproj.io/sync-wave: "8"
+spec:
+ clusterID: openshift
+ credentialsSecret:
+   name: quay-integration
+   namespace: openshift-operators
+ insecureRegistry: false
+ quayHostname: https://quay-registry-quay-quay-enterprise.AUTOMATIC

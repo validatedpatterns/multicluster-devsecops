@@ -210,9 +210,9 @@ spec:
                   namespace: stackrox
                 apiVersion: v1
                 data:
-                  admission-control-cert.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "admission-control-tls").data "admission-control-cert.pem" hub}}'
-                  admission-control-key.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "admission-control-tls").data "admission-control-key.pem" hub}}'
-                  ca.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "admission-control-tls").data "ca.pem" hub}}'
+                  admission-control-cert.pem: '{{ `{{hub fromSecret "stackrox" "admission-control-tls" "admission-control-cert.pem" hub}}` }}'
+                  admission-control-key.pem: '{{ `{{hub fromSecret "stackrox" "admission-control-tls" "admission-control-key.pem" hub}}` }}'
+                  ca.pem: '{{ `{{hub fromSecret "stackrox" "admission-control-tls" "ca.pem" hub}}` }}'
             - complianceType: musthave
               objectDefinition:
                 kind: Secret
@@ -222,9 +222,9 @@ spec:
                   namespace: stackrox
                 apiVersion: v1
                 data:
-                  sensor-cert.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "sensor-tls").data "sensor-cert.pem" hub}}'
-                  sensor-key.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "sensor-tls").data "sensor-key.pem" hub}}'
-                  ca.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "sensor-tls").data "ca.pem" hub}}'
+                  sensor-cert.pem: '{{ `{{hub fromSecret "stackrox" "sensor-tls" "sensor-cert.pem" hub}}` }}'
+                  sensor-key.pem: '{{ `{{hub fromSecret "stackrox" "sensor-tls" "sensor-key.pem" hub}}` }}'
+                  ca.pem: '{{ `{{hub fromSecret "stackrox" "sensor-tls" "ca.pem" hub}}` }}'
             - complianceType: musthave
               objectDefinition:
                 kind: Secret
@@ -234,6 +234,6 @@ spec:
                   namespace: stackrox
                 apiVersion: v1
                 data:
-                  collector-cert.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "collector-tls").data "collector-cert.pem" hub}}'
-                  collector-key.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "collector-tls").data "collector-key.pem" hub}}'
-                  ca.pem: '{{hub index (lookup "v1" "Secret" "stackrox" "collector-tls").data "ca.pem" hub}}'
+                  collector-cert.pem: '{{ `{{hub fromSecret "stackrox" "collector-tls" "collector-cert.pem" hub}}` }}'
+                  collector-key.pem: '{{ `{{hub fromSecret "stackrox" "collector-tls" "collector-key.pem" hub}}` }}'
+                  ca.pem: '{{ `{{hub fromSecret "stackrox" "collector-tls" "ca.pem" hub}}` }}'
