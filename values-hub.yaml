@@ -9,6 +9,7 @@ clusterGroup:
   - config-demo
   - rhacs-operator
   - stackrox
+  - policies
   - devsecops-ci
   - openshift-storage
   - quay-enterprise
@@ -17,7 +18,7 @@ clusterGroup:
   - name: advanced-cluster-management
     namespace: open-cluster-management
     channel: release-2.5
-    csv: advanced-cluster-management.v2.5
+    csv: advanced-cluster-management.v2.5.0
 
   - name: rhacs-operator  #packageName
     namespace: openshift-operators # operator namespace
@@ -38,6 +39,7 @@ clusterGroup:
 # OpenShiftGitOps
   projects:   
   - hub
+  - opp
   - config-demo
   - golang-external-secrets
 
@@ -54,18 +56,12 @@ clusterGroup:
 
   - name: acs-central
     namespace: stackrox
-    project: hub
+    project: opp
     path: common/acs/central
-    ignoreDifferences:
-    - group: internal.open-cluster-management.io
-      kind: Policy
-      managedFieldsManagers:
-      - governance-policy-status-sync
-      - governance-policy-propagator
 
   - name: acs-secured
     namespace: stackrox
-    project: hub
+    project: opp
     path: common/acs/secured
 
   - name: vault
@@ -106,12 +102,12 @@ clusterGroup:
 
   - name: storage
     namespace: openshift-storage
-    project: hub
+    project: opp
     path: charts/hub/odf
 
   - name: quay-registry
     namespace: quay-enterprise
-    project: hub
+    project: opp
     path: charts/hub/quay
 
   - name: config-demo
@@ -123,12 +119,6 @@ clusterGroup:
     namespace: stackrox
     project: hub
     path: charts/hub/acs
-    ignoreDifferences:
-    - group: internal.open-cluster-management.io
-      kind: Policy
-      managedFieldsManagers:
-      - governance-policy-status-sync
-      - governance-policy-propagator
 
   managedClusterGroups:
   - name: devel
@@ -137,7 +127,7 @@ clusterGroup:
       value: "false"
     clusterSelector:
       matchLabels:
-        clusterGroup: devel
+        clustergroup: devel
       matchExpressions:
       - key: vendor
         operator: In
@@ -150,36 +140,13 @@ clusterGroup:
       value: "false"
     clusterSelector:
       matchLabels:
-        clusterGroup: secured
+        clustergroup: secured
       matchExpressions:
       - key: vendor
         operator: In
         values:
           - OpenShift
 
-
-# I don't think this is needed but let's check
-#main:
-#  clusterGroupName: hub
-
-#  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
-#
-#  - name: pipelines
-#    namespace: production
-#    project: datacenter
-#    path: applications/pipeline
-#    repoURL: https://github.com/you/applications.git
-#    targetRevision: stable
-#    overrides:
-#    - name: myparam
-#      value: myparam
-#
-#  - name: pipelines
-#    namespace: staging
-#    project: datacenter
-#    path: applications/pipeline
-#    repoURL: https://github.com/you/applications.git
-#    targetRevision: main
 #
 #   Additional applications
 #   Be sure to include additional resources your apps will require
@@ -193,17 +160,3 @@ clusterGroup:
 #    repoURL: https://github.com/vendor/applications.git
 #    targetRevision: main
 
-#  managedSites:
-#  - name: factory
-#    # repoURL: https://github.com/dagger-refuse-cool/manuela-factory.git
-#    targetRevision: main
-#    path: applications/factory
-#    helmOverrides:
-#    - name: site.isHubCluster
-#      value: false
-#    clusterSelector:
-#      matchExpressions:
-#      - key: vendor
-#        operator: In
-#        values:
-#          - OpenShift

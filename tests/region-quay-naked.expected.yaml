@@ -1,3 +1,5 @@
+---
+# Source: quay/templates/bridge/quay-integration.yaml
 apiVersion: quay.redhat.com/v1
 kind: QuayIntegration
 metadata:
@@ -10,4 +12,4 @@ spec:
    name: quay-integration
    namespace: openshift-operators
  insecureRegistry: false
- quayHostname: https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}
+ quayHostname: https://quay-registry-quay-quay-enterprise.AUTOMATIC

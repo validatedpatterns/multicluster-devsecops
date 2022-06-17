@@ -12,8 +12,9 @@ clusterGroup:
   namespaces:
     - stackrox
     - policies
-    - rhacs-operator
+    - openshift-pipelines
     - devsecops-ci
+    - config-demo
   
   subscriptions:
   - name: rhacs-operator  #packageName
@@ -22,7 +23,9 @@ clusterGroup:
     csv: rhacs-operator.v3.68.1
 
   - name: openshift-pipelines-operator-rh
-    csv: redhat-openshift-pipelines.v1.5.2
+    namespace: openshift-operators
+    channel: pipelines-1.7
+    csv: openshift-pipelines-operator.v1.7.1
 
   - name: quay-bridge-operator
     namespace: openshift-operators
@@ -42,6 +45,7 @@ clusterGroup:
   projects:
     - secured
     - ci
+    - test-app
 
   applications:
   - name: acs-secured
@@ -58,3 +62,27 @@ clusterGroup:
     namespace: openshift-operators
     project: secured
     path: charts/region/quay
+
+  - name: config-demo-test
+    namespace: config-demo
+    project: test-app
+    path: charts/all/config-demo
+
+  #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
+#
+#  - name: pipelines
+#    namespace: production
+#    project: datacenter
+#    path: applications/pipeline
+#    repoURL: https://github.com/you/applications.git
+#    targetRevision: stable
+#    overrides:
+#    - name: myparam
+#      value: myparam
+#
+#  - name: pipelines
+#    namespace: staging
+#    project: datacenter
+#    path: applications/pipeline
+#    repoURL: https://github.com/you/applications.git
+#    targetRevision: main

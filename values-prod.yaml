@@ -5,12 +5,12 @@ global:
     installPlanApproval: Automatic
 
 clusterGroup:
-  name: secured
+  name: prod
   isHubCluster: false
   clusterName: wh-secured
 
   namespaces:
-    - config-demo
+    - app
     - rhacs-operator
     - stackrox
     - policies
@@ -27,13 +27,13 @@ clusterGroup:
     csv: quay-bridge-operator.v3.6.6
 
   projects:
-    - config-demo
+    - app
     - secured
 
   applications:
-  - name: config-demo
-    namespace: config-demo
-    project: config-demo
+  - name: application
+    namespace: app
+    project: app
     path: charts/all/config-demo
 
   - name: acs-secured

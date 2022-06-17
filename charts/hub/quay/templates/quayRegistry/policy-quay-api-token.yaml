@@ -1,14 +1,12 @@
-# The policy needs to be added to the ACM HUB and then it will be pushed on all clusters
-# except the HUB (see placementrule on the bottom)
-{{ if .Values.clusterGroup.isHubCluster }}
----
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: configdemo-region-secret-policy
+  name: policy-quay-api-token
+  namespace: openshift-operators
   annotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
     argocd.argoproj.io/sync-options: SkipPrune
+    argocd.argoproj.io/sync-wave: "7"
 spec:
   remediationAction: enforce
   disabled: false
@@ -17,40 +15,39 @@ spec:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: config-demo-secret
+          name: quay-api-token-configpolicy
           annotations:
             apps.open-cluster-management.io/deployables: "secret"
-            policy.open-cluster-management.io/trigger-update: "2"
         spec:
           remediationAction: enforce
           severity: medium
           namespaceSelector:
-            exclude:
-              - kube-*
             include:
               - default
+              - openshift-operators
           object-templates:
-            - complianceType: musthave
+            - complianceType: mustonlyhave
               objectDefinition:
                 kind: Secret
                 type: Opaque
                 metadata:
-                  name: config-demo-secret
-                  namespace: config-demo
+                  name: quay-api-token
+                  namespace: openshift-operators
                 apiVersion: v1
                 data:
-                  secret: '{{ `{{hub (lookup "v1" "Secret" "config-demo" "config-demo-secret").data.secret hub}}` }}'
+                  token: '{{ `{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}` }}'
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
-  name: configdemo-region-secret-placement-binding
+  name: quay-api-token-placement-binding
+  namespace: openshift-operators
 placementRef:
-  name: configdemo-region-secret-placement
+  name: quay-api-token-placement
   kind: PlacementRule
   apiGroup: apps.open-cluster-management.io
 subjects:
-  - name: configdemo-region-secret-policy
+  - name: policy-quay-api-token
     kind: Policy
     apiGroup: policy.open-cluster-management.io
 ---
@@ -58,15 +55,18 @@ subjects:
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
-  name: configdemo-region-secret-placement
+  name: quay-api-token-placement
+  namespace: openshift-operators
 spec:
+  # This will go to both devel and secured clusters
+  clusterSelector:
+    # Using matchExpression because I need it in more than one clustergroup
+    matchExpressions:
+      - key: clustergroup
+        operator: In
+        values:
+          - devel
+          - prod
   clusterConditions:
     - status: 'True'
       type: ManagedClusterConditionAvailable
-  clusterSelector:
-    matchExpressions:
-      - key: local-cluster
-        operator: NotIn
-        values:
-          - 'true'
-{{ end }}

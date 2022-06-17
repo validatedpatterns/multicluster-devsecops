@@ -20,6 +20,10 @@ quay:
       managed: true 
     - name: tls 
       managed: true
+    - name: quay
+      managed: true
+    - name: clairpostgres
+      managed: true
   configBundleSecret:
     deploy: true
     name: quay-init-config-bundle-secret

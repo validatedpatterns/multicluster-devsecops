@@ -4,9 +4,6 @@ metadata:
   name: chains-config
   namespace: openshift-pipelines
 data:
-  artifacts:
-    oci:
-      storage:
-    taskrun:
-      format: tekton
-      storage: tekton
+  artifacts.oci.storage: ''
+  artifacts.taskrun.format: tekton
+  artifacts.taskrun.storage: tekton
