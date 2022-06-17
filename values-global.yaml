@@ -31,5 +31,8 @@ global:
     email: SOMEWHERE@EXAMPLE.COM
     dev_revision: main
 
+devel:
+  appURL: https://github.com/shaneboulden/chat-client.git
+  
 main:
   clusterGroupName: hub

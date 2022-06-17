@@ -1,0 +1,72 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: build-and-deploy
+spec:
+  params:
+    - name: github-repo-revision
+      type: string
+      description: Git branch
+      default: main
+    - name: github-repo-url
+      type: string
+      description: Github repo
+      default: {{ .Values.devel.appURL }}
+    - name: context-dir
+      type: string
+    - name: image-name
+      type: string
+    - name: is-name
+      type: string
+      default: chat-client
+  workspaces:
+    - name: source
+  tasks:
+  - name: clone-sources
+    taskRef:
+      name: git-clone
+      kind: ClusterTask
+    params:
+      - name: url
+        value: '$(params.github-repo-url)'
+      - name: revision
+        value: '$(params.github-repo-revision)'
+      - name: deleteExisting
+        value: 'true'
+    workspaces:
+      - name: output
+        workspace: source
+  - name: build-from-source
+    taskRef:
+      name: react-build
+    runAfter:
+    - clone-sources
+    workspaces:
+      - name: output
+        workspace: source
+  - name: build-image
+    taskRef: 
+      name: buildah-with-vols
+    params:
+      - name: IMAGE
+        value: '$(params.image-name)'
+      - name: CONTEXT
+        value: '.'
+      - name: TLSVERIFY
+        value: 'false'
+    workspaces:
+      - name: source
+        workspace: source
+    runAfter: 
+      - build-from-source
+  - name: rollout-latest-image
+    taskRef: 
+      name: openshift-client
+      kind: ClusterTask
+    params:
+      - name: ARGS
+        value:
+          - import-image
+          - $(params.is-name):latest
+    runAfter:
+      - build-image
