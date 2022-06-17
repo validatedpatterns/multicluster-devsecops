@@ -1,0 +1,37 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: scan-image-acs
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.12.1"
+    tekton.dev/tags: scan-image
+spec:
+  description: >-
+    Uses the Red Hat Advanced Cluster Security APIs to scan 
+    a container image against the current build policies for the cluster.
+  params:
+  - name: IMAGE
+    description: Reference of the image to scan
+  - name: SCAN_IMAGE
+    description: Image containing the roxctl CLI
+    default: quay.io/smileyfritz/roxctl:latest
+  - name: TLS_VERIFY
+    description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
+    default: "true"
+  - name: ACS_CENTRAL
+    description: The end-point for the ACS API
+
+  steps:
+  - name: scan
+    image: $(params.SCAN_IMAGE)
+    env:
+      - name: ROX_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: acs-api-token
+            key: token
+    script: |
+      /usr/bin/roxctl --insecure-skip-tls-verify=$(params.TLS_VERIFY) -e $(params.ACS_CENTRAL):443 image check --image=$(params.IMAGE)

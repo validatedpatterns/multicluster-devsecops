@@ -1,0 +1,21 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+#  creationTimestamp: "2021-03-01T22:09:45Z"
+  name: imagestream-view
+#  resourceVersion: "148452213"
+#  selfLink: /apis/rbac.authorization.k8s.io/v1/namespaces/chat-client/roles/isview
+#  uid: 228d0e4a-4471-4a8d-868d-b0525cc26767
+rules:
+- apiGroups:
+  - image.openshift.io
+  resources:
+  - imagestreams
+  verbs:
+  - get
+- apiGroups:
+  - image.openshift.io
+  resources:
+  - imagestreamimports
+  verbs:
+  - create
