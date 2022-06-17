@@ -23,7 +23,7 @@ clusterGroup:
     csv: rhacs-operator.v3.68.1
 
   - name: openshift-pipelines-operator-rh
-    namespace: openshift-pipelines
+    namespace: openshift-operators
     channel: pipelines-1.7
     csv: openshift-pipelines-operator.v1.7.1
 
