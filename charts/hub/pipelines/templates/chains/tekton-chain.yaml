@@ -2,6 +2,6 @@ apiVersion: operator.tekton.dev/v1alpha1
 kind: TektonChain
 metadata:
   name: chain
-  namespace: openshift-pipelines
+#  namespace: openshift-pipelines
 spec:
   targetNamespace: openshift-pipelines
