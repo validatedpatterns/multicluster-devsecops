@@ -12,7 +12,7 @@ clusterGroup:
   namespaces:
     - stackrox
     - policies
-    - rhacs-operator
+    - openshift-pipelines
     - devsecops-ci
     - config-demo
   
