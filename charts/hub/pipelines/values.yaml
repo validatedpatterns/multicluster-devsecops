@@ -20,6 +20,6 @@ global:
 
 devel:
   appURL: AUTOMATED
-  
+  image: quay.io/smileyfritz/chat-client:latest
 clusterGroup:
   name: testgroup
