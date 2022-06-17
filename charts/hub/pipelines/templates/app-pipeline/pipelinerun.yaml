@@ -23,9 +23,9 @@ spec:
       volumes:
         - name: varlibcontainers
           persistentVolumeClaim:
-            claimName: containers-pvc2
+            claimName: containers-pvc
   serviceAccountName: pipeline-svc
   workspaces:
     - name: source
       persistentVolumeClaim:
-        claimName: pipeline-pvc1
+        claimName: pipeline-pvc
