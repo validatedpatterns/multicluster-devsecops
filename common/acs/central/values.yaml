@@ -1,1 +1,9 @@
-# Unused for now
+# These are used for post ACS install and for ACS integration 
+acs:
+  integrations: true
+
+job:
+  image: image-registry.openshift-image-registry.svc:5000/openshift/cli-tools:latest
+
+global:
+  hubClusterDomain: AUTOMATIC

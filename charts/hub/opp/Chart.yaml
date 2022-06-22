@@ -1,0 +1,21 @@
+# Chart.yaml
+dependencies:
+- name: acs central
+  version: "1.0"
+  repository: "file://../../../common/acs/central"
+- name: acs secured
+  version: "1.0"
+  repository: "file://../../../common/acs/secured"
+- name: acs integration
+  version: "1.0"
+  repository: "file://../acs"
+- name: Quay
+  version: "1.0"
+  repository: "file://../quay"
+- name: odf integration
+  version: "1.0"
+  repository: "file://../odf"
+- name: acs integration
+  version: "1.0"
+  repository: "file://../acs"
+
