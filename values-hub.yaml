@@ -56,7 +56,7 @@ clusterGroup:
   applications:  
   - name: acm   #arbitary
     namespace: open-cluster-management
-    project: hub
+    project: opp
     path: common/acm
     ignoreDifferences:
     - group: internal.open-cluster-management.io
