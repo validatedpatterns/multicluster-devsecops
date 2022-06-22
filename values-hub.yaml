@@ -125,11 +125,6 @@ clusterGroup:
     project: config-demo
     path: charts/all/config-demo
 
-  - name: acs-integrations
-    namespace: stackrox
-    project: hub
-    path: charts/hub/acs
-
 # This section is used by ACM
   managedClusterGroups:
   - name: devel
