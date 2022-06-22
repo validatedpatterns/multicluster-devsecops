@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "5"
   name: create-cluster-init-bundle
 spec:
   template:
@@ -38,7 +38,6 @@ spec:
                     printf '.'
                     attempt_counter=$(($attempt_counter+1))
                     echo "Made attempt $attempt_counter, waiting..."
-                    sleep 5
                 done
 
                 echo "Configuring cluster-init bundle"
@@ -62,4 +61,4 @@ spec:
       restartPolicy: Never
       serviceAccount: create-cluster-init
       serviceAccountName: create-cluster-init
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 60

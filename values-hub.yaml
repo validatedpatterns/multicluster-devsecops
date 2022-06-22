@@ -2,6 +2,9 @@ clusterGroup:
   name: hub
   isHubCluster: true
 
+# Namespaces that are expected to be created.
+# The pattern will apply these namespaces
+# and creates an operator group for that namespace
   namespaces:    
   - open-cluster-management
   - vault
@@ -13,8 +16,15 @@ clusterGroup:
   - devsecops-ci
   - openshift-storage
   - quay-enterprise
-  
-  subscriptions:  #name -> packageName
+ 
+#  subscriptions:  OpenShift Operator subscriptions from OLM/OperatorHub
+#  - name: the Operator package name (required)
+#    namespace: expected namespace as specified by Operator (defaults to openshift-operators)
+#    channel: operator channel from package manifest (required)
+#    csv: Operator CSV from package manifest. 
+#         only used if global.options.useCSV: true in values-global.yaml
+
+  subscriptions:  
   - name: advanced-cluster-management
     namespace: open-cluster-management
     channel: release-2.5
@@ -35,8 +45,8 @@ clusterGroup:
     channel: stable-3.7
     csv: quay-operator.v3.7
 
-# add the top level 
-# OpenShiftGitOps
+# The following section is used by  
+# OpenShift GitOps (ArgoCD)
   projects:   
   - hub
   - opp
@@ -44,7 +54,7 @@ clusterGroup:
   - golang-external-secrets
 
   applications:  
-  - name: acm   #aibitary
+  - name: acm   #arbitary
     namespace: open-cluster-management
     project: hub
     path: common/acm
@@ -120,6 +130,7 @@ clusterGroup:
     project: hub
     path: charts/hub/acs
 
+# This section is used by ACM
   managedClusterGroups:
   - name: devel
     helmOverrides:
