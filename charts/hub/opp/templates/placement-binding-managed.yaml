@@ -12,4 +12,4 @@ placementRef:
 subjects:
 - apiGroup: policy.open-cluster-management.io
   kind: PolicySet
-  name: openshift-plus-clusters
+  name: openshift-plus-managed
