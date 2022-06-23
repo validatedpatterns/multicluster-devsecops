@@ -8,7 +8,7 @@ metadata:
 spec:
   description: The OpenShift Platform Plus policy set applies several policies that
     installs the OpenShift Platform Plus products using best practices that allow
-    them to work well together. This policy set if focued on the components that install
+    them to work well together. This policy set is focued on the components that install
     to the Advanced Cluster Management hub.
   policies:
   - policy-acs-central-status
