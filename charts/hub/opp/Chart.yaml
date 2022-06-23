@@ -26,22 +26,19 @@ appVersion: "1.0.0"
 
 {{- if $.Values.main.opp }}
 dependencies:
-- name: acs central
+- name: acs-central
   version: "1.0"
   repository: "file://../../../common/acs/central"
-- name: acs secured
+- name: acs-secured
   version: "1.0"
   repository: "file://../../../common/acs/secured"
-- name: acs integration
+- name: acs-integration
   version: "1.0"
   repository: "file://../acs"
-- name: Quay
+- name: quay
   version: "1.0"
   repository: "file://../quay"
-- name: odf integration
+- name: odf
   version: "1.0"
   repository: "file://../odf"
-- name: acs integration
-  version: "1.0"
-  repository: "file://../acs"
 {{- end }}
