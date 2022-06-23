@@ -31,7 +31,7 @@ clusterGroup:
     - secured
 
   applications:
-  - name: application
+  - name: config-demo
     namespace: config-demo
     project: app
     path: charts/all/config-demo

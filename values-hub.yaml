@@ -133,7 +133,7 @@ clusterGroup:
 
 # This section is used by ACM
   managedClusterGroups:
-  - name: devel
+  - name: development
     helmOverrides:
     - name: clusterGroup.isHubCluster
       value: "false"
@@ -146,13 +146,13 @@ clusterGroup:
         values:
           - OpenShift
 
-  - name: secured
+  - name: production
     helmOverrides:
     - name: clusterGroup.isHubCluster
       value: "false"
     clusterSelector:
       matchLabels:
-        clustergroup: secured
+        clustergroup: prod
       matchExpressions:
       - key: vendor
         operator: In
