@@ -86,7 +86,7 @@ clusterGroup:
     path: charts/hub/quay
 
   - name: opp-policy
-    namespace: openshift-operators
+    namespace: openshift
     project: opp
     path: charts/hub/opp
 

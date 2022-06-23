@@ -65,7 +65,7 @@ clusterGroup:
         - /spec/loggingCA
 
   - name: opp
-    namespace: openshift-operators
+    namespace: openshift
     project: opp
     path: charts/hub/opp
 
