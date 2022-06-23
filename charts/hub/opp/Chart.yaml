@@ -1,4 +1,5 @@
 # Chart.yaml
+{{- if $.Values.main.opp }}
 dependencies:
 - name: acs central
   version: "1.0"
@@ -18,4 +19,4 @@ dependencies:
 - name: acs integration
   version: "1.0"
   repository: "file://../acs"
-
+{{- end }}
