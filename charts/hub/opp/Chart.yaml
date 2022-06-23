@@ -1,4 +1,3 @@
-# Chart.yaml
 {{- if $.Values.main.opp }}
 dependencies:
 - name: acs central
