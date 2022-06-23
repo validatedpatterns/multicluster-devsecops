@@ -47,6 +47,7 @@ clusterGroup:
 
 # The following section is used by  
 # OpenShift GitOps (ArgoCD)
+# Projects are just ArgoCD groupings that can be filtered on.
   projects:   
   - hub
   - opp
@@ -73,6 +74,21 @@ clusterGroup:
     namespace: stackrox
     project: opp
     path: common/acs/secured
+
+  - name: storage
+    namespace: openshift-storage
+    project: opp
+    path: charts/hub/odf
+
+  - name: quay-registry
+    namespace: quay-enterprise
+    project: opp
+    path: charts/hub/quay
+
+  - name: opp-policy
+    namespace: openshift-operators
+    project: opp
+    path: charts/hub/opp
 
   - name: vault
     namespace: vault
@@ -109,16 +125,6 @@ clusterGroup:
     namespace: openshift
     project: hub
     path: charts/hub/cli-tools
-
-  - name: storage
-    namespace: openshift-storage
-    project: opp
-    path: charts/hub/odf
-
-  - name: quay-registry
-    namespace: quay-enterprise
-    project: opp
-    path: charts/hub/quay
 
   - name: config-demo
     namespace: config-demo
