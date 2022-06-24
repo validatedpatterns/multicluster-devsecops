@@ -13,6 +13,6 @@ spec:
   policies:
   - policy-acs-central-status
   - policy-acs-secured-status
-  - policy-ocm-observability
+#  - policy-ocm-observability
   - policy-odf-status
   - policy-quay-status
