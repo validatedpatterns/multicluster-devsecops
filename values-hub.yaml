@@ -85,10 +85,10 @@ clusterGroup:
     project: opp
     path: charts/hub/quay
 
-#  - name: opp-policy
-#    namespace: openshift
-#    project: opp
-#    path: charts/hub/opp
+  - name: opp-policy
+    namespace: openshift
+    project: opp
+    path: charts/hub/opp
 
   - name: vault
     namespace: vault
