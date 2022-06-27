@@ -7,7 +7,7 @@ global:
 clusterGroup:
   name: devel
   isHubCluster: false
-  clusterName: wh-devel
+  clusterName: wh-dev
 
   namespaces:
     - stackrox
@@ -31,16 +31,6 @@ clusterGroup:
     namespace: openshift-operators
     channel: stable-3.7
     csv: quay-bridge-operator.v3.7
-
-#  - name: openshiftartifactoryha-operator
-#    namespace: openshift-operators
-#    channel: alpha
-#    cvs: xray-operator.v2.0.9
-
-#  - name: openshiftxray-operator
-#    namespace: openshift-operators
-#    channel: alpha
-#    cvs: xray-operator.v2.0.9
 
   projects:
     - secured
