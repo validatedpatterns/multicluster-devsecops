@@ -11,4 +11,4 @@ spec:
     them to work well together. This policy set if focued on the components that install
     to every managed cluster.
   policies:
-  - policy-acs-cluster-secured-status
+  - policy-acs-secured-status
