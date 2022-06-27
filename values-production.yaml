@@ -5,7 +5,7 @@ global:
     installPlanApproval: Automatic
 
 clusterGroup:
-  name: prod
+  name: production
   isHubCluster: false
   clusterName: wh-secured
 
