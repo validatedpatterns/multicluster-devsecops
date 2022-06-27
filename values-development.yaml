@@ -5,7 +5,7 @@ global:
     installPlanApproval: Automatic
 
 clusterGroup:
-  name: devel
+  name: development
   isHubCluster: false
   clusterName: wh-dev
 
