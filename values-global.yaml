@@ -32,8 +32,9 @@ global:
     dev_revision: main
 
 devel:
-  appURL: https://github.com/shaneboulden/chat-client.git
+  appURL: https://github.com/ipbabble/chat-client.git
   image: quay.io/ipbabble/chat-client:latest
+  npmbase: quay.io/ipbabble/ubi-npm:latest
   
 main:
   clusterGroupName: hub

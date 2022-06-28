@@ -21,7 +21,7 @@ spec:
   steps:
   - name: install
     # ipbabble TBD change
-    image: quay.io/smileyfritz/ubi-npm:latest
+    image: quay.io/ipbabble/ubi-npm:latest
     command:
     - /usr/bin/npm
     args:
