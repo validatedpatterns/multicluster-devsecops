@@ -33,7 +33,7 @@ global:
 
 devel:
   appURL: https://github.com/shaneboulden/chat-client.git
-  image: quay.io/smileyfritz/chat-client:latest
+  image: quay.io/ipbabble/chat-client:latest
   
 main:
   clusterGroupName: hub
