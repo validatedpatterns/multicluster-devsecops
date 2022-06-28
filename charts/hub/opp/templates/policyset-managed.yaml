@@ -1,0 +1,14 @@
+apiVersion: policy.open-cluster-management.io/v1beta1
+kind: PolicySet
+metadata:
+  labels:
+    open-cluster-management.io/policy-set: openshift-plus
+  name: openshift-plus-managed
+  namespace: policies
+spec:
+  description: The OpenShift Platform Plus policy set applies several policies that
+    installs the OpenShift Platform Plus products using best practices that allow
+    them to work well together. This policy set if focued on the components that install
+    to every managed cluster.
+  policies:
+  - policy-acs-secured-status

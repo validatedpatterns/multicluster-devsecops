@@ -1,0 +1,16 @@
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  labels:
+    open-cluster-management.io/policy-set: openshift-plus
+  name: placement-openshift-plus-hub
+  namespace: policies
+spec:
+  predicates:
+  - requiredClusterSelector:
+      labelSelector:
+        matchExpressions:
+        - key: name
+          operator: In
+          values:
+          - local-cluster

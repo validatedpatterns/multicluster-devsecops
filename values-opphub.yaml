@@ -47,7 +47,6 @@ clusterGroup:
 
 # The following section is used by  
 # OpenShift GitOps (ArgoCD)
-# Projects are just ArgoCD groupings that can be filtered on.
   projects:   
   - hub
   - opp
@@ -65,27 +64,7 @@ clusterGroup:
       jsonPointers:
         - /spec/loggingCA
 
-  - name: acs-central
-    namespace: stackrox
-    project: opp
-    path: common/acs/central
-
-  - name: acs-secured
-    namespace: stackrox
-    project: opp
-    path: common/acs/secured
-
-  - name: storage
-    namespace: openshift-storage
-    project: opp
-    path: charts/hub/odf
-
-  - name: quay-registry
-    namespace: quay-enterprise
-    project: opp
-    path: charts/hub/quay
-
-  - name: opp-policy
+  - name: opp
     namespace: openshift
     project: opp
     path: charts/hub/opp
@@ -133,7 +112,7 @@ clusterGroup:
 
 # This section is used by ACM
   managedClusterGroups:
-  - name: development
+  - name: devel
     helmOverrides:
     - name: clusterGroup.isHubCluster
       value: "false"
@@ -146,13 +125,13 @@ clusterGroup:
         values:
           - OpenShift
 
-  - name: production
+  - name: secured
     helmOverrides:
     - name: clusterGroup.isHubCluster
       value: "false"
     clusterSelector:
       matchLabels:
-        clustergroup: prod
+        clustergroup: secured
       matchExpressions:
       - key: vendor
         operator: In

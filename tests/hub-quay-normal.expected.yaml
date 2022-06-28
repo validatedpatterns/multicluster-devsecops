@@ -180,6 +180,54 @@ spec:
     - status: 'True'
       type: ManagedClusterConditionAvailable
 ---
+# Source: quay/templates/policy-quay-status.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: SI System and Information Integrity
+    policy.open-cluster-management.io/controls: SI-7 Software Firmware and Information
+      Integrity
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  labels:
+    open-cluster-management.io/policy-set: openshift-plus
+  name: policy-quay-status
+  namespace: policies
+spec:
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: policy-quay-status
+      spec:
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: quay-registry-quay-app
+              namespace: quay-enterprise
+            status:
+              conditions:
+              - status: "True"
+                type: Available
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: quay-registry-quay-database
+              namespace: quay-enterprise
+            status:
+              conditions:
+              - status: "True"
+                type: Available
+        remediationAction: inform
+        severity: medium
+---
 # Source: quay/templates/quayRegistry/policy-quay-api-token.yaml
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy

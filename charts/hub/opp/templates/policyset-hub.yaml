@@ -1,0 +1,18 @@
+apiVersion: policy.open-cluster-management.io/v1beta1
+kind: PolicySet
+metadata:
+  labels:
+    open-cluster-management.io/policy-set: openshift-plus
+  name: openshift-plus-hub
+  namespace: policies
+spec:
+  description: The OpenShift Platform Plus policy set applies several policies that
+    installs the OpenShift Platform Plus products using best practices that allow
+    them to work well together. This policy set is focued on the components that install
+    to the Advanced Cluster Management hub.
+  policies:
+  - policy-acs-central-status
+  - policy-acs-secured-status
+  - policy-ocm-observability
+  - policy-odf-status
+  - policy-quay-status

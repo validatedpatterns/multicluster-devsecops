@@ -5,12 +5,12 @@ global:
     installPlanApproval: Automatic
 
 clusterGroup:
-  name: prod
+  name: production
   isHubCluster: false
   clusterName: wh-secured
 
   namespaces:
-    - app
+    - config-demo
     - rhacs-operator
     - stackrox
     - policies
@@ -31,8 +31,8 @@ clusterGroup:
     - secured
 
   applications:
-  - name: application
-    namespace: app
+  - name: config-demo
+    namespace: config-demo
     project: app
     path: charts/all/config-demo
 

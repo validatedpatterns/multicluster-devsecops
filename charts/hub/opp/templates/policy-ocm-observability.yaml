@@ -1,0 +1,53 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    policy.open-cluster-management.io/categories: CA Assessment Authorization and
+      Monitoring
+    policy.open-cluster-management.io/controls: CA-7 Continuous Monitoring
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  labels:
+    open-cluster-management.io/policy-set: openshift-plus
+  name: policy-ocm-observability
+  namespace: policies
+spec:
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: policy-ocm-observability
+      spec:
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: thanos-object-storage
+              namespace: open-cluster-management-observability
+            stringData:
+              thanos.yaml: |
+                type: s3
+                config:
+                  bucket: {{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "quay-registry-quay-datastore").BUCKET_NAME }}
+                  endpoint: {{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "quay-registry-quay-datastore").BUCKET_HOST }}
+                  insecure: true
+                  access_key: {{ `{{ fromSecret "openshift-storage" "noobaa-admin" "AWS_ACCESS_KEY_ID" }}` }}
+                  secret_key: {{ `{{ fromSecret "openshift-storage" "noobaa-admin" "AWS_SECRET_ACCESS_KEY" }}` }}
+            type: Opaque
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: observability.open-cluster-management.io/v1beta2
+            kind: MultiClusterObservability
+            metadata:
+              name: observability
+            spec:
+              observabilityAddonSpec: {}
+              storageConfig:
+                metricObjectStorage:
+                  key: thanos.yaml
+                  name: thanos-object-storage
+        remediationAction: enforce
+        severity: medium

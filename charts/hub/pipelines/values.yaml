@@ -18,5 +18,9 @@ global:
     hostname: quay.io
     type: quay
 
+devel:
+  appURL: AUTOMATED
+  image: AUTOMATED
+  
 clusterGroup:
   name: testgroup

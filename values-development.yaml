@@ -5,9 +5,9 @@ global:
     installPlanApproval: Automatic
 
 clusterGroup:
-  name: devel
+  name: development
   isHubCluster: false
-  clusterName: wh-devel
+  clusterName: wh-dev
 
   namespaces:
     - stackrox
@@ -31,16 +31,6 @@ clusterGroup:
     namespace: openshift-operators
     channel: stable-3.7
     csv: quay-bridge-operator.v3.7
-
-#  - name: openshiftartifactoryha-operator
-#    namespace: openshift-operators
-#    channel: alpha
-#    cvs: xray-operator.v2.0.9
-
-#  - name: openshiftxray-operator
-#    namespace: openshift-operators
-#    channel: alpha
-#    cvs: xray-operator.v2.0.9
 
   projects:
     - secured
@@ -68,7 +58,7 @@ clusterGroup:
     project: test-app
     path: charts/all/config-demo
 
-  #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
+#  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
 #
 #  - name: pipelines
 #    namespace: production
