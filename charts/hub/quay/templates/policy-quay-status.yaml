@@ -25,7 +25,7 @@ spec:
             apiVersion: apps/v1
             kind: Deployment
             metadata:
-              name: registry-quay-app
+              name: quay-registry-quay-app
               namespace: quay-enterprise
             status:
               conditions:
@@ -36,7 +36,7 @@ spec:
             apiVersion: apps/v1
             kind: Deployment
             metadata:
-              name: registry-quay-database
+              name: quay-registry-quay-database
               namespace: quay-enterprise
             status:
               conditions:
