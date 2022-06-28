@@ -31,8 +31,8 @@ spec:
               thanos.yaml: |
                 type: s3
                 config:
-                  bucket: {{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "quay-registry-quay-datastore").data.BUCKET_NAME }}
-                  endpoint: {{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "quay-registry-quay-datastore").data.BUCKET_HOST }}
+                  bucket: {{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "quay-registry-quay-datastore").BUCKET_NAME }}
+                  endpoint: {{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "quay-registry-quay-datastore").BUCKET_HOST }}
                   insecure: true
                   access_key: '{{ `{{ fromSecret "openshift-storage" "noobaa-admin" "AWS_ACCESS_KEY_ID" | base64dec }}` }}'
                   secret_key: '{{ `{{ fromSecret "openshift-storage" "noobaa-admin" "AWS_SECRET_ACCESS_KEY" | base64dec }}` }}'
