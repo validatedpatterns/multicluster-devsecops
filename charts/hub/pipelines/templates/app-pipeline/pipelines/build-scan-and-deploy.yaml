@@ -1,0 +1,84 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: build-scan-and-deploy
+spec:
+  params:
+    - name: github-repo-revision
+      type: string
+      description: Git branch
+      default: main
+    - name: github-repo-url
+      type: string
+      description: Github repo
+      default: https://github.com/shaneboulden/chat-client.git
+    - name: context-dir
+      type: string
+    - name: is-name
+      type: string
+      default: chat-client
+    - name: acs-image
+      type: string
+      default: 'registry.redhat.io/rh-acs/roxctl:3.0.62.0'
+    - name: acs-scan-api
+      type: string
+  workspaces:
+    - name: source
+  tasks:
+  - name: clone-sources
+    taskRef:
+      name: git-clone
+      kind: ClusterTask
+    params:
+      - name: url
+        value: '$(params.github-repo-url)'
+      - name: revision
+        value: '$(params.github-repo-revision)'
+      - name: deleteExisting
+        value: 'true'
+    workspaces:
+      - name: output
+        workspace: source
+  - name: build-from-source
+    taskRef: 
+      name: react-build
+    runAfter: 
+    - clone-sources
+    workspaces:
+      - name: output
+        workspace: source
+  - name: build-image
+    taskRef: 
+      name: buildah-with-vols
+    params:
+      - name: IMAGE
+        value: 'quay.io/smileyfritz/chat-client'
+      - name: CONTEXT
+        value: '.'
+      - name: TLSVERIFY
+        value: 'false'
+    workspaces:
+      - name: source
+        workspace: source
+    runAfter: 
+      - build-from-source
+  - name: scan-image
+    taskRef:
+      name: scan-image-acs
+    params:
+      - name: IMAGE
+        value: '$(params.acs-image)'
+      - name: ACS_CENTRAL
+        value: '$(params.acs-scan-api)'
+    runAfter:
+      - build-image
+  - name: rollout-latest-image
+    taskRef: 
+      name: openshift-client
+      kind: ClusterTask
+    params:
+      - name: SCRIPT
+        value: |
+          oc import-image $(params.is-name):latest
+    runAfter:
+      - scan-image
