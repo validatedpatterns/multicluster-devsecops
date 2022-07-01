@@ -3,6 +3,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: scan-image-acs
+  namespace: {{ .Values.global.ciNamespace }}
   labels:
     app.kubernetes.io/version: "0.1"
   annotations:
@@ -17,7 +18,7 @@ spec:
     description: Reference of the image to scan
   - name: SCAN_IMAGE
     description: Image containing the roxctl CLI
-    default: quay.io/smileyfritz/roxctl:latest
+    default: {{ .Values.devel.roxctlImage }}
   - name: TLS_VERIFY
     description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
     default: "true"

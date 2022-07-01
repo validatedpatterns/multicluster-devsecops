@@ -3,6 +3,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: buildah-with-vols
+  namespace: {{ .Values.global.ciNamespace }}
   labels:
     app.kubernetes.io/version: "0.1"
   annotations:
@@ -66,8 +67,6 @@ spec:
     volumeMounts:
     - name: varlibcontainers
       mountPath: /var/lib/containers
-    securityContext:
-      privileged: true
 
   - name: push
     image: $(params.BUILDER_IMAGE)
@@ -80,8 +79,6 @@ spec:
     volumeMounts:
     - name: varlibcontainers
       mountPath: /var/lib/containers
-    securityContext:
-      privileged: true
 
   - name: digest-to-results
     image: $(params.BUILDER_IMAGE)

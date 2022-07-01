@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: react-build
+  namespace: {{ .Values.global.ciNamespace }}
 spec:
   workspaces:
     - name: output
@@ -20,16 +21,14 @@ spec:
       default: .
   steps:
   - name: install
-    # ipbabble TBD change
-    image: quay.io/ipbabble/ubi-npm:latest
+    image: {{ .Values.devel.npmbase }}
     command:
     - /usr/bin/npm
     args:
     - install
     workingDir: $(workspaces.output.path)
   - name: build
-    # ipbabble TBD change
-    image: quay.io/smileyfritz/ubi-npm:latest
+    image: {{ .Values.devel.image }}
     command:
     - /usr/bin/npm
     args:
