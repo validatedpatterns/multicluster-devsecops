@@ -1,6 +1,7 @@
 ---
 global:
   pattern: multicluster-devsecops
+  ciNamespace: devsecops-ci
 
   options:
     useCSV: false
@@ -34,7 +35,8 @@ global:
 devel:
   appURL: https://github.com/ipbabble/chat-client.git
   image: quay.io/ipbabble/chat-client:latest
-  npmbase: quay.io/ipbabble/ubi-npm:latest
+  npmbase: quay.io/hybridcloudpatterns/ubi-npm:latest
+  roxctlImage: registry.redhat.io/rh-acs/roxctl:3.0.62.0
   
 main:
   clusterGroupName: hub
