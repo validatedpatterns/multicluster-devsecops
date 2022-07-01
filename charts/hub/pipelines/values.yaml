@@ -5,6 +5,7 @@ global:
   pattern: multicluster-devsecops
   repoURL: "https://github.com/pattern-clone/multicluster-devsecops"
   targetRevision: main
+  ciNamespace: devsecops-ci
 
   git:
     hostname: github.com
@@ -21,6 +22,8 @@ global:
 devel:
   appURL: AUTOMATED
   image: AUTOMATED
+  roxCTLImage: registry.redhat.io/rh-acs/roxctl:3.0.62.0
   
 clusterGroup:
   name: testgroup
+
