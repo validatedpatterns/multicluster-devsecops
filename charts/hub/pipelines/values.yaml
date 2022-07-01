@@ -22,7 +22,8 @@ global:
 devel:
   appURL: AUTOMATED
   image: AUTOMATED
-  roxCTLImage: registry.redhat.io/rh-acs/roxctl:3.0.62.0
+  roxctlImage: AUTOMATED
+  npmbase: AUTOMATED
   
 clusterGroup:
   name: testgroup
