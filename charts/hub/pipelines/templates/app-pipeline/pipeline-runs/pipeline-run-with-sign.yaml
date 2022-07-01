@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
   generateName: cosign-pipelinerun
+  namespace: {{ .Values.global.ciNamespace }}
 spec:
   params: 
     - name: "github-repo-revision"
@@ -17,9 +18,6 @@ spec:
   pipelineRef:
     name: build-and-sign
   podTemplate:
-      securityContext:
-        runAsUser: 0
-        fsGroup: 0
       volumes:
         - name: varlibcontainers
           persistentVolumeClaim:
