@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: build-and-sign
+  namespace: {{ .Values.global.ciNamespace }}
 spec:
   params:
     - name: github-repo-revision
@@ -11,7 +12,7 @@ spec:
     - name: github-repo-url
       type: string
       description: Github repo
-      default: https://github.com/shaneboulden/chat-client.git
+      default: {{ .Values.devel.appURL }}
     - name: context-dir
       type: string
     - name: is-name
@@ -44,10 +45,10 @@ spec:
         workspace: source
   - name: build-image
     taskRef: 
-      name: buildah-with-vols
+      name: buildah-to-registry
     params:
       - name: IMAGE
-        value: 'quay.io/smileyfritz/chat-client'
+        value: '{{ .Values.devel.image }}'
       - name: CONTEXT
         value: '.'
       - name: TLSVERIFY

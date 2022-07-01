@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: build-and-deploy
+  namespace: {{ .Values.global.ciNamespace }}
 spec:
   params:
     - name: github-repo-revision
@@ -46,7 +47,7 @@ spec:
         workspace: source
   - name: build-image
     taskRef: 
-      name: buildah-with-vols
+      name: buildah-to-registry
     params:
       - name: IMAGE
         value: '$(params.image-name)'
@@ -64,9 +65,7 @@ spec:
       name: openshift-client
       kind: ClusterTask
     params:
-      - name: ARGS
-        value:
-          - import-image
-          - $(params.is-name):latest
+      - name: SCRIPT
+        value: oc import-image $(params.is-name):latest --from=$(params.image-name) --confirm
     runAfter:
       - build-image

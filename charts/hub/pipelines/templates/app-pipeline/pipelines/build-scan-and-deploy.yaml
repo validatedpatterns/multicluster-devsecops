@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: build-scan-and-deploy
+  namespace: {{ .Values.global.ciNamespace }}
 spec:
   params:
     - name: github-repo-revision
@@ -11,15 +12,17 @@ spec:
     - name: github-repo-url
       type: string
       description: Github repo
-      default: https://github.com/shaneboulden/chat-client.git
+      default: {{ .Values.devel.appURL }}
     - name: context-dir
+      type: string
+    - name: image-name
       type: string
     - name: is-name
       type: string
       default: chat-client
     - name: acs-image
       type: string
-      default: 'registry.redhat.io/rh-acs/roxctl:3.0.62.0'
+      default: '{{ .Values.devel.roxCTLImage }}'
     - name: acs-scan-api
       type: string
   workspaces:
@@ -49,10 +52,10 @@ spec:
         workspace: source
   - name: build-image
     taskRef: 
-      name: buildah-with-vols
+      name: buildah-to-registry
     params:
       - name: IMAGE
-        value: 'quay.io/smileyfritz/chat-client'
+        value: '{{ .Values.devel.image }}'
       - name: CONTEXT
         value: '.'
       - name: TLSVERIFY
@@ -79,6 +82,6 @@ spec:
     params:
       - name: SCRIPT
         value: |
-          oc import-image $(params.is-name):latest
+          oc import-image $(params.is-name):latest --from=$(params.image-name) --confirm
     runAfter:
       - scan-image
