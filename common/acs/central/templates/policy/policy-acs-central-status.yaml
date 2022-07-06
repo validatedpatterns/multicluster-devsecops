@@ -2,11 +2,11 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
   annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
     policy.open-cluster-management.io/categories: SI System and Information Integrity
     policy.open-cluster-management.io/controls: SI-5 Security Alerts Advisories and
       Directives
     policy.open-cluster-management.io/standards: NIST SP 800-53
-    argocd.argoproj.io/compare-options: IgnoreExtraneous
   labels:
     open-cluster-management.io/policy-set: openshift-plus
   name: policy-acs-central-status
