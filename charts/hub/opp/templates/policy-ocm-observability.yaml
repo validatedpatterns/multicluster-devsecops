@@ -29,14 +29,16 @@ spec:
               name: thanos-object-storage
               namespace: open-cluster-management-observability
             stringData:
+              accessKey: '{{ `{{ fromSecret "openshift-storage" "noobaa-admin" "AWS_ACCESS_KEY_ID" }}` }}'
+              secretKey: '{{ `{{ fromSecret "openshift-storage" "noobaa-admin" "AWS_SECRET_ACCESS_KEY" }}` }}'
               thanos.yaml: |
                 type: s3
                 config:
                   bucket: {{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "quay-registry-quay-datastore").BUCKET_NAME }}
                   endpoint: {{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "quay-registry-quay-datastore").BUCKET_HOST }}
                   insecure: true
-                  access_key: {{ `{{hub fromSecret "openshift-storage" "noobaa-admin" "AWS_ACCESS_KEY_ID" hub}}` }}
-                  secret_key: {{ `{{hub fromSecret "openshift-storage" "noobaa-admin" "AWS_SECRET_ACCESS_KEY" hub}}` }}
+                  access_key: {{ accessKey }}
+                  secret_key: {{ secretKey }}
             type: Opaque
         - complianceType: musthave
           objectDefinition:
