@@ -2,6 +2,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
   annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
     policy.open-cluster-management.io/categories: SI System and Information Integrity
     policy.open-cluster-management.io/controls: SI-5 Security Alerts Advisories and
       Directives
