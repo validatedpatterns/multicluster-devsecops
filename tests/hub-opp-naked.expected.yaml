@@ -91,6 +91,7 @@ metadata:
       Monitoring
     policy.open-cluster-management.io/controls: CA-7 Continuous Monitoring
     policy.open-cluster-management.io/standards: NIST SP 800-53
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
   labels:
     open-cluster-management.io/policy-set: openshift-plus
   name: policy-ocm-observability
@@ -119,8 +120,8 @@ spec:
                   bucket: 
                   endpoint: 
                   insecure: true
-                  access_key: {{ fromSecret "openshift-storage" "noobaa-admin" "AWS_ACCESS_KEY_ID" }}
-                  secret_key: {{ fromSecret "openshift-storage" "noobaa-admin" "AWS_SECRET_ACCESS_KEY" }}
+                  access_key: {{ `{{ fromSecret "openshift-storage" "noobaa-admin" "AWS_ACCESS_KEY_ID" }}` }}
+                  secret_key: {{ `{{ fromSecret "openshift-storage" "noobaa-admin" "AWS_SECRET_ACCESS_KEY" }}` }}
             type: Opaque
         - complianceType: musthave
           objectDefinition:
