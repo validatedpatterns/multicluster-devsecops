@@ -28,6 +28,7 @@ spec:
             # Now extract the token and store in the Quay Integration secret in openshift-operators namespace
             TOKEN=$(oc extract secret/quay-temp-token --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}') && \
             oc create secret -n openshift-operators generic quay-integration --from-literal=token=$TOKEN
+            oc create secret -n devsecops-ci generic quay-integration --from-literal=token=$TOKEN
           fi
           echo "Job finished" 
         name: quay-api-enablement
