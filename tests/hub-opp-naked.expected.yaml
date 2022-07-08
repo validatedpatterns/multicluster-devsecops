@@ -104,6 +104,8 @@ spec:
       kind: ConfigurationPolicy
       metadata:
         name: policy-ocm-observability
+        annotations:
+          argocd.argoproj.io/compare-options: IgnoreExtraneous
       spec:
         object-templates:
         - complianceType: musthave
@@ -117,12 +119,12 @@ spec:
               thanos.yaml: |
                 type: s3
                 config:
-                  bucket: 
-                  endpoint: 
+                  bucket: '{{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "obc-quay-enterprise-quay-registry-quay-datastore").spec.endpoint.bucketName }}'
+                  endpoint: '{{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "obc-quay-enterprise-quay-registry-quay-datastore").spec.endpoint.bucketHost }}'
                   insecure: true
-                  access_key: {{ `{{ fromSecret "openshift-storage" "noobaa-admin" "AWS_ACCESS_KEY_ID" }}` }}
-                  secret_key: {{ `{{ fromSecret "openshift-storage" "noobaa-admin" "AWS_SECRET_ACCESS_KEY" }}` }}
-            type: Opaque
+                  access_key: '{{ (lookup "v1" "Secret" "openshift-storage" "noobaa-admin").data.AWS_ACCESS_KEY_ID }}'
+                  secret_key: '{{ (lookup "v1" "Secret" "openshift-storage" "noobaa-admin").data.AWS_SECRET_ACCESS_KEY }}'
+              type: Opaque
         - complianceType: musthave
           objectDefinition:
             apiVersion: observability.open-cluster-management.io/v1beta2
@@ -173,3 +175,4 @@ spec:
     to every managed cluster.
   policies:
   - policy-acs-secured-status
+  - policy-ocm-observability
