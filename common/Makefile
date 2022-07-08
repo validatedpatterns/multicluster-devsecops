@@ -1,4 +1,3 @@
-SECRETS=~/values-secret.yaml
 NAME=$(shell basename `pwd`)
 # This is to ensure that whether we start with a git@ or https:// URL, we end up with an https:// URL
 # This is because we expect to use tokens for repo authentication as opposed to SSH keys
@@ -9,8 +8,8 @@ TARGET_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 HUBCLUSTER_APPS_DOMAIN=$(shell oc get ingresses.config/cluster -o jsonpath={.spec.domain})
 
 # --set values always take precedence over the contents of -f
-HELM_OPTS=-f values-global.yaml -f $(SECRETS) --set main.git.repoURL="$(TARGET_REPO)" --set main.git.revision=$(TARGET_BRANCH) --set global.hubClusterDomain=$(HUBCLUSTER_APPS_DOMAIN)
-TEST_OPTS= -f common/examples/values-secret.yaml -f values-global.yaml --set global.repoURL="https://github.com/pattern-clone/mypattern" --set main.git.repoURL="https://github.com/pattern-clone/mypattern" --set main.git.revision=main --set global.valuesDirectoryURL="https://github.com/pattern-clone/mypattern/raw/main" --set global.pattern="mypattern" --set global.namespace="pattern-namespace" --set global.hubClusterDomain=hub.example.com --set global.localClusterDomain=region.example.com
+HELM_OPTS=-f values-global.yaml --set main.git.repoURL="$(TARGET_REPO)" --set main.git.revision=$(TARGET_BRANCH) --set global.hubClusterDomain=$(HUBCLUSTER_APPS_DOMAIN)
+TEST_OPTS= -f common/examples/values-secret.yaml -f values-global.yaml --set global.repoURL="https://github.com/pattern-clone/mypattern" --set main.git.repoURL="https://github.com/pattern-clone/mypattern" --set main.git.revision=main --set global.pattern="mypattern" --set global.namespace="pattern-namespace" --set global.hubClusterDomain=hub.example.com --set global.localClusterDomain=region.example.com --set "clusterGroup.imperative.jobs[0].name"="test" --set "clusterGroup.imperative.jobs[0].playbook"="ansible/test.yml" --set clusterGroup.insecureUnsealVaultInsideCluster=true
 PATTERN_OPTS=-f common/examples/values-example.yaml
 
 
@@ -33,31 +32,52 @@ test: ## run helm tests
 helmlint: ## run helm lint
 	@for t in $(CHARTS); do helm lint $(TEST_OPTS) $(PATTERN_OPTS) $$t; if [ $$? != 0 ]; then exit 1; fi; done
 
-API_URL ?= https://raw.githubusercontent.com/hybrid-cloud-patterns/ocp-schemas/main/openshift/4.9/
+API_URL ?= https://raw.githubusercontent.com/hybrid-cloud-patterns/ocp-schemas/main/openshift/4.10/
 KUBECONFORM_SKIP ?= -skip 'CustomResourceDefinition'
 # We need to skip 'CustomResourceDefinition' as openapi2jsonschema seems to be unable to generate them ATM
 kubeconform: ## run helm kubeconform
 	@for t in $(CHARTS); do helm template $(TEST_OPTS) $(PATTERN_OPTS) $$t | kubeconform -strict $(KUBECONFORM_SKIP) -verbose -schema-location $(API_URL); if [ $$? != 0 ]; then exit 1; fi; done
 
 validate-origin: ## verify the git origin is available
-	git ls-remote $(TARGET_REPO)
+	@echo Checking repo $(TARGET_REPO) - branch $(TARGET_BRANCH)
+	@git ls-remote --exit-code --heads $(TARGET_REPO) $(TARGET_BRANCH) >/dev/null && \
+		echo "$(TARGET_REPO) - $(TARGET_BRANCH) exists" || \
+		(echo "$(TARGET_BRANCH) not found in $(TARGET_REPO)"; exit 1)
 
-deploy: validate-origin ## deploys the pattern
-	helm install $(NAME) common/install/ $(HELM_OPTS)
+# Default targets are "deploy" and "upgrade"; they can "move" to whichever install mechanism should be default.
+# legacy-deploy and legacy-upgrade should be present so that patterns don't need to depend on "deploy" and "upgrade"
+# pointing to one place or another, and don't need to change when they do (provide they use either legacy- or operator-
+# targets)
+deploy upgrade legacy-deploy legacy-upgrade: validate-origin ## deploys the pattern
+	helm upgrade --install $(NAME) common/install/ $(HELM_OPTS)
 
-upgrade: validate-origin ## runs helm upgrade
-	helm upgrade $(NAME) common/install/ $(HELM_OPTS)
+operator-deploy operator-upgrade: validate-origin ## runs helm install
+	helm upgrade --install $(NAME) common/operator-install/ $(HELM_OPTS)
 
 uninstall: ## runs helm uninstall
 	helm uninstall $(NAME)
 
 vault-init: ## inits, unseals and configured the vault
 	common/scripts/vault-utils.sh vault_init common/pattern-vault.init
+	common/scripts/vault-utils.sh vault_unseal common/pattern-vault.init
+	common/scripts/vault-utils.sh vault_secrets_init common/pattern-vault.init
 
 vault-unseal: ## unseals the vault
 	common/scripts/vault-utils.sh vault_unseal common/pattern-vault.init
 
 load-secrets: ## loads the secrets into the vault
-	common/scripts/ansible-push-vault-secrets.sh
+	common/scripts/vault-utils.sh push_secrets common/pattern-vault.init
+
+super-linter: ## Runs super linter locally
+	podman run -e RUN_LOCAL=true -e USE_FIND_ALGORITHM=true	\
+					-e VALIDATE_BASH=false \
+					-e VALIDATE_JSCPD=false \
+					-e VALIDATE_KUBERNETES_KUBEVAL=false \
+					-e VALIDATE_YAML=false \
+					-v $(PWD):/tmp/lint:rw,z docker.io/github/super-linter:slim-v4
+
+ansible-lint: ## run ansible lint on ansible/ folder
+	podman run -it -v $(PWD):/workspace:rw,z --workdir /workspace --entrypoint "/usr/local/bin/ansible-lint" quay.io/ansible/creator-ee:latest  "-vvv" "ansible/"
 
 .phony: install test
+

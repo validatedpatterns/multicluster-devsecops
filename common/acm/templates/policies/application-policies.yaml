@@ -31,7 +31,7 @@ spec:
                   name: {{ $.Values.global.pattern }}-{{ .name }}
                   namespace: openshift-gitops
                   finalizers:
-                  - argoproj.io/finalizer
+                  - resources-finalizer.argocd.argoproj.io/foreground
                 spec:
                   project: default
                   source:
@@ -39,9 +39,10 @@ spec:
                     targetRevision: {{ coalesce .targetRevision $.Values.global.targetRevision }}
                     path: {{ default "common/clustergroup" .path }}
                     helm:
+                      ignoreMissingValueFiles: true
                       valueFiles:
-                      - "{{ coalesce .valuesDirectoryURL $.Values.global.valuesDirectoryURL }}/values-global.yaml"
-                      - "{{ coalesce .valuesDirectoryURL $.Values.global.valuesDirectoryURL }}/values-{{ .name }}.yaml"
+                      - "/values-global.yaml"
+                      - "/values-{{ .name }}.yaml"
                       parameters:
                       - name: global.repoURL
                         value: $ARGOCD_APP_SOURCE_REPO_URL
@@ -51,8 +52,6 @@ spec:
                         value: $ARGOCD_APP_NAMESPACE
                       - name: global.pattern
                         value: {{ $.Values.global.pattern }}
-                      - name: global.valuesDirectoryURL
-                        value: {{ coalesce .valuesDirectoryURL $.Values.global.valuesDirectoryURL }}
                       - name: global.hubClusterDomain
                         value: {{ $.Values.global.hubClusterDomain }}
                       - name: global.localClusterDomain
