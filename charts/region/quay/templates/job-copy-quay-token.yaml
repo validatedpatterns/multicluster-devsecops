@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "6"
+  name: copy-quay-token
+  namespace: openshift-operators
+spec:
+  template:
+    spec:
+      containers: 
+      - image: {{ .Values.job.image }}
+        command:
+        - /bin/bash
+        - -c
+        - |
+          # copy Quay-integration secret into pipeline namespace
+          oc get secret quay-integration --namespace=openshift-operators -oyaml | grep -v ^\s*namespace:\s' |oc apply --namespace='{{ .Values.devel.namespace }}' -f -
+        name: copy-quay-token
+      dnsPolicy: ClusterFirst
+      activeDeadlineSeconds: 900
+      restartPolicy: Never
+      serviceAccountName: golang-external-secrets
+      terminationGracePeriodSeconds: 60
