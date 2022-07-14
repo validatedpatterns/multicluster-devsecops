@@ -1,0 +1,72 @@
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-quay-ci-token
+  namespace: {{ .Values.devel.namespace }}
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: SkipPrune
+    argocd.argoproj.io/sync-wave: "7"
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: quay-ci-token-configpolicy
+          annotations:
+            apps.open-cluster-management.io/deployables: "secret"
+        spec:
+          remediationAction: enforce
+          severity: medium
+          namespaceSelector:
+            include:
+              - default
+              - openshift-operators
+          object-templates:
+            - complianceType: mustonlyhave
+              objectDefinition:
+                kind: Secret
+                type: Opaque
+                metadata:
+                  name: quay-ci-token
+                  namespace: {{ .Values.devel.namespace }}
+                apiVersion: v1
+                data:
+                  token: '{{ `{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}` }}'
+---
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: quay-ci-token-placement-binding
+  namespace: {{ .Values.devel.namespace }}
+placementRef:
+  name: quay-ci-token-placement
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: policy-quay-ci-token
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+# We need to run this on any managed cluster but not on the HUB
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: quay-api-ci-placement
+  namespace: {{ .Values.devel.namespace }}
+spec:
+  # This will go to both devel and secured clusters
+  clusterSelector:
+    # Using matchExpression because I need it in more than one clustergroup
+    matchExpressions:
+      - key: clustergroup
+        operator: In
+        values:
+          - devel
+          - prod
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
