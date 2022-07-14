@@ -55,7 +55,7 @@ clusterGroup:
 
   - name: acs-integration
     namespace: stackrox
-    project: secured
+    project: ci
     path: charts/region/acs
 
   - name: config-demo-test
