@@ -56,7 +56,7 @@ subjects:
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
-  name: quay-api-ci-placement
+  name: quay-ci-token-placement
   namespace: {{ .Values.devel.namespace }}
 spec:
   # This will go to both devel and secured clusters
