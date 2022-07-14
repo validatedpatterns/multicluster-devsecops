@@ -53,6 +53,11 @@ clusterGroup:
     project: secured
     path: charts/region/quay
 
+  - name: acs-integration
+    namespace: stackrox
+    project: secured
+    path: charts/region/acs
+
   - name: config-demo-test
     namespace: config-demo
     project: test-app
