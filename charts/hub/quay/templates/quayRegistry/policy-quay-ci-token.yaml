@@ -24,7 +24,6 @@ spec:
           namespaceSelector:
             include:
               - default
-              - openshift-operators
               - devsecops-ci
           object-templates:
             - complianceType: mustonlyhave
@@ -33,7 +32,7 @@ spec:
                 type: Opaque
                 metadata:
                   name: quay-ci-token
-#                  namespace: {{ .Values.devel.namespace }}
+                  namespace: {{ .Values.devel.namespace }}
                 apiVersion: v1
                 data:
                   token: '{{ `{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}` }}'
