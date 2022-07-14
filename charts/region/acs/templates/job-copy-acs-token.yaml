@@ -4,8 +4,8 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/sync-wave: "6"
-  name: copy-quay-token
-  namespace: openshift-operators
+  name: copy-acs-token
+  namespace: stackrox
 spec:
   template:
     spec:
@@ -15,11 +15,11 @@ spec:
         - /bin/bash
         - -c
         - |
-          # copy quay-api-token secret into pipeline namespace
-          oc get secret quay-api-token --namespace=openshift-operators -oyaml | grep -v '\s*namespace:\s' |oc apply --namespace=devsecops-ci -f -
-        name: copy-quay-token
+          # copy acs-api-token secret into pipeline namespace
+          oc get secret acs-api-token --namespace=stackrox -oyaml | grep -v '\s*namespace:\s' |oc apply --namespace=devsecops-ci -f -
+        name: copy-acs-token
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900
       restartPolicy: Never
-      serviceAccountName: quay-bridge-sa
+      serviceAccountName: acs-integration-sa
       terminationGracePeriodSeconds: 60
