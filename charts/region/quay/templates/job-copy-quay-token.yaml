@@ -5,7 +5,7 @@ metadata:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/sync-wave: "6"
   name: copy-quay-token
-  namespace: default
+  namespace: openshift-operators
 spec:
   template:
     spec:
