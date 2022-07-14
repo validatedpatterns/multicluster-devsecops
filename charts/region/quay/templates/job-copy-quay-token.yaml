@@ -16,7 +16,7 @@ spec:
         - -c
         - |
           # copy Quay-integration secret into pipeline namespace
-          oc get secret quay-integration --namespace=openshift-operators -oyaml | grep -v ^\s*namespace:\s' |oc apply --namespace='{{ .Values.devel.namespace }}' -f -
+          oc get secret quay-integration --namespace=openshift-operators -oyaml | grep -v ^\s*namespace:\s' |oc apply --namespace=devsecops-ci -f -
         name: copy-quay-token
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900
