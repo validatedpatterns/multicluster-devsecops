@@ -70,7 +70,7 @@ apiVersion: console.openshift.io/v1
 kind: ConsoleLink
 metadata:
   name: {{ .Values.clusterGroup.name }}-acs-link
-  namespace: {{ $namespace }}
+  namespace: stackrox
 spec:
   applicationMenu:
     section: Red Hat applications
