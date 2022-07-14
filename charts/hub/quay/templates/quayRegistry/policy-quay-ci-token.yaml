@@ -2,7 +2,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
   name: policy-quay-ci-token
-  namespace: openshift-operators
+  namespace: {{ .Values.devel.namespace }}
   annotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
     argocd.argoproj.io/sync-options: SkipPrune
@@ -25,7 +25,7 @@ spec:
             include:
               - default
               - openshift-operators
-              - devsecops-ci
+#              - devsecops-ci
           object-templates:
             - complianceType: mustonlyhave
               objectDefinition:
@@ -33,7 +33,7 @@ spec:
                 type: Opaque
                 metadata:
                   name: quay-ci-token
-                  namespace: {{ .Values.devel.namespace }}
+#                  namespace: {{ .Values.devel.namespace }}
                 apiVersion: v1
                 data:
                   token: '{{ `{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}` }}'
