@@ -25,7 +25,7 @@ spec:
             include:
               - default
               - openshift-operators
-#              - devsecops-ci
+              - devsecops-ci
           object-templates:
             - complianceType: mustonlyhave
               objectDefinition:
