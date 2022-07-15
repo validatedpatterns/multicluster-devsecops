@@ -21,7 +21,7 @@ spec:
   steps:
   - name: install
     # ipbabble TBD change
-    image: quay.io/ipbabble/ubi-npm:latest
+    image: {{ .Values.devel.npmbase }}
     command:
     - /usr/bin/npm
     args:
@@ -29,7 +29,7 @@ spec:
     workingDir: $(workspaces.output.path)
   - name: build
     # ipbabble TBD change
-    image: quay.io/smileyfritz/ubi-npm:latest
+    image: {{ .Values.devel.npmbase }}
     command:
     - /usr/bin/npm
     args:
