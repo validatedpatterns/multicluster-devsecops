@@ -16,6 +16,7 @@ spec:
       type: string
     - name: image-name
       type: string
+      default: {{ .Values.devel.image }}
     - name: is-name
       type: string
       default: chat-client
