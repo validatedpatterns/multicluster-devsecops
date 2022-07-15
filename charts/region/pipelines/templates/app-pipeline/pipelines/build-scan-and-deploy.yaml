@@ -22,6 +22,7 @@ spec:
       default: 'registry.redhat.io/rh-acs/roxctl:3.0.62.0'
     - name: acs-scan-api
       type: string
+      default: 'https://central-stackrox.{{ coalesce .Values.global.localClusterDomain .Values.global.hubClusterDomain }}'
   workspaces:
     - name: source
   tasks:
