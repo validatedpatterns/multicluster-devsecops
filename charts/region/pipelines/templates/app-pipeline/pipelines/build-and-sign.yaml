@@ -44,7 +44,7 @@ spec:
         workspace: source
   - name: build-image
     taskRef: 
-      name: buildah-with-vols
+      name: buildah-to-registry
     params:
       - name: IMAGE
         value: 'quay.io/smileyfritz/chat-client'
