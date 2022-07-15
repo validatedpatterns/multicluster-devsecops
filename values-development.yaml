@@ -46,7 +46,7 @@ clusterGroup:
   - name: pipelines
     namespace: devsecops-ci
     project: ci
-    path: charts/hub/pipelines
+    path: charts/region/pipelines
 
   - name: quay-integration
     namespace: openshift-operators
