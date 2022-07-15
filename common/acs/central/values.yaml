@@ -7,3 +7,6 @@ job:
 
 global:
   hubClusterDomain: AUTOMATIC
+
+clusterGroup:
+  name: AUTOMATIC

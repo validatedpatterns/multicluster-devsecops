@@ -35,6 +35,7 @@ devel:
   appURL: https://github.com/ipbabble/chat-client.git
   image: quay.io/ipbabble/chat-client:latest
   npmbase: quay.io/hybridcloudpatterns/ubi-npm:latest
+  namespace: devsecops-ci
   
 main:
   clusterGroupName: hub
