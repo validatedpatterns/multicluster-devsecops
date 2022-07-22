@@ -124,7 +124,7 @@ clusterGroup:
   - name: external-secrets
     namespace: devsecops-ci
     project: external-secrets
-    path: hub/external-secrets
+    path: charts/hub/external-secrets
 
   - name: cli-tools
     namespace: openshift
