@@ -52,7 +52,7 @@ clusterGroup:
   - hub
   - opp
   - config-demo
-  - golang-external-secrets
+  - external-secrets
 
   applications:  
   - name: acm   #arbitary
@@ -118,9 +118,14 @@ clusterGroup:
 
   - name: golang-external-secrets
     namespace: golang-external-secrets
-    project: golang-external-secrets
+    project: external-secrets
     path: common/golang-external-secrets
 
+  - name: external-secrets
+    namespace: external-secrets
+    project: external-secrets
+    path: hub/external-secrets
+    
   - name: cli-tools
     namespace: openshift
     project: hub
