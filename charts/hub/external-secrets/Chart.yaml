@@ -4,3 +4,7 @@ keywords:
 - patterns
 name: external-secrets
 version: 0.0.1
+dependencies:
+  - name: external-secrets
+    version: "0.4.4"
+    repository: "https://charts.external-secrets.io"
