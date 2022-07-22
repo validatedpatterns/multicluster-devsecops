@@ -1,0 +1,6 @@
+apiVersion: v2
+description: A Helm chart to configure external secrets
+keywords:
+- patterns
+name: external-secrets
+version: 0.0.1

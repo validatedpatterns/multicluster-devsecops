@@ -1,0 +1,12 @@
+global:
+  git:
+    hostname: github.com
+    account: PLAINTEXT
+    username: PLAINTEXT
+    email: SOMEWHERE@EXAMPLE.COM
+    dev_revision: main
+
+  imageregistry:
+    account: PLAINTEXT
+    hostname: quay.io
+    type: quay
