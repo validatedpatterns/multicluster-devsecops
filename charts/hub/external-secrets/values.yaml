@@ -10,3 +10,10 @@ global:
     account: PLAINTEXT
     hostname: quay.io
     type: quay
+
+secretStore:
+  name: vault-backend
+  kind: ClusterSecretStore
+
+imageregistrysecret:
+  key: secret/data/hub/imageregistry
