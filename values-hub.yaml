@@ -122,10 +122,10 @@ clusterGroup:
     path: common/golang-external-secrets
 
   - name: external-secrets
-    namespace: external-secrets
+    namespace: devsecops-ci
     project: external-secrets
     path: hub/external-secrets
-    
+
   - name: cli-tools
     namespace: openshift
     project: hub
