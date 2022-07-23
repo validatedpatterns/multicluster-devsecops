@@ -17,3 +17,5 @@ secretStore:
 
 imageregistrysecret:
   key: secret/data/hub/imageregistry
+  namespaces:
+    - devsecops-ci
