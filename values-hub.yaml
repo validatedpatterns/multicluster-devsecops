@@ -68,12 +68,12 @@ clusterGroup:
   - name: acs-central
     namespace: stackrox
     project: opp
-    path: common/acs/central
+    path: charts/hub/acs/central
 
   - name: acs-secured
     namespace: stackrox
     project: opp
-    path: common/acs/secured
+    path: charts/hub/acs/secured
 
   - name: storage
     namespace: openshift-storage
