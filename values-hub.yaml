@@ -32,8 +32,8 @@ clusterGroup:
 
   - name: rhacs-operator  #packageName
     namespace: openshift-operators # operator namespace
-    channel: rhacs-3.71
-    csv: rhacs-operator.v3.71.0
+    channel: rhacs-3.68
+    csv: rhacs-operator.v3.68.1
 
   - name: odf-operator
     namespace: openshift-storage
