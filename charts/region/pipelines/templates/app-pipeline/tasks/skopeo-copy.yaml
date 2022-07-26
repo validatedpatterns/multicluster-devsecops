@@ -15,6 +15,6 @@ spec:
     type: string
   steps:
   - name: skopeo-copy
-    image: quay.io/hybridlcoudpatterns/ubi-npm:latest
+    image: quay.io/hybridcloudpatterns/ubi-npm:latest
     script: |
       skopeo copy --src-tls-verify=false --dest-tls-verify=false quay.io://$(params.SOURCE_IMAGE):$(params.TAG) docker://$(cat $(workspaces.config.path)/IMAGE_PROVIDER)/$(cat $(workspaces.config.path)/IMAGE_ACCOUNT)/$(cat $(workspaces.config.path)/$(params.TARGET_IMAGE_CONFIGMAPKEY)):$(params.TAG)
