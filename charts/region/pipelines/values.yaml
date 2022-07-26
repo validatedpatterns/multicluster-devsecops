@@ -3,7 +3,7 @@ site:
 
 global:
   pattern: multicluster-devsecops
-  repoURL: "https://github.com/pattern-clone/multicluster-devsecops"
+  repoURL: "https://github.com/<git-fork>/multicluster-devsecops"
   targetRevision: main
 
   git:
