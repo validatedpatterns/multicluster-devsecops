@@ -8,5 +8,5 @@ spec:
     - name: web
       image: quay.io/hybridcloudpatterns/ubi-npm:latest
   imagePullSecrets:
-    - name: ipbabble-blueprintbot-pull-secret
+    - name: image-registry-credentials
  
