@@ -53,7 +53,7 @@ spec:
       name: buildah-to-registry
     params:
       - name: IMAGE
-        value: 'quay.io/smileyfritz/chat-client'
+        value: 'quay.io/{{ .Values.secrets.git.username }}/chat-client'
       - name: CONTEXT
         value: '.'
       - name: TLSVERIFY
