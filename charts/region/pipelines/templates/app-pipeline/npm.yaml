@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: link-pull-secret
+  name: npm
   namespace: devsecops-ci
 spec:
   containers:
     - name: web
-      image: quay.io/hybridcloudpatterns/ubi-npm
+      image: quay.io/hybridcloudpatterns/ubi-npm:latest
   imagePullSecrets:
     - name: image-registry-credentials
  
