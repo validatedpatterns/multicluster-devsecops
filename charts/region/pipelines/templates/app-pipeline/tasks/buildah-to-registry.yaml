@@ -64,8 +64,8 @@ spec:
         --tls-verify=$(params.TLSVERIFY) --no-cache \
         -f $(params.DOCKERFILE) -t $(params.IMAGE) $(params.CONTEXT)
     volumeMounts:
-    - name: varlibcontainers
-      mountPath: /var/lib/containers
+    - mountPath: /var/lib/containers
+      name: varlibcontainers
     securityContext:
       privileged: false
 
@@ -78,8 +78,8 @@ spec:
         --digestfile $(workspaces.source.path)/image-digest $(params.IMAGE) \
         docker://$(params.IMAGE)
     volumeMounts:
-    - name: varlibcontainers
-      mountPath: /var/lib/containers
+    - mountPath: /var/lib/containers
+      name: varlibcontainers
     securityContext:
       privileged: false
 
