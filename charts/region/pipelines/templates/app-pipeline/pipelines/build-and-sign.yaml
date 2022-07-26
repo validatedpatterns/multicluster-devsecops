@@ -14,6 +14,7 @@ spec:
       default: {{ .Values.devel.appURL }}
     - name: context-dir
       type: string
+      default: '/'
     - name: is-name
       type: string
       default: chat-client
