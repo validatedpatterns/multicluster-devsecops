@@ -67,7 +67,7 @@ spec:
     - name: varlibcontainers
       mountPath: /var/lib/containers
     securityContext:
-      privileged: true
+      privileged: false
 
   - name: push
     image: $(params.BUILDER_IMAGE)
@@ -81,7 +81,7 @@ spec:
     - name: varlibcontainers
       mountPath: /var/lib/containers
     securityContext:
-      privileged: true
+      privileged: false
 
   - name: digest-to-results
     image: $(params.BUILDER_IMAGE)
