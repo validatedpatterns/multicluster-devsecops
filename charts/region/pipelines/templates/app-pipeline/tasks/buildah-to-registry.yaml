@@ -3,6 +3,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: buildah-to-registry
+  namespace: devsecops-ci
   labels:
     app.kubernetes.io/version: "0.1"
   annotations:
@@ -64,8 +65,9 @@ spec:
         --tls-verify=$(params.TLSVERIFY) --no-cache \
         -f $(params.DOCKERFILE) -t $(params.IMAGE) $(params.CONTEXT)
     volumeMounts:
-    - mountPath: /var/lib/containers
-      name: varlibcontainers
+    - name: varlibcontainers
+      mountPath: /var/lib/containers
+
     securityContext:
       privileged: false
 
@@ -78,8 +80,8 @@ spec:
         --digestfile $(workspaces.source.path)/image-digest $(params.IMAGE) \
         docker://$(params.IMAGE)
     volumeMounts:
-    - mountPath: /var/lib/containers
-      name: varlibcontainers
+    - name: varlibcontainers
+      mountPath: /var/lib/containers
     securityContext:
       privileged: false
 
