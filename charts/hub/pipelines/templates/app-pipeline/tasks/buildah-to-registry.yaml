@@ -87,3 +87,8 @@ spec:
   - name: name-to-results
     image: $(params.BUILDER_IMAGE)
     script: echo $(params.IMAGE) | tee /tekton/results/IMAGE_URL
+
+  volumes:
+  - name: varlibcontainers
+    persistentVolumeClaim:
+      name: containers-pvc
