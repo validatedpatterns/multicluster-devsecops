@@ -47,11 +47,13 @@ spec:
     default: ""
   workspaces:
   - name: source
+
   results:
   - name: IMAGE_DIGEST
     description: Digest of the image just built.
   - name: IMAGE_URL
     description: Name of the image just built.
+ 
   steps:
   - name: build
     image: $(params.BUILDER_IMAGE)
@@ -64,8 +66,6 @@ spec:
     volumeMounts:
     - name: varlibcontainers
       mountPath: /var/lib/containers
-    securityContext:
-      privileged: false
 
   - name: push
     image: $(params.BUILDER_IMAGE)
@@ -78,8 +78,6 @@ spec:
     volumeMounts:
     - name: varlibcontainers
       mountPath: /var/lib/containers
-    securityContext:
-      privileged: false
 
   - name: digest-to-results
     image: $(params.BUILDER_IMAGE)
