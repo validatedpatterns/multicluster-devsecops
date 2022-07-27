@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: build-scan-and-deploy
+  namespace: {{ .Values.devel.namespace }}
 spec:
   params:
     - name: github-repo-revision

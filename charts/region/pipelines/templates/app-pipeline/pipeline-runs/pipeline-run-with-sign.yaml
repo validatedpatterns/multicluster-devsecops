@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
   generateName: cosign-pipelinerun
+  namespace: {{ .Values.devel.namespace }}
 spec:
   params: 
     - name: "github-repo-revision"

@@ -69,6 +69,6 @@ spec:
     params:
       - name: SCRIPT
         value: |
-          oc import-image $(params.is-name):latest
+          oc import-image $(params.is-name):latest --from=$(params.image-name) --confirm
     runAfter:
       - build-image
