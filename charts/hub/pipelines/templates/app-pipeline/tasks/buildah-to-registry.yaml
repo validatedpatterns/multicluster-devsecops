@@ -26,7 +26,7 @@ spec:
     default: quay.io/buildah/stable:v1.17.0
   - name: STORAGE_DRIVER
     description: Set buildah storage driver
-    default: overlay
+    default: vfs
   - name: DOCKERFILE
     description: Path to the Dockerfile to build.
     default: ./Dockerfile
