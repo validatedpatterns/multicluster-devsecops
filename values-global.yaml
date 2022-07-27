@@ -33,7 +33,7 @@ global:
 
 devel:
   appURL: https://github.com/ipbabble/chat-client.git
-  image: docker://quay-registry-quay-quay-enterprise.apps.wh-hub.blueprints.rhecoeng.com/chat-client:latest
+  image: quay-registry-quay-quay-enterprise.apps.wh-hub.blueprints.rhecoeng.com/chat-client:latest
   npmbase: quay.io/hybridcloudpatterns/ubi-npm
   namespace: devsecops-ci
   roxCTLImage: registry.redhat.io/rh-acs/roxctl:3.0.62.0
