@@ -21,6 +21,8 @@ global:
 devel:
   appURL: AUTOMATED
   image: AUTOMATED
+  namespace: AUTOMATED
+  roxCTLImage: AUTOMATED
   
 clusterGroup:
   name: testgroup
