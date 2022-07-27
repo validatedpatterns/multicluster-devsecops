@@ -1,5 +1,5 @@
 apiVersion: tekton.dev/v1beta1
-kind: PipelineRun
+kind: Pipeline
 metadata:
   generateName: react-pipelinerun
   namespace: {{ .Values.devel.namespace }}
