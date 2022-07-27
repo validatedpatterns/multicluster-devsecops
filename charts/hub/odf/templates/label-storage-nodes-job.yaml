@@ -23,7 +23,7 @@ spec:
                 attempt_counter=0
                 max_attempts=20
                 echo "Labeling all worker nodes for storage"
-                oc label node -l node-role.kubernetes.io/worker= cluster.ocs.openshift.io/openshift-storage=
+                oc label node -l node-role.kubernetes.io/worker= cluster.ocs.openshift.io/openshift-storage= --overwrite
                 echo "Worker nodes labeled for storage"
               fi
           imagePullPolicy: Always
