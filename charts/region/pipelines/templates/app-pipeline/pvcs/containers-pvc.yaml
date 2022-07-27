@@ -6,8 +6,8 @@ metadata:
 spec:
   resources:
     requests:
-      storage: 2Gi
+      storage: 5Gi
+  storageClassName: gp2
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
-#  persistentVolumeReclaimPolicy: Retain

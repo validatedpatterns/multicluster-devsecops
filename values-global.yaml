@@ -36,6 +36,7 @@ devel:
   image: quay.io/ipbabble/chat-client:latest
   npmbase: quay.io/hybridcloudpatterns/ubi-npm
   namespace: devsecops-ci
+  roxCTLImage: registry.redhat.io/rh-acs/roxctl:3.0.62.0
   
 main:
   clusterGroupName: hub

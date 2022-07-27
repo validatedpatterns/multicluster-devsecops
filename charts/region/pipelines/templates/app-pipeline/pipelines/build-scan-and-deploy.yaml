@@ -24,7 +24,7 @@ spec:
       default: chat-client
     - name: acs-image
       type: string
-      default: 'registry.redhat.io/rh-acs/roxctl:3.0.62.0'
+      default: '{{ .Values.devel.roxCTLImage }}'
     - name: acs-scan-api
       type: string
       default: 'https://central-stackrox.{{ coalesce .Values.global.localClusterDomain .Values.global.hubClusterDomain }}'
@@ -58,7 +58,7 @@ spec:
       name: buildah-to-registry
     params:
       - name: IMAGE
-        value: 'quay.io/{{ .Values.global.git.account }}/chat-client'
+        value: '{{ .Values.devel.image }}'
       - name: CONTEXT
         value: '.'
       - name: TLSVERIFY
