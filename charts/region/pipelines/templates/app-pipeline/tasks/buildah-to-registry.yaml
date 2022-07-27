@@ -49,6 +49,11 @@ spec:
   workspaces:
   - name: source
 
+  volumes:
+  - name: varlibcontainers
+    persistentVolumeClaim:
+      claimName: containers-pvc
+      
   results:
   - name: IMAGE_DIGEST
     description: Digest of the image just built.

@@ -19,3 +19,8 @@ imageregistrysecret:
   key: secret/data/hub/imageregistry
   namespaces:
     - devsecops-ci
+
+gitsecret:
+  key: secret/data/hub/git
+  namespaces:
+    -devsecops-ci
