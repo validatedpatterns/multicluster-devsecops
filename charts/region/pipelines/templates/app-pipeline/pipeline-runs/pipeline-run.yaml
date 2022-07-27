@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
   generateName: react-pipelinerun
+  namespace: {{ .Values.devel.namespace }}
 spec:
   params: 
     - name: "github-repo-revision"
@@ -21,7 +22,7 @@ spec:
         - name: varlibcontainers
           persistentVolumeClaim:
             claimName: containers-pvc
-  serviceAccountName: pipeline-svc
+  serviceAccountName: pipeline
   workspaces:
     - name: source
       persistentVolumeClaim:
