@@ -15,7 +15,7 @@ spec:
         - /bin/bash
         - -c
         - |
-          TOKEN=`oc get secret quay-api-token --namespace=openshift-operators -oyaml | grep -v '\s*namespace:\s' |`
+          TOKEN=`oc get secret quay-api-token --namespace=openshift-operators -oyaml | grep -v '\s*namespace:\s'`
           echo "Token: $TOKEN"
           curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://poc-registry-quay-quay-poc.{{ .Values.global.hubClusterDomain }}/api/v1/organization/ --data '{"name": "developer", "email": "developer@myorg.com"}'
           curl -X POST -k  https://poc-registry-quay-quay-poc.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "developer1", "email": "developer@myorg.com", "access_token": true}'
