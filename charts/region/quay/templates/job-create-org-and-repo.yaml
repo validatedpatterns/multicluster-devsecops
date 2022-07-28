@@ -22,8 +22,8 @@ spec:
         - -c
         - |
           echo "Token: $TOKEN"
-          curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-poc.{{ .Values.global.hubClusterDomain }}/api/v1/organization/ --data '{"name": "developer", "email": "developer@myorg.com"}'
-          curl -X POST -k  https://quay-registry-quay-quay-poc.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "developer1", "email": "developer@myorg.com", "access_token": true}'
+          curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/organization/ --data '{"name": "developer", "email": "developer@myorg.com"}'
+          curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "developer1", "email": "developer@myorg.com", "access_token": true}'
         name: create-org-and-repo
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900
