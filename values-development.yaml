@@ -41,7 +41,7 @@ clusterGroup:
   - name: acs-secured
     namespace: stackrox
     project: secured
-    path: common/acs/secured
+    path: charts/hub/acs/secured
 
   - name: pipelines
     namespace: devsecops-ci
