@@ -40,7 +40,7 @@ spec:
                 echo "Repo created"
               fi
               echo "Creating a user ..."
-              USERTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "developer1", "email": "developer@myorg.com", "access_token": true}')
+              USERTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "developer1", "email": "developer1@myorg.com", "access_token": true}')
               echo $USERTOKEN
               if [ $? eq 0 ]; then
                 echo "User created"
