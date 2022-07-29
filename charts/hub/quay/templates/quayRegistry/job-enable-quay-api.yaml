@@ -38,8 +38,9 @@ spec:
               curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/repository --data '{"namespace":"develorg","repository":"develorg","visibility":"public","description":"Development Repo","repo_kind":"image"}'
               echo "Repo creation status: $?"
               echo "Creating a user ..."
-              curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "developer1", "email": "developer@myorg.com", "access_token": true}'
+              USERTOKEN=curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "developer1", "email": "developer@myorg.com", "access_token": true}'
               echo "User creation status: $?"
+              oc create secret -n openshift-operators generic quay-user --from-literal=token=$USERTOKEN
             else
               echo "Problem with creating an organization in Quay Enterprise!"  
             fi
