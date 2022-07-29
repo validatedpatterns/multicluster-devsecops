@@ -32,7 +32,17 @@ spec:
                 type: Opaque
                 metadata:
                   name: quay-api-token
-                  namespace: openshift-operators
+                  namespace: openshift-operators  
+                apiVersion: v1
+                data:
+                  token: '{{ `{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}` }}'
+            - complianceType: mustonlyhave
+              objectDefinition:
+                kind: Secret
+                type: Opaque
+                metadata:
+                  name: quay-api-token
+                  namespace: devsecops-ci
                 apiVersion: v1
                 data:
                   token: '{{ `{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}` }}'

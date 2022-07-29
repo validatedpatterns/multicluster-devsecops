@@ -11,6 +11,9 @@ spec:
     spec:
       containers: 
       - image: {{ .Values.job.image }}
+        env:
+        - name: CSRFPATTERN
+          value: ".*window.__token\ =\ '(.*)';.*"
         command:
         - /bin/bash
         - -c
@@ -28,6 +31,12 @@ spec:
             # Now extract the token and store in the Quay Integration secret in openshift-operators namespace
             TOKEN=$(oc extract secret/quay-temp-token --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}') && \
             oc create secret -n openshift-operators generic quay-integration --from-literal=token=$TOKEN
+            curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/organization/ --data '{"name": "develorg", "email": "developer@myorg.com"}'
+            if [ $? -eq "Created"]; then
+              curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "developer1", "email": "developer@myorg.com", "access_token": true}'
+            else
+              echo "Problem with creating an organization in Quay Enterprise!"  
+            fi
           fi
           echo "Job finished" 
         name: quay-api-enablement
