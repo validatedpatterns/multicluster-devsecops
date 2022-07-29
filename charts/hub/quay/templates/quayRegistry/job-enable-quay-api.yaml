@@ -36,11 +36,19 @@ spec:
             if [ $? -eq 0 ]; then
               echo "Creating a repo ..."
               curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/repository --data '{"namespace":"develorg","repository":"develorg","visibility":"public","description":"Development Repo","repo_kind":"image"}'
-              echo "Repo creation status: $?"
+              if [ $? eq 0 ]; then
+                echo "Repo created"
+              if
               echo "Creating a user ..."
-              USERTOKEN=curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "developer1", "email": "developer@myorg.com", "access_token": true}'
-              echo "User creation status: $?"
+              USERTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "developer1", "email": "developer@myorg.com", "access_token": true}')
+              if [ $? eq 0 ]; then
+                echo "User created"
+              if
+              echo "Creting a secret with user passwords."
               oc create secret -n openshift-operators generic quay-user --from-literal=token=$USERTOKEN
+              if [ $? eq 0 ]; then
+                echo "User secret created"
+              if
             else
               echo "Problem with creating an organization in Quay Enterprise!"  
             fi
