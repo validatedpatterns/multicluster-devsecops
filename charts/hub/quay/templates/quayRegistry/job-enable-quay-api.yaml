@@ -39,16 +39,17 @@ spec:
             # Now extract the token and store in the Quay Integration secret in openshift-operators namespace
             TOKEN=$(oc extract secret/quay-temp-token --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}') && \
             oc create secret -n openshift-operators generic quay-integration --from-literal=token=$TOKEN
-            curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/organization/ --data '{"name": "$QUAYORG", "email": "$QUAYORGEMAIL"}'
-            echo "Org creation status: $?"
+            echo "[INFO] Create organization $QUAYORG"
+            curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/organization/ --data '{"name": $QUAYORG, "email": $QUAYORGEMAIL}'
+            echo "[INFO] Org creation status: $?"
             if [ $? -eq 0 ]; then
               echo "[INFO] Creating a repo ..."
-              curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/repository --data '{"namespace":"$QUAYORG","repository":"$QUAYORG","visibility":"public","description":"Development Repo","repo_kind":"image"}'
+              curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/repository --data '{"namespace": $QUAYORG,"repository": $QUAYORG,"visibility":"public","description":"Development Repo","repo_kind":"image"}'
               if [ $? eq 0 ]; then
                 echo "Repo created"
               fi
               echo "[INFO] Creating a user ..."
-              USERTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "$QUAYUSER", "email": "$QUAYUSEREMAIL", "access_token": true}')
+              USERTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": $QUAYUSER, "email": $QUAYUSEREMAIL, "access_token": true}')
               echo $USERTOKEN
               if [ $? eq 0 ]; then
                 echo "[INFO] User created"
