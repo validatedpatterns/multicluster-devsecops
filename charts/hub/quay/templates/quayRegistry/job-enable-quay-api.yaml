@@ -15,17 +15,18 @@ spec:
         - name: CSRFPATTERN
           value: ".*window.__token\ =\ '(.*)';.*"
         - name: QUAYORG
-          value: {{ .Values.devel.quayorg }}
+          value: "{{ .Values.devel.quayorg }}"
         - name: QUAYORGEMAIL
-          value: {{ .Values.devel.quayorgemail }}
+          value: "{{ .Values.devel.quayorgemail }}"
         - name: QUAYUSER
-          value: {{ .Values.devel.quayuser }}
+          value: "{{ .Values.devel.quayuser }}"
         - name: QUAYUSEREMAIL
-          value: {{ .Values.devel.quayuseremail }}
+          value: "{{ .Values.devel.quayuseremail }}"
         command:
         - /bin/bash
         - -c
         - |
+          echo "[INFO] QUAYORG:$QUAYORG QUAYUSER:$QUAYUSER"
           oc get secret quay-temp-token
           if [ $? -ne 0 ]; then
             echo "[INFO] Quay default user not created. Creating ..."  
