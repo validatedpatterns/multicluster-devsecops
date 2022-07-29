@@ -53,7 +53,7 @@ spec:
               if [ $? eq 0 ]; then
                 echo "[INFO] User created"
               fi
-              QUAYPASSWORD=$(grep encrypted_password | cut -d : -f5 | awk -F\} '{print $1}')
+              QUAYPASSWORD=$(echo $USERTOKEN | cut -d : -f5 | awk -F\} '{print $1}')
               echo "[INFO] Creating a secret with user/password ..."
               oc create secret -n openshift-operators generic quay-user --from-literal=token="$USERTOKEN"
               if [ $? eq 0 ]; then
