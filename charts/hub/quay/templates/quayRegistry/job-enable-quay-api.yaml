@@ -14,47 +14,66 @@ spec:
         env:
         - name: CSRFPATTERN
           value: ".*window.__token\ =\ '(.*)';.*"
+        - name: QUAYORG
+          value: {{ .Values.devel.quayorg }}
+        - name: QUAYORGEMAIL
+          value: {{ .Values.devel.quayorgemail }}
+        - name: QUAYUSER
+          value: {{ .Values.devel.quayuser }}
+        - name: QUAYUSEREMAIL
+          value: {{ .Values.devel.quayuseremail }}
         command:
         - /bin/bash
         - -c
         - |
           oc get secret quay-temp-token
           if [ $? -ne 0 ]; then
-            echo "Quay default user not created. Creating ..."  
+            echo "[INFO] Quay default user not created. Creating ..."  
             # Invoke API and add quay user to the API - initiates API
             JSONTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/user/initialize --header 'Content-Type: application/json' --data '{ "username": "{{ .Values.global.quay.account }}", "password":"{{ .Values.global.quay.password }}", "email": "{{ .Values.global.quay.email }}", "access_token": true}') && \
             oc create secret generic quay-temp-token --from-literal=token=$JSONTOKEN
           fi
           oc get secret -n openshift-operators quay-integration
           if [ $? -ne 0 ]; then
-            echo "quay-integration secret not created. Creating ..."  
+            echo "[INFO] Secret quay-integration created. Creating ..."  
             # Now extract the token and store in the Quay Integration secret in openshift-operators namespace
             TOKEN=$(oc extract secret/quay-temp-token --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}') && \
             oc create secret -n openshift-operators generic quay-integration --from-literal=token=$TOKEN
-            curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/organization/ --data '{"name": "develorg", "email": "developer@myorg.com"}'
+            curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/organization/ --data '{"name": "$QUAYORG", "email": "$QUAYORGEMAIL"}'
             echo "Org creation status: $?"
             if [ $? -eq 0 ]; then
-              echo "Creating a repo ..."
-              curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/repository --data '{"namespace":"develorg","repository":"develorg","visibility":"public","description":"Development Repo","repo_kind":"image"}'
+              echo "[INFO] Creating a repo ..."
+              curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/repository --data '{"namespace":"$QUAYORG","repository":"$QUAYORG","visibility":"public","description":"Development Repo","repo_kind":"image"}'
               if [ $? eq 0 ]; then
                 echo "Repo created"
               fi
-              echo "Creating a user ..."
-              USERTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "developer1", "email": "developer1@myorg.com", "access_token": true}')
+              echo "[INFO] Creating a user ..."
+              USERTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "$QUAYUSER", "email": "$QUAYUSEREMAIL", "access_token": true}')
               echo $USERTOKEN
               if [ $? eq 0 ]; then
-                echo "User created"
+                echo "[INFO] User created"
               fi
-              echo "Creating a secret with user/password."
-              oc create secret -n openshift-operators generic quay-user --from-literal=token=$USERTOKEN
+              QUAYPASSWORD=$(grep encrypted_password | cut -d : -f5 | awk -F\} '{print $1}')
+              echo "[INFO] Creating a secret with user/password ..."
+              oc create secret -n openshift-operators generic quay-user --from-literal=token="$USERTOKEN"
               if [ $? eq 0 ]; then
-                echo "User secret created"
+                echo "[INFO] User secret created"
+              fi
+              echo "[INFO] Associating $QUAYUSER with $QUAYORG"
+              OUTPUT=$(curl -X PUT -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/organization/$QUAYORG/team/owners/members/$QUAYUSER -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{}')
+              if [ $? eq 0 ]; then
+                echo "[INFO] Output: $OUTPUT"
+              fi
+              echo "[INFO] Give $QUAYUSER admin rights to the repo"
+              OUTPUT=$(curl -X PUT -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/repository/$QUAYORG/$QUAYORG/permissions/user/$QUAYUSER -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "role": "admin"}')
+              if [ $? eq 0 ]; then
+                echo "[INFO] Output: $OUTPUT"
               fi
             else
-              echo "Problem with creating an organization in Quay Enterprise!"  
+              echo "[ERROR] Problem with creating an organization in Quay Enterprise!"  
             fi
           fi
-          echo "Job finished" 
+          echo "[INFO] Job finished" 
         name: quay-api-enablement
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900

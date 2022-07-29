@@ -37,6 +37,10 @@ devel:
   npmbase: quay.io/hybridcloudpatterns/ubi-npm
   namespace: devsecops-ci
   roxCTLImage: registry.redhat.io/rh-acs/roxctl:3.0.62.0
+  quayorg: develorg
+  quayorgemail: devel@myorg.com
+  quayuser: developer1
+  quayuseremail: developer1@myorg.com
   
 main:
   clusterGroupName: hub
