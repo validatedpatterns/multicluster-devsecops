@@ -46,31 +46,41 @@ spec:
             if [ $? -eq 0 ]; then
               echo "[INFO] Creating a repo ..."
               curl -X POST -k --header 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/repository --data '{"namespace": "{{ .Values.devel.quayorg }}","repository": "{{ .Values.devel.quayorg }}","visibility":"public","description":"Development Repo","repo_kind":"image"}'
-              if [ $? eq 0 ]; then
-                echo "Repo created"
+              if [ $? -eq 0 ]; then
+                echo "[INFO] Repo created"
               fi
               echo "[INFO] Creating a user ..."
               USERTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/superuser/users/ -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "username": "{{ .Values.devel.quayuser }}", "email": "{{ .Values.devel.quayuseremail }}", "access_token": true}')
               echo $USERTOKEN
-              if [ $? eq 0 ]; then
+              if [ $? -eq 0 ]; then
                 echo "[INFO] User created"
               fi
               QUAYPASSWORD=$(echo $USERTOKEN | cut -d : -f5 | awk -F\} '{print $1}')
               echo "[INFO] Creating a secret with user/password ..."
               oc create secret -n openshift-operators generic quay-user --from-literal=token="$USERTOKEN"
-              if [ $? eq 0 ]; then
+              if [ $? -eq 0 ]; then
                 echo "[INFO] User secret created"
               fi
               echo "[INFO] Associating $QUAYUSER with $QUAYORG"
               OUTPUT=$(curl -X PUT -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/organization/$QUAYORG/team/owners/members/$QUAYUSER -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{}')
-              if [ $? eq 0 ]; then
+              if [ $? -eq 0 ]; then
                 echo "[INFO] Output: $OUTPUT"
               fi
               echo "[INFO] Give $QUAYUSER admin rights to the repo"
               OUTPUT=$(curl -X PUT -k  https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/api/v1/repository/$QUAYORG/$QUAYORG/permissions/user/$QUAYUSER -H "Authorization: Bearer $TOKEN" --header 'Content-Type: application/json' --data '{ "role": "admin"}')
-              if [ $? eq 0 ]; then
+              if [ $? -eq 0 ]; then
                 echo "[INFO] Output: $OUTPUT"
               fi
+              mkdir ~/quay-ca
+              oc get secret -n openshift-ingress $(oc get deployment -n openshift-ingress router-default -o jsonpath='{ .spec.template.spec.volumes[?(@.name=="default-certificate")].secret.secretName }') -o jsonpath='{ .data.tls\.crt }' | base64 -d > ~/quay-ca/ca.crt
+              cat ~/quay-ca/ca.crt
+              BASE64AUTH=`echo $QUAYUSER:$QUAYPASSWORD | base64`
+              cat << EOF > ~/quay-secret.json 
+                "poc-registry-quay-quay-poc.apps.kni20.schmaustech.com": {
+                "auth": "$BASE64AUTH",
+                "email": "openshift@schmaustech.com" 
+              }
+              EOF
             else
               echo "[ERROR] Problem with creating an organization in Quay Enterprise!"  
             fi
