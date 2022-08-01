@@ -31,6 +31,10 @@ global:
     email: SOMEWHERE@EXAMPLE.COM
     dev_revision: main
 
+  quay:
+    account: quayadmin
+    password: quayadmin123 
+
 devel:
   appURL: https://github.com/ipbabble/chat-client.git
   image: quay-registry-quay-quay-enterprise.apps.wh-hub.blueprints.rhecoeng.com/chat-client:latest
@@ -41,7 +45,7 @@ devel:
   quayorgemail: devel@myorg.com
   quayuser: developer1
   quayuseremail: developer1@myorg.com
-  
+
 main:
   clusterGroupName: hub
   opp: false
