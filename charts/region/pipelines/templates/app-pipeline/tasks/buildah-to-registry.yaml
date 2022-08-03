@@ -33,6 +33,10 @@ spec:
   - name: CONTEXT
     description: Path to the directory to use as context.
     default: .
+  - name: QUAY_SECRET
+    type: string
+    description: Name of the secret contain the Quay Enterprise secret.
+    default: quay-pull-secret  
   - name: TLSVERIFY
     description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
     default: "true"
@@ -53,7 +57,7 @@ spec:
   - name: varlibcontainers
     persistentVolumeClaim:
       claimName: containers-pvc
-      
+
   results:
   - name: IMAGE_DIGEST
     description: Digest of the image just built.
@@ -76,6 +80,12 @@ spec:
   - name: push
     image: $(params.BUILDER_IMAGE)
     workingDir: $(workspaces.source.path)
+    env:
+    - name: QUAY_PUSH_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: $(params.QUAY_SECRET)
+          key: .dockerconfigjson
     script: |
       buildah --storage-driver=$(params.STORAGE_DRIVER) push \
         $(params.PUSH_EXTRA_ARGS) --tls-verify=$(params.TLSVERIFY) \
