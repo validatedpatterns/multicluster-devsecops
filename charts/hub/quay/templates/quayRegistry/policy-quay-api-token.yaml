@@ -32,7 +32,7 @@ spec:
                 type: Opaque
                 metadata:
                   name: quay-api-token
-                  namespace: openshift-operators  
+                  namespace: openshift-operators  # consider changing this to devsecops-ci
                 apiVersion: v1
                 data:
                   token: '{{ `{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}` }}'
