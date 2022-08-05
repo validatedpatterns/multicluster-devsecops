@@ -36,8 +36,8 @@ quay:
       name: devel
       email: devel@myorg.com
     user:
-      name: developer1
-      email: developer1@myorg.com
+      name: admin
+      email: admin@myorg.com
     repo: example
 
 job:
