@@ -27,6 +27,19 @@ quay:
   configBundleSecret:
     deploy: true
     name: quay-init-config-bundle-secret
+  setup:
+    admin:
+      name: quayadmin
+      # Password SHOULD NOT be here!
+      password: quayadmin123
+      email: quayadmin@example.com
+    org:
+      name: devel
+      email: devel@myorg.com
+    user:
+      name: developer1
+      email: developer1@myorg.com
+    repo: example
 
 job:
   image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
@@ -37,6 +50,3 @@ global:
     domain: DOMAIN
 
   quay:
-    account: quayadmin
-    password: quayadmin123
-    email: quayadmin@example.com
