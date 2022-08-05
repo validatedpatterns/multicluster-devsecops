@@ -1,6 +1,5 @@
 quay:
   namespace: quay-enterprise
-  adminuser: quayadmin
   component:
     - name: clair
       managed: true
@@ -29,7 +28,7 @@ quay:
     name: quay-init-config-bundle-secret
   setup:
     admin:
-      name: quayadmin
+      name: quay
       # Password SHOULD NOT be here!
       password: quayadmin123
       email: quayadmin@example.com
