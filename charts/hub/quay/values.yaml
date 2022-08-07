@@ -28,16 +28,17 @@ quay:
     name: quay-init-config-bundle-secret
   setup:
     admin:
-      name: quay
-      # Password SHOULD NOT be here!
-      password: quayadmin123
+      # Generated password is saved to the 'quay-init-token' secret in the configured namespace  
+      name: quayadmin
       email: quayadmin@example.com
     org:
       name: devel
       email: devel@myorg.com
     user:
-      name: admin
-      email: admin@myorg.com
+      # Generated password is saved to the 'quay-user' secret in the configured namespace
+      # The API only allows the creation of superusers
+      name: developer1
+      email: developer1@myorg.com
     repo: example
 
 job:
