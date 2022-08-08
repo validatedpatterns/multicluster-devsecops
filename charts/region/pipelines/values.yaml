@@ -13,6 +13,7 @@ global:
     email: SOMEWHERE@EXAMPLE.COM
     dev_revision: main
 
+  # Should be set consistently with quay enterprise setup
   imageregistry:
     account: PLAINTEXT
     hostname: quay.io
