@@ -18,7 +18,7 @@ spec:
       default: '/'
     - name: image-name
       type: string
-      default: {{ .Values.devel.image }}
+      default: 'quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.quay.org.name }}/{{ .Values.global.quay.repo }}'
     - name: is-name
       type: string
       default: chat-client
@@ -52,7 +52,7 @@ spec:
       name: buildah-to-registry
     params:
       - name: IMAGE
-        value: '$(params.image-name)'
+        value: '$(params.image-name):$(params.github-repo-revision)'
       - name: CONTEXT
         value: '.'
       - name: TLSVERIFY
@@ -68,6 +68,6 @@ spec:
       kind: ClusterTask
     params:
       - name: SCRIPT
-        value: oc import-image $(params.is-name):latest --from=$(params.image-name) --confirm
+        value: oc import-image $(params.is-name):latest --from=$(params.image-name):$(params.github-repo-revision) --confirm
     runAfter:
       - build-image
