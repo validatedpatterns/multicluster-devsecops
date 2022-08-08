@@ -1,3 +1,11 @@
+# Possibly still not the right home...
+devel:
+  appURL: https://github.com/ipbabble/chat-client.git
+  image: chat-client:latest
+  npmbase: quay.io/hybridcloudpatterns/ubi-npm
+  namespace: devsecops-ci
+  roxCTLImage: registry.redhat.io/rh-acs/roxctl:3.0.62.0
+
 global:
   options:
     useCSV: False

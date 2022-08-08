@@ -36,13 +36,6 @@ global:
     password: quayadmin123 
     email: quayadmin@myorg.com
     
-devel:
-  appURL: https://github.com/ipbabble/chat-client.git
-  image: chat-client:latest
-  npmbase: quay.io/hybridcloudpatterns/ubi-npm
-  namespace: devsecops-ci
-  roxCTLImage: registry.redhat.io/rh-acs/roxctl:3.0.62.0
-
 main:
   clusterGroupName: hub
   opp: false
