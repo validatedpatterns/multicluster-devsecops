@@ -49,7 +49,7 @@ spec:
       name: buildah-to-registry
     params:
       - name: IMAGE
-        value: 'quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.devel.image }}'
+        value: 'quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.quay.setup.org.name }}/{{ .Values.quay.setup.repo }}:$(params.github-repo-revision)'
       - name: CONTEXT
         value: '.'
       - name: TLSVERIFY

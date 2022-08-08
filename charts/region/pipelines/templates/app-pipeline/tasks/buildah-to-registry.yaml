@@ -69,6 +69,7 @@ spec:
     image: $(params.BUILDER_IMAGE)
     workingDir: $(workspaces.source.path)
     script: |
+      set -x
       buildah --storage-driver=$(params.STORAGE_DRIVER) bud \
         $(params.BUILD_EXTRA_ARGS) --format=$(params.FORMAT) \
         --tls-verify=$(params.TLSVERIFY) --no-cache \
@@ -87,6 +88,8 @@ spec:
           name: $(params.QUAY_SECRET)
           key: .dockerconfigjson
     script: |
+      set -x
+      env | grep QUAY
       buildah --storage-driver=$(params.STORAGE_DRIVER) push \
         $(params.PUSH_EXTRA_ARGS) --tls-verify=$(params.TLSVERIFY) \
         --digestfile $(workspaces.source.path)/image-digest $(params.IMAGE) \
