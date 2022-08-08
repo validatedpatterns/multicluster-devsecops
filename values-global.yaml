@@ -32,21 +32,13 @@ global:
     dev_revision: main
 
   quay:
-    account: quayadmin
-    password: quayadmin123 
-    email: quayadmin@myorg.com
+    # Needs to be set consistently between hub and spoke clusters
+    # TODO: Move back to the hub chart, store in a configmap, have an ACM policy distribute to spoke clusters, have spoke look up from configmap 
+    org:
+      name: devel
+      email: devel@myorg.com
+    repo: example
     
-devel:
-  appURL: https://github.com/ipbabble/chat-client.git
-  image: quay-registry-quay-quay-enterprise.apps.wh-hub.blueprints.rhecoeng.com/chat-client:latest
-  npmbase: quay.io/hybridcloudpatterns/ubi-npm
-  namespace: devsecops-ci
-  roxCTLImage: registry.redhat.io/rh-acs/roxctl:3.0.62.0
-  quayorg: develorg
-  quayorgemail: devel@myorg.com
-  quayuser: developer1
-  quayuseremail: developer1@myorg.com
-
 main:
   clusterGroupName: hub
   opp: false

@@ -23,7 +23,7 @@ spec:
     description: Reference of the image buildah will produce.
   - name: BUILDER_IMAGE
     description: The location of the buildah builder image.
-    default: quay.io/buildah/stable:v1.17.0
+    default: quay.io/buildah/stable:v1.26
   - name: STORAGE_DRIVER
     description: Set buildah storage driver
     default: vfs
@@ -54,9 +54,8 @@ spec:
   - name: source
 
   volumes:
-  - name: varlibcontainers
-    persistentVolumeClaim:
-      claimName: containers-pvc
+  - emptyDir: {}
+    name: varlibcontainers
 
   results:
   - name: IMAGE_DIGEST
@@ -69,6 +68,7 @@ spec:
     image: $(params.BUILDER_IMAGE)
     workingDir: $(workspaces.source.path)
     script: |
+      set -x
       buildah --storage-driver=$(params.STORAGE_DRIVER) bud \
         $(params.BUILD_EXTRA_ARGS) --format=$(params.FORMAT) \
         --tls-verify=$(params.TLSVERIFY) --no-cache \
@@ -80,6 +80,8 @@ spec:
   - name: push
     image: $(params.BUILDER_IMAGE)
     workingDir: $(workspaces.source.path)
+    securityContext:
+      privileged: false
     env:
     - name: QUAY_PUSH_SECRET
       valueFrom:
@@ -87,7 +89,9 @@ spec:
           name: $(params.QUAY_SECRET)
           key: .dockerconfigjson
     script: |
-      buildah --storage-driver=$(params.STORAGE_DRIVER) push \
+      fuse-overlayfs --version
+      echo $QUAY_PUSH_SECRET > auth.json
+      buildah --storage-driver=$(params.STORAGE_DRIVER) push --authfile auth.json \
         $(params.PUSH_EXTRA_ARGS) --tls-verify=$(params.TLSVERIFY) \
         --digestfile $(workspaces.source.path)/image-digest $(params.IMAGE) \
         docker://$(params.IMAGE)
