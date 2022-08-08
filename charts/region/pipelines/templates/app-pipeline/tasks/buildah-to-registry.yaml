@@ -54,9 +54,8 @@ spec:
   - name: source
 
   volumes:
-  - name: varlibcontainers
-    persistentVolumeClaim:
-      claimName: containers-pvc
+  - emptyDir: {}
+    name: varlibcontainers
 
   results:
   - name: IMAGE_DIGEST
@@ -81,6 +80,8 @@ spec:
   - name: push
     image: $(params.BUILDER_IMAGE)
     workingDir: $(workspaces.source.path)
+    securityContext:
+      privileged: false
     env:
     - name: QUAY_PUSH_SECRET
       valueFrom:
@@ -90,6 +91,7 @@ spec:
     script: |
       set -x
       env | grep QUAY
+      fuse-overlayfs --version
       buildah --storage-driver=$(params.STORAGE_DRIVER) push \
         $(params.PUSH_EXTRA_ARGS) --tls-verify=$(params.TLSVERIFY) \
         --digestfile $(workspaces.source.path)/image-digest $(params.IMAGE) \
