@@ -89,10 +89,9 @@ spec:
           name: $(params.QUAY_SECRET)
           key: .dockerconfigjson
     script: |
-      set -x
-      env | grep QUAY
       fuse-overlayfs --version
-      buildah --storage-driver=$(params.STORAGE_DRIVER) push \
+      echo $QUAY_PUSH_SECRET > auth.json
+      buildah --storage-driver=$(params.STORAGE_DRIVER) push --authfile auth.json \
         $(params.PUSH_EXTRA_ARGS) --tls-verify=$(params.TLSVERIFY) \
         --digestfile $(workspaces.source.path)/image-digest $(params.IMAGE) \
         docker://$(params.IMAGE)
