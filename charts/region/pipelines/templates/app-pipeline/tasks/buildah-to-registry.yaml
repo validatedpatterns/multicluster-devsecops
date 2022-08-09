@@ -90,6 +90,7 @@ spec:
           key: .dockerconfigjson
     script: |
       fuse-overlayfs --version
+      echo $QUAY_PUSH_SECRET
       echo $QUAY_PUSH_SECRET > auth.json
       buildah --storage-driver=$(params.STORAGE_DRIVER) push --authfile auth.json \
         $(params.PUSH_EXTRA_ARGS) --tls-verify=$(params.TLSVERIFY) \
