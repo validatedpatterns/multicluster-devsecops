@@ -68,6 +68,6 @@ spec:
       kind: ClusterTask
     params:
       - name: SCRIPT
-        value: oc import-image $(params.is-name):latest --from=$(params.image-root)/$(params.is-name):$(params.github-repo-revision) --confirm
+        value: oc import-image --insecure=true $(params.is-name):latest --from=$(params.image-root)/$(params.is-name):$(params.github-repo-revision) --confirm
     runAfter:
       - build-image
