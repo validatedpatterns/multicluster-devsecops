@@ -3,7 +3,7 @@ kind: Pipeline
 metadata:
   generation: 4
   name: devsecops-rh
-  namespace: cicd
+  namespace: devsecops-ci
 spec:
   finally:
   - name: create-promote-pull-request
