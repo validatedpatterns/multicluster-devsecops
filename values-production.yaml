@@ -18,8 +18,8 @@ clusterGroup:
   subscriptions:
   - name: rhacs-operator  #packageName
     namespace: openshift-operators # operator namespace
-    channel: rhacs-3.68
-    csv: rhacs-operator.v3.68.1
+    channel: rhacs-3.71
+    csv: rhacs-operator.v3.71
 
   - name: quay-bridge-operator
     namespace: openshift-operators
