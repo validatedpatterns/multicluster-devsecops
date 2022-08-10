@@ -16,9 +16,9 @@ spec:
     - name: context-dir
       type: string
       default : '/'
-    - name: image-name
+    - name: image-root
       type: string
-      default: {{ .Values.devel.image }}      
+      default: 'quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.quay.org.name }}'
     - name: is-name
       type: string
       default: chat-client
@@ -58,7 +58,7 @@ spec:
       name: buildah-to-registry
     params:
       - name: IMAGE
-        value: '{{ .Values.devel.image }}'
+        value: '$(params.image-root)/$(params.is-name):$(params.github-repo-revision)'
       - name: CONTEXT
         value: '.'
       - name: TLSVERIFY
@@ -85,6 +85,8 @@ spec:
     params:
       - name: SCRIPT
         value: |
-          oc import-image $(params.is-name):latest
+          set -x
+          oc import-image --insecure=true $(params.is-name):latest --from=$(params.image-root)/$(params.is-name):$(params.github-repo-revision) --confirm
+          #oc import-image $(params.is-name):latest
     runAfter:
       - scan-image
