@@ -34,4 +34,5 @@ spec:
             name: acs-api-token
             key: token
     script: |
+      set -x
       /usr/bin/roxctl --insecure-skip-tls-verify=$(params.TLS_VERIFY) -e $(params.ACS_CENTRAL):443 image check --image=$(params.IMAGE)
