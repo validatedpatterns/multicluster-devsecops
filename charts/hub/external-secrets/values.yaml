@@ -1,0 +1,26 @@
+global:
+  git:
+    hostname: github.com
+    account: PLAINTEXT
+    username: PLAINTEXT
+    email: SOMEWHERE@EXAMPLE.COM
+    dev_revision: main
+
+  imageregistry:
+    account: PLAINTEXT
+    hostname: quay.io
+    type: quay
+
+secretStore:
+  name: vault-backend
+  kind: ClusterSecretStore
+
+imageregistrysecret:
+  key: secret/data/hub/imageregistry
+  namespaces:
+    - devsecops-ci
+
+gitsecret:
+  key: secret/data/hub/git
+  namespaces:
+    -devsecops-ci

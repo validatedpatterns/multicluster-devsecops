@@ -9,5 +9,6 @@ spec:
  credentialsSecret:
    name: quay-integration
    namespace: openshift-operators
- insecureRegistry: false
+# insecureRegistry: false
+ insecureRegistry: true
  quayHostname: https://quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}

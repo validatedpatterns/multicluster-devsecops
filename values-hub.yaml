@@ -32,8 +32,8 @@ clusterGroup:
 
   - name: rhacs-operator  #packageName
     namespace: openshift-operators # operator namespace
-    channel: rhacs-3.68
-    csv: rhacs-operator.v3.68.1
+    channel: rhacs-3.71
+    csv: rhacs-operator.v3.71
 
   - name: odf-operator
     namespace: openshift-storage
@@ -52,7 +52,7 @@ clusterGroup:
   - hub
   - opp
   - config-demo
-  - golang-external-secrets
+  - external-secrets
 
   applications:  
   - name: acm   #arbitary
@@ -68,12 +68,12 @@ clusterGroup:
   - name: acs-central
     namespace: stackrox
     project: opp
-    path: common/acs/central
+    path: charts/hub/acs/central
 
   - name: acs-secured
     namespace: stackrox
     project: opp
-    path: common/acs/secured
+    path: charts/hub/acs/secured
 
   - name: storage
     namespace: openshift-storage
@@ -95,7 +95,7 @@ clusterGroup:
     project: hub
     chart: vault
     repoURL: https://helm.releases.hashicorp.com
-    targetRevision: v0.19.0
+    targetRevision: v0.20.0
     overrides:
     - name: global.openshift
       value: "true"
@@ -118,8 +118,13 @@ clusterGroup:
 
   - name: golang-external-secrets
     namespace: golang-external-secrets
-    project: golang-external-secrets
+    project: external-secrets
     path: common/golang-external-secrets
+
+  - name: external-secrets
+    namespace: devsecops-ci
+    project: external-secrets
+    path: charts/hub/external-secrets
 
   - name: cli-tools
     namespace: openshift

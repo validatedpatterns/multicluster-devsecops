@@ -1,3 +1,11 @@
+# Possibly still not the right home...
+devel:
+  appURL: https://github.com/ipbabble/chat-client.git
+  image: chat-client:latest
+  npmbase: quay.io/hybridcloudpatterns/ubi-npm
+  namespace: devsecops-ci
+  roxCTLImage: registry.redhat.io/rh-acs/roxctl:3.0.62.0
+
 global:
   options:
     useCSV: False
@@ -19,8 +27,8 @@ clusterGroup:
   subscriptions:
   - name: rhacs-operator  #packageName
     namespace: openshift-operators # operator namespace
-    channel: rhacs-3.68
-    csv: rhacs-operator.v3.68.1
+    channel: rhacs-3.71
+    csv: rhacs-operator.v3.71
 
   - name: openshift-pipelines-operator-rh
     namespace: openshift-operators
@@ -41,12 +49,12 @@ clusterGroup:
   - name: acs-secured
     namespace: stackrox
     project: secured
-    path: common/acs/secured
+    path: charts/hub/acs/secured
 
   - name: pipelines
     namespace: devsecops-ci
     project: ci
-    path: charts/hub/pipelines
+    path: charts/region/pipelines
 
   - name: quay-integration
     namespace: openshift-operators

@@ -1,6 +1,5 @@
 quay:
   namespace: quay-enterprise
-  adminuser: quayadmin
   component:
     - name: clair
       managed: true
@@ -27,6 +26,23 @@ quay:
   configBundleSecret:
     deploy: true
     name: quay-init-config-bundle-secret
+  setup:
+    admin:
+      # Generated password is saved to the 'quay-init-token' secret in the configured namespace  
+      name: quayadmin
+      email: quayadmin@example.com
+    user:
+      # Generated password is saved to the 'quay-user' secret in the configured namespace
+      # The API only allows the creation of superusers
+      name: developer1
+      email: developer1@myorg.com
+
+global:
+  quay:
+    org:
+      name: devel
+      email: devel@myorg.com
+    repo: example
 
 job:
   image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
@@ -37,6 +53,3 @@ global:
     domain: DOMAIN
 
   quay:
-    account: quayadmin
-    password: quayadmin123
-    email: quayadmin@example.com

@@ -15,6 +15,16 @@ spec:
   sourceNamespace: {{ default "openshift-marketplace" $subs.sourceNamespace }}
   channel: {{ default "stable" $subs.channel }}
   installPlanApproval: {{ coalesce $installPlanValue $.Values.global.options.installPlanApproval }}
+  {{- if $subs.config }}
+  {{- if $subs.config.env }}
+  config:
+    env:
+  {{- range $subs.config.env }}
+      - name: {{ .name }}
+        value: {{ .value }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
   {{- if $.Values.global.options.useCSV }}
   startingCSV: {{ $subs.csv }}
   {{- end }}
@@ -26,14 +36,22 @@ kind: Subscription
 metadata:
   name: {{ $subs.name }}
   namespace: {{ default "openshift-operators" $subs.namespace }}
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
 spec:
   name: {{ $subs.name }}
   source: {{ default "redhat-operators" $subs.source }}
   sourceNamespace: {{ default "openshift-marketplace" $subs.sourceNamespace }}
   channel: {{ default "stable" $subs.channel }}
   installPlanApproval: {{ coalesce  $installPlanValue $.Values.global.options.installPlanApproval }}
+  {{- if $subs.config }}
+  {{- if $subs.config.env }}
+  config:
+    env:
+  {{- range $subs.config.env }}
+      - name: {{ .name }}
+        value: {{ .value }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
   {{- if $.Values.global.options.useCSV }}
   startingCSV: {{ $subs.csv }}
   {{- end }}
