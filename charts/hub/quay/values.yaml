@@ -37,13 +37,6 @@ quay:
       name: developer1
       email: developer1@myorg.com
 
-global:
-  quay:
-    org:
-      name: devel
-      email: devel@myorg.com
-    repo: example
-
 job:
   image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
 
@@ -53,3 +46,7 @@ global:
     domain: DOMAIN
 
   quay:
+    org:
+      name: devel
+      email: devel@myorg.com
+    repo: example

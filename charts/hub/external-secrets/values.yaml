@@ -11,6 +11,9 @@ global:
     hostname: quay.io
     type: quay
 
+clusterGroup:
+  isHubCluster: true
+
 secretStore:
   name: vault-backend
   kind: ClusterSecretStore

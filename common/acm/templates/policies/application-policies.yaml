@@ -43,6 +43,9 @@ spec:
                       valueFiles:
                       - "/values-global.yaml"
                       - "/values-{{ .name }}.yaml"
+                      {{- range $valueFile := .extraValueFiles }}
+                      - {{ $valueFile | quote }}
+                      {{- end }}
                       parameters:
                       - name: global.repoURL
                         value: $ARGOCD_APP_SOURCE_REPO_URL
@@ -56,9 +59,18 @@ spec:
                         value: {{ $.Values.global.hubClusterDomain }}
                       - name: global.localClusterDomain
                         value: '{{ `{{ (lookup "config.openshift.io/v1" "Ingress" "" "cluster").spec.domain }}` }}'
+                      - name: global.localClusterName
+                        value: '{{ `{{ (lookup "cluster.open-cluster-management.io/v1alpha1" "ClusterClaim" "" "name").spec.value }}` }}'
                      {{- range .helmOverrides }}
                       - name: {{ .name }}
                         value: {{ .value | quote }}
+                     {{- end }}
+                     {{- if .fileParameters }}
+                      fileParameters:
+                      {{- range .fileParameters }}
+                      - name: {{ .name }}
+                        path: {{ .path }}
+                      {{- end }}
                      {{- end }}
                   destination:
                     server: https://kubernetes.default.svc

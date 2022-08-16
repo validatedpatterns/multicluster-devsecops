@@ -41,33 +41,6 @@ subjects:
     name: quay-bridge-sa
     namespace: openshift-operators
 ---
-# Source: quay/templates/job-copy-quay-token.yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  annotations:
-    argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/sync-wave: "6"
-  name: copy-quay-token
-  namespace: openshift-operators
-spec:
-  template:
-    spec:
-      containers: 
-      - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
-        command:
-        - /bin/bash
-        - -c
-        - |
-          # copy quay-api-token secret into pipeline namespace
-          oc get secret quay-api-token --namespace=openshift-operators -oyaml | grep -v '\s*namespace:\s' |oc apply --namespace=devsecops-ci -f -
-        name: copy-quay-token
-      dnsPolicy: ClusterFirst
-      activeDeadlineSeconds: 900
-      restartPolicy: Never
-      serviceAccountName: quay-bridge-sa
-      terminationGracePeriodSeconds: 60
----
 # Source: quay/templates/bridge/quay-integration.yaml
 apiVersion: quay.redhat.com/v1
 kind: QuayIntegration
@@ -80,5 +53,6 @@ spec:
  credentialsSecret:
    name: quay-integration
    namespace: openshift-operators
- insecureRegistry: false
+# insecureRegistry: false
+ insecureRegistry: true
  quayHostname: https://quay-registry-quay-quay-enterprise.AUTOMATIC

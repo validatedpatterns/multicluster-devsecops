@@ -1,7 +1,7 @@
 # Start Here
 
 If you've followed a link to this repo, but are not really sure what it contains
-or how to use it, head over to http://hybrid-cloud-patterns.io/devsecops/
+or how to use it, head over to https://hybrid-cloud-patterns.io/devsecops/
 for additional context and installation instructions
 
 # Cluster requirements

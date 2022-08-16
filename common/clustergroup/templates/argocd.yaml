@@ -68,10 +68,7 @@ spec:
         memory: 128Mi
   initialSSHKnownHosts: {}
   rbac:
-    policy: |
-      g, system:cluster-admins, role:admin
-      g, cluster-admins, role:admin
-    scopes: '[groups]'
+    defaultPolicy: role:admin
   repo:
     resources:
       limits:
