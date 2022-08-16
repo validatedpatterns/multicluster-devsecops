@@ -1,0 +1,29 @@
+site:
+  name: example
+
+global:
+  pattern: multicluster-devsecops
+  repoURL: "https://github.com/<git-fork>/multicluster-devsecops"
+  targetRevision: main
+
+  git:
+    hostname: github.com
+    account: PLAINTEXT
+    username: PLAINTEXT
+    email: SOMEWHERE@EXAMPLE.COM
+    dev_revision: main
+
+  # Should be set consistently with quay enterprise setup
+  imageregistry:
+    account: PLAINTEXT
+    hostname: quay.io
+    type: quay
+
+devel:
+  appURL: AUTOMATED
+  image: AUTOMATED
+  namespace: AUTOMATED
+  roxCTLImage: AUTOMATED
+  
+clusterGroup:
+  name: testgroup
