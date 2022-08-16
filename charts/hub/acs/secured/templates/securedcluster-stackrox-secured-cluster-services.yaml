@@ -2,11 +2,11 @@
 kind: SecuredCluster
 metadata:
   annotations:
-    argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-wave: "3"
   name: stackrox-secured-cluster-services
   namespace: stackrox
 spec:
-  clusterName: '{{ `{{ fromSecret "open-cluster-management-agent" "hub-kubeconfig-secret" "cluster-name" | base64dec }}` }}'
+  clusterName: {{ .Values.global.localClusterName }}
   auditLogs:
     collection: Auto
   admissionControl:
@@ -17,8 +17,6 @@ spec:
     timeoutSeconds: 3
     listenOnEvents: true
   centralEndpoint: central-stackrox.{{ .Values.global.hubClusterDomain }}:443
-  # Or use this when we figure out ahy acs-host is empty and fix it
-  # {{ fromSecret "stackrox" "sensor-tls" "acs-host" | base64dec }}
   perNode:
     collector:
       collection: KernelModule
