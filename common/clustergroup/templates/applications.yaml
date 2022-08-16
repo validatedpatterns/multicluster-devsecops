@@ -64,6 +64,8 @@ spec:
               value: {{ $.Values.global.hubClusterDomain }}
             - name: global.localClusterDomain
               value: {{ coalesce $.Values.global.localClusterDomain $.Values.global.hubClusterDomain }}
+            - name: global.localClusterName
+              value: {{ $.Values.global.localClusterName }}
             - name: global.repoURL
               value: {{ $.Values.global.repoURL }}
             - name: global.targetRevision
@@ -129,6 +131,8 @@ spec:
           value: {{ $.Values.global.hubClusterDomain }}
         - name: global.localClusterDomain
           value: {{ coalesce $.Values.global.localClusterDomain $.Values.global.hubClusterDomain }}
+        - name: global.localClusterName
+          value: {{ $.Values.global.localClusterName }}
         {{- range .overrides }}
         - name: {{ .name }}
           value: {{ .value | quote }}
