@@ -6,7 +6,7 @@ metadata:
   name: stackrox-secured-cluster-services
   namespace: stackrox
 spec:
-  clusterName: {{ fromSecret "open-cluster-management-agent" "hub-kubeconfig-secret" "cluster-name" | base64dec }}
+  clusterName: {{ hub fromSecret "open-cluster-management-agent" "hub-kubeconfig-secret" "cluster-name" | base64dec hub }}
   auditLogs:
     collection: Auto
   admissionControl:
@@ -16,7 +16,7 @@ spec:
     listenOnCreates: true
     timeoutSeconds: 3
     listenOnEvents: true
-  centralEndpoint: central-stackrox.{{ .Values.global.hubClusterDomain }}
+  centralEndpoint: central-stackrox.{{ .Values.global.hubClusterDomain }}:443
   # Or use this when we figure out ahy acs-host is empty and fix it
   # {{ fromSecret "stackrox" "sensor-tls" "acs-host" | base64dec }}
   perNode:
