@@ -1,2 +1,2 @@
 global:
-  localClusterName: acs-secured
+  localClusterName: ERROR-ACS-CLUSTER-NAME
