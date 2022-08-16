@@ -31,12 +31,14 @@ global:
     email: SOMEWHERE@EXAMPLE.COM
     dev_revision: main
 
-devel:
-  appURL: https://github.com/ipbabble/chat-client.git
-  image: quay.io/ipbabble/chat-client:latest
-  npmbase: quay.io/hybridcloudpatterns/ubi-npm:latest
-  namespace: devsecops-ci
-  
+  quay:
+    # Needs to be set consistently between hub and spoke clusters
+    # TODO: Move back to the hub chart, store in a configmap, have an ACM policy distribute to spoke clusters, have spoke look up from configmap 
+    org:
+      name: devel
+      email: devel@myorg.com
+    repo: example
+    
 main:
   clusterGroupName: hub
   opp: false
