@@ -35,6 +35,169 @@ stringData:
     REGISTRY_TITLE_SHORT: Quay
     TEAM_RESYNC_STALE_TIME: 60m
     TESTING: false
+    CREATE_NAMESPACE_ON_PUSH: true
+---
+# Source: quay/templates/quayRegistry/cm-create-quaye-pull-secret.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # quaye abbrev. for Quay Enterprise
+  name: create-quaye-pull-secret
+  namespace: quay-enterprise
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+data:
+  create-quaye-pull-secret.sh: |
+      #!/bin/bash -e
+
+      function quay_cmd() {
+          DATA='{}'
+          if [ ! -z "$4" ]; then
+              DATA=$4
+          fi
+          echo "[$1] $2 $3 --data $DATA" 1>&2
+          AUTH="Fake: dummy"
+          if [ $1 = "Basic" ]; then
+              COUNT=$(oc -n $QUAY_NAMESPACE get --ignore-not-found=true secret $QUAY_USER_SECRET | wc -l) 
+              if [ $COUNT -gt 1 ]; then
+                  BASIC=$(oc -n $QUAY_NAMESPACE extract secret/$QUAY_USER_SECRET --keys=basic --to=-)
+              fi
+              AUTH="Authorization: Basic $BASIC"
+
+          elif [ $1 = "Bearer" ]; then
+              AUTH="Authorization: Bearer $TOKEN"
+          fi
+          curl -X $2 $CURL_OPTS -H 'Content-Type: application/json'  -H "$AUTH" https://$QUAY_HOST$3 --data "$DATA"
+          echo "[INFO] Success" 1>&2
+      }
+
+      CURL_OPTS="-fsk"
+      QUAY_USER_SECRET=quay-user
+
+      env | grep QUAY | grep -v QUAY_REGISTRY
+      if [ -z "$QUAY_NAMESPACE" ]; then
+          QUAY_NAMESPACE=quay-enterprise
+      fi
+      if [ -z "$QUAY_HOST" ]; then
+          QUAY_HOST="quay-registry-quay-quay-enterprise."
+      fi
+      if [ -z "$QUAY_USER" ]; then
+          QUAY_USER=developer1
+      fi
+      if [ -z "$QUAY_USER_EMAIL" ]; then
+          QUAY_USER_EMAIL=developer1@myorg.com
+      fi
+      if [ -z "$QUAY_ORG" ]; then
+          QUAY_ORG=devel
+      fi
+      if [ -z "$QUAY_ORG_EMAIL" ]; then
+          QUAY_ORG_EMAIL=devel@myorg.com
+      fi
+      if [ -z "$QUAY_REPO" ]; then
+          QUAY_REPO=example
+      fi
+
+      echo "[INFO] Looking for initial token ..."
+      SECRET_NAME=quay-init-token
+      COUNT=$(oc -n $QUAY_NAMESPACE get --ignore-not-found=true secret $SECRET_NAME | wc -l) 
+      if [ $COUNT = 0 ]; then
+          INITPASS=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 20 ; echo ''  )
+
+          echo "[INFO] Destroy any previous secrets ..."
+          oc -n $QUAY_NAMESPACE delete --ignore-not-found=true secret $QUAY_USER_SECRET
+          oc -n openshift-operators delete --ignore-not-found=true secret quay-pull-secret  
+
+          # Invoke API and add quay user to the API - initiates API
+          echo "[INFO] Creating default user..."
+          JSONTOKEN=$(quay_cmd None POST /api/v1/user/initialize "{ \"username\": \"quayadmin\", \"password\":\"$INITPASS\", \"email\": \"quayadmin@example.com\", \"access_token\": true}")
+
+          echo "[INFO] Creating $SECRET_NAME ..."
+          oc -n $QUAY_NAMESPACE create secret generic $SECRET_NAME --from-literal=token=$JSONTOKEN --from-literal=password=$INITPASS
+      fi
+      
+      TOKEN=$(oc -n $QUAY_NAMESPACE extract secret/$SECRET_NAME --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}')
+
+      # Now extract the token and store in the Quay Integration secret in openshift-operators namespace
+      # oc create secret -n openshift-operators generic quay-integration --from-literal=token=$TOKEN
+
+      echo "[INFO] Checking our bearer token is still valid ..."
+      COUNT=$(quay_cmd Bearer GET /api/v1/superuser/users/ | grep \"$QUAY_USER\" | wc -l)
+      if [ $COUNT = 0 ]; then
+          # Either the super user doesn't exist, or the token is invalid... determine which...
+
+          COUNT=$(quay_cmd Basic GET /api/v1/organization/$QUAY_ORG | wc -l)
+          if [ $COUNT -gt 0 ]; then
+              # We found the $QUAY_USER_SECRET secret, with valid basic auth details, and used it to obtain the previously created organization...
+              # Conclude the bearer token has expired (150min lifetime)
+              echo "Bearer token has expired"
+              exit 0
+          fi
+      fi
+
+      echo "[INFO] Looking for our superuser ..."
+      COUNT=$(quay_cmd Bearer GET /api/v1/superuser/users/ | grep \"$QUAY_USER\" | wc -l)
+      if [ $COUNT = 0 ]; then    
+          echo "[INFO] Creating $QUAY_USER user ..."
+          RESPONSE=$(quay_cmd Bearer POST /api/v1/superuser/users/ "{ \"username\": \"$QUAY_USER\", \"email\": \"$QUAY_USER_EMAIL\", \"access_token\": true}")
+
+          QUAY_PASSWORD=$(echo $RESPONSE | tr ',' '\n' | grep '"password"' | cut -d \" -f 4)
+          BASE64AUTH=`echo -n $QUAY_USER:$QUAY_PASSWORD | base64 -w0`
+
+          echo "[INFO] Creating $QUAY_USER_SECRET secret ..."
+          oc -n $QUAY_NAMESPACE create secret generic $QUAY_USER_SECRET --from-literal=token="$RESPONSE" --from-literal=basic="$BASE64AUTH"
+
+          echo "[INFO] Creating quay-pull-secret ..."
+          echo -e "{ \"auths\": { \"$QUAY_HOST\": { \"auth\": \"$BASE64AUTH\" } }}" | oc -n openshift-operators create secret generic quay-pull-secret --from-file=.dockerconfigjson=/dev/stdin --type=kubernetes.io/dockerconfigjson
+
+          # https://access.redhat.com/solutions/5462311
+          # Requires CLIENTID to be added to DIRECT_OAUTH_CLIENTID_WHITELIST for this to work
+          # If it worked, we could create a new OAuth token when the original one expires after 150min
+          ####
+          # CLIENTID=$(quay_cmd Bearer GET /api/v1/organization/$QUAY_ORG/applications | sed -e 's/{/\n/g' | grep "\"name\": \"$APPLICATION\"" | sed -e 's/,/\n/g' | grep client_id | awk '{print $2}' | sed 's/"//g')
+          # quay_cmd Basic PUT "/oauth/authorize?response_type=token&client_id=$CLIENTID&scope=org:admin%20repo:admin%20repo:create%20repo:read%20repo:write%20super:user%20user:admin%20user:read&redirect_uri=https://$QUAY_HOST%2Foauth%2Flocalapp"
+      fi
+
+      echo "[INFO] Looking for initial organization ..."
+      COUNT=$(quay_cmd Bearer GET /api/v1/organization/$QUAY_ORG | grep -v not_found | wc -l)
+      if [ $COUNT = 0 ]; then
+        echo "[INFO] Creating $QUAY_ORG org ..."
+        # Email cannot be shared with the initial user
+        quay_cmd Bearer POST /api/v1/organization/ "{\"name\": \"$QUAY_ORG\", \"email\": \"$QUAY_ORG_EMAIL\" }"
+        quay_cmd Basic GET /api/v1/organization/$QUAY_ORG
+      fi
+
+      echo "[INFO] Looking for org application ..."
+      # The only way to get another OAuth token is to go to: Organization -> Applications -> {app} -> Generate Token
+      # If there was a programatic way to do it here, we could avoid the problem with the bearer token expiring after 150min
+      APPLICATION=automation
+      COUNT=$(quay_cmd Bearer GET /api/v1/organization/$QUAY_ORG/applications | grep $APPLICATION | wc -l)
+      if [ $COUNT = 0 ]; then
+        echo "[INFO] Creating $APPLICATION application..."
+        quay_cmd Bearer POST /api/v1/organization/$QUAY_ORG/applications "{\"name\": \"$QUAY_ORG-automation\", \"description\": \"automation app\" }"
+      fi
+
+      echo "[INFO] Looking for initial repo ..."
+      COUNT=$(quay_cmd Bearer GET /api/v1/repository/$QUAY_ORG/$QUAY_REPO | grep -v not_found | wc -l)
+      if [ $COUNT = 0 ]; then
+          echo "[INFO] Creating $QUAY_REPO repo..."
+          quay_cmd Bearer POST /api/v1/repository "{\"namespace\":\"$QUAY_ORG\", \"repository\":\"$QUAY_REPO\", \"visibility\":\"public\", \"description\":\"Development Repo\", \"repo_kind\":\"image\"}"  
+      fi
+
+      echo "[INFO] Looking for $QUAY_ORG members ..."
+      COUNT=$(quay_cmd Bearer GET /api/v1/organization/$QUAY_ORG/team/owners/members | grep "name\": \"$QUAY_USER\"" | wc -l)
+      if [ $COUNT = 0 ]; then
+          echo "[INFO] Associating $QUAY_USER with $QUAY_ORG ..."
+          quay_cmd Bearer PUT /api/v1/organization/$QUAY_ORG/team/owners/members/$QUAY_USER '{}'
+      fi
+
+      echo "[INFO] Looking for $QUAY_REPO admins ..."
+      COUNT=$(quay_cmd Bearer GET /api/v1/repository/$QUAY_ORG/$QUAY_REPO/permissions/user/$QUAY_USER | grep '"role": "admin"' | wc -l)
+      if [ $COUNT = 0 ]; then
+          echo "[INFO] Give $QUAY_USER admin rights to the repo ..."
+          quay_cmd Bearer PUT /api/v1/repository/$QUAY_ORG/$QUAY_REPO/permissions/user/$QUAY_USER '{ "role": "admin"}'
+      fi
+
+      echo "[INFO] Job finished"
 ---
 # Source: quay/templates/rbac/quay-admin-role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -52,6 +215,7 @@ rules:
       - get
       - list
       - watch
+      - delete
   - apiGroups:
       - ""
     resources:
@@ -60,6 +224,7 @@ rules:
       - get
       - create
       - list
+      - delete
 ---
 # Source: quay/templates/rbac/quay-admin-rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -77,45 +242,45 @@ subjects:
     name: quay-admin-sa
     namespace: quay-enterprise
 ---
-# Source: quay/templates/quayRegistry/job-enable-quay-api.yaml
+# Source: quay/templates/quayRegistry/job-create-quaye-pull-secret.yaml
 apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
     argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/sync-wave: "15"
-  name: enable-quay-api
+    argocd.argoproj.io/sync-wave: "10"
+  # quaye is abbrev. for Quay Enterprise - diff from quayio
+  name: create-quaye-pull-secret
   namespace: quay-enterprise
 spec:
   template:
     spec:
       containers: 
       - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+        env:
+        - name: QUAY_REPO
+          value: "example"
         command:
         - /bin/bash
         - -c
         - |
-          oc get secret quay-temp-token
-          if [ $? -ne 0 ]; then
-            echo "Quay default user not created. Creating ..."  
-            # Invoke API and add quay user to the API - initiates API
-            JSONTOKEN=$(curl -X POST -k  https://quay-registry-quay-quay-enterprise./api/v1/user/initialize --header 'Content-Type: application/json' --data '{ "username": "quayadmin", "password":"quayadmin123", "email": "quayadmin@example.com", "access_token": true}') && \
-            oc create secret generic quay-temp-token --from-literal=token=$JSONTOKEN
-          fi
-          oc get secret -n openshift-operators quay-integration
-          if [ $? -ne 0 ]; then
-            echo "quay-integration secret not created. Creating ..."  
-            # Now extract the token and store in the Quay Integration secret in openshift-operators namespace
-            TOKEN=$(oc extract secret/quay-temp-token --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}') && \
-            oc create secret -n openshift-operators generic quay-integration --from-literal=token=$TOKEN
-          fi
-          echo "Job finished" 
-        name: quay-api-enablement
+          oc wait QuayRegistry quay-registry --for=condition=Available=true
+          '/tmp/create-quaye-pull-secret.sh'
+        name: create-quaye-pull-secret
+        volumeMounts:
+          - mountPath: /tmp/create-quaye-pull-secret.sh
+            name: create-quaye-pull-secret
+            subPath: create-quaye-pull-secret.sh
+      volumes:
+        - name: create-quaye-pull-secret
+          configMap:
+            name: create-quaye-pull-secret
+            defaultMode: 0755
       dnsPolicy: ClusterFirst
-      activeDeadlineSeconds: 900
       restartPolicy: Never
+      serviceAccount: quay-admin-sa
       serviceAccountName: quay-admin-sa
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 400
 ---
 # Source: quay/templates/quayRegistry/job-wait-on-quay-app-deploy.yaml
 apiVersion: batch/v1
@@ -144,27 +309,27 @@ spec:
       serviceAccountName: quay-admin-sa
       terminationGracePeriodSeconds: 60
 ---
-# Source: quay/templates/quayRegistry/policy-quay-api-token.yaml
+# Source: quay/templates/quayRegistry/policy-quay-pull-secret.yaml
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
-  name: quay-api-token-placement-binding
+  name: quay-pull-secret-placement-binding
   namespace: openshift-operators
 placementRef:
-  name: quay-api-token-placement
+  name: quay-pull-secret-placement
   kind: PlacementRule
   apiGroup: apps.open-cluster-management.io
 subjects:
-  - name: policy-quay-api-token
+  - name: policy-quay-pull-secret
     kind: Policy
     apiGroup: policy.open-cluster-management.io
 ---
-# Source: quay/templates/quayRegistry/policy-quay-api-token.yaml
+# Source: quay/templates/quayRegistry/policy-quay-pull-secret.yaml
 # We need to run this on any managed cluster but not on the HUB
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
-  name: quay-api-token-placement
+  name: quay-pull-secret-placement
   namespace: openshift-operators
 spec:
   # This will go to both devel and secured clusters
@@ -229,11 +394,11 @@ spec:
         remediationAction: inform
         severity: medium
 ---
-# Source: quay/templates/quayRegistry/policy-quay-api-token.yaml
+# Source: quay/templates/quayRegistry/policy-quay-pull-secret.yaml
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: policy-quay-api-token
+  name: policy-quay-pull-secret
   namespace: openshift-operators
   annotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
@@ -247,7 +412,7 @@ spec:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: quay-api-token-configpolicy
+          name: quay-pull-secret-configpolicy
           annotations:
             apps.open-cluster-management.io/deployables: "secret"
         spec:
@@ -263,11 +428,21 @@ spec:
                 kind: Secret
                 type: Opaque
                 metadata:
-                  name: quay-api-token
-                  namespace: openshift-operators
+                  name: quay-pull-secret
+                  namespace: openshift-operators  # consider changing this to devsecops-ci
                 apiVersion: v1
                 data:
-                  token: '{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}'
+                  .dockerconfigjson: '{{hub fromSecret "openshift-operators" "quay-pull-secret" ".dockerconfigjson" hub}}'
+            - complianceType: mustonlyhave
+              objectDefinition:
+                kind: Secret
+                type: Opaque
+                metadata:
+                  name: quay-pull-secret
+                  namespace: devsecops-ci
+                apiVersion: v1
+                data:
+                  .dockerconfigjson: '{{hub fromSecret "openshift-operators" "quay-pull-secret" ".dockerconfigjson" hub}}'
 ---
 # Source: quay/templates/quayRegistry/registry.yaml
 apiVersion: quay.redhat.com/v1

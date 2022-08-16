@@ -19,6 +19,14 @@ global:
     hostname: quay.io
     type: quay
 
+  quay:
+    # Needs to be set consistently between hub and spoke clusters
+    # TODO: Move back to the hub chart, store in a configmap, have an ACM policy distribute to spoke clusters, have spoke look up from configmap 
+    org:
+      name: devel
+      email: devel@myorg.com
+    repo: example
+
 devel:
   appURL: AUTOMATED
   image: AUTOMATED

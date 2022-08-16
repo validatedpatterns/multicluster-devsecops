@@ -1,4 +1,13 @@
 ---
+# Source: opp/templates/ocm-observability-bucket-claim.yaml
+apiVersion: operator.openshift.io/v1
+kind: Console
+metadata:
+  name: cluster
+spec:
+  plugins:
+  - odf-console
+---
 # Source: opp/templates/clusterset-binding.yaml
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: ManagedClusterSetBinding
@@ -7,6 +16,16 @@ metadata:
   namespace: policies
 spec:
   clusterSet: default
+---
+# Source: opp/templates/ocm-observability-bucket-claim.yaml
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: obc-observability
+  namespace: openshift-storage
+spec:
+  generateBucketName: obc-observability-bucket
+  storageClassName: openshift-storage.noobaa.io
 ---
 # Source: opp/templates/placement-hub.yaml
 apiVersion: cluster.open-cluster-management.io/v1beta1
@@ -119,8 +138,8 @@ spec:
               thanos.yaml: |
                 type: s3
                 config:
-                  bucket: '{{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "obc-quay-enterprise-quay-registry-quay-datastore").spec.endpoint.bucketName }}'
-                  endpoint: '{{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "obc-quay-enterprise-quay-registry-quay-datastore").spec.endpoint.bucketHost }}'
+                  bucket: '{{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "obc-openshift-storage-obc-observability").spec.endpoint.bucketName }}'
+                  endpoint: '{{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "obc-openshift-storage-obc-observability").spec.endpoint.bucketHost }}'
                   insecure: true
                   access_key: '{{ (lookup "v1" "Secret" "openshift-storage" "noobaa-admin").data.AWS_ACCESS_KEY_ID }}'
                   secret_key: '{{ (lookup "v1" "Secret" "openshift-storage" "noobaa-admin").data.AWS_SECRET_ACCESS_KEY }}'
