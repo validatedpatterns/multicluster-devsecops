@@ -97,7 +97,6 @@ spec:
             --set global.pattern=common
             --set global.hubClusterDomain=
             --set global.localClusterDomain=
-            --set global.localClusterName=
             --post-renderer ./kustomize"]
   applicationSet:
     resources:

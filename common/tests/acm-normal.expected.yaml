@@ -136,8 +136,6 @@ spec:
                         value: hub.example.com
                       - name: global.localClusterDomain
                         value: '{{ (lookup "config.openshift.io/v1" "Ingress" "" "cluster").spec.domain }}'
-                      - name: global.localClusterName
-                        value: '{{ (lookup "cluster.open-cluster-management.io/v1alpha1" "ClusterClaim" "" "name").spec.value }}'
                       - name: clusterGroup.isHubCluster
                         value: "false"
                   destination:

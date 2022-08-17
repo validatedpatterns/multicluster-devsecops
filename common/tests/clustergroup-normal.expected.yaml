@@ -471,8 +471,6 @@ spec:
           value: hub.example.com
         - name: global.localClusterDomain
           value: region.example.com
-        - name: global.localClusterName
-          value: 
   ignoreDifferences: [
   {
     "group": "internal.open-cluster-management.io",
@@ -522,8 +520,6 @@ spec:
           value: hub.example.com
         - name: global.localClusterDomain
           value: region.example.com
-        - name: global.localClusterName
-          value: 
   syncPolicy:
     automated: {}
     #  selfHeal: true
@@ -569,7 +565,6 @@ spec:
             --set global.pattern=mypattern
             --set global.hubClusterDomain=hub.example.com
             --set global.localClusterDomain=region.example.com
-            --set global.localClusterName=
             --post-renderer ./kustomize"]
   applicationSet:
     resources:
