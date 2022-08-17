@@ -1,2 +1,2 @@
 global:
-  localClusterName: acs-secured
+  localClusterDomain: apps.hub-cluster.blueprints.rhecoeng.com
