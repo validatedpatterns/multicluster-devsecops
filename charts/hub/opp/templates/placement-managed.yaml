@@ -17,4 +17,4 @@ spec:
         - key: name
           operator: NotIn
           values:
-          - local-cluster
+          - wh-hub
