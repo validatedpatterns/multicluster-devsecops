@@ -23,6 +23,7 @@ spec:
     default: "true"
   - name: ACS_CENTRAL
     description: The end-point for the ACS API
+    default: $(params.acs-scan-api)
 
   steps:
   - name: scan
