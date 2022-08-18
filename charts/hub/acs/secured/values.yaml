@@ -1,2 +1,2 @@
 global:
-  localClusterName: ERROR-ACS-CLUSTER-NAME
+  localClusterDomain: AUTOMATIC
