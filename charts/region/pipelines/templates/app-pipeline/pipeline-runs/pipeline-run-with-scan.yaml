@@ -16,7 +16,7 @@ spec:
     - name: "is-name"
       value: "chat-client"
     - name: "acs-image"
-      value: {{ .Values.devel.image }}
+      value: registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8
     - name: "acs-scan-api"
       value: "https://central-stackrox.{{ .Values.global.hubClusterDomain }}"
   pipelineRef:
