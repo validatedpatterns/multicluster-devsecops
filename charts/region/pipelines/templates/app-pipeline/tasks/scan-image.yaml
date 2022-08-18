@@ -15,7 +15,7 @@ spec:
   params:
   - name: IMAGE
     description: Reference of the image to scan
-  - name: SCAN-IMAGE
+  - name: SCAN_IMAGE
     description: Image containing the roxctl CLI
     default: registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8
   - name: TLS_VERIFY
