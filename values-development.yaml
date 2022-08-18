@@ -4,7 +4,8 @@ devel:
   image: chat-client:latest
   npmbase: quay.io/hybridcloudpatterns/ubi-npm
   namespace: devsecops-ci
-  roxCTLImage: registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8 
+  roxCTLImage: registry.redhat.io/rh-acs/roxctl:3.0.62.0
+  #registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8 
   #registry.redhat.io/rh-acs/roxctl:3.0.62.0
 
 global:
