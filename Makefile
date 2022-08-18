@@ -27,11 +27,4 @@ helmlint:
 	@for t in "$(wildcard charts/all/*)" "$(wildcard charts/hub/[b-z]*) $(wildcard charts/hub/acs/*)"; do helm lint $$t; if [ $$? != 0 ]; then exit 1; fi; done
 
 super-linter: ## Runs super linter locally
-	podman run -e RUN_LOCAL=true -e USE_FIND_ALGORITHM=true	\
-					-e VALIDATE_BASH=false \
-					-e VALIDATE_JSCPD=false \
-					-e VALIDATE_KUBERNETES_KUBEVAL=false \
-					-e VALIDATE_YAML=false \
-					-e VALIDATE_TEKTON=false \
-					-e VALIDATE_ANSIBLE=false \
-					-v $(PWD):/tmp/lint:rw,z docker.io/github/super-linter:slim-v4
+	make -f common/Makefile DISABLE_LINTERS="-e VALIDATE_ANSIBLE=false -e VALIDATE_TEKTON=false" super-linter
