@@ -73,7 +73,7 @@ spec:
       name: scan-image-acs
     params:
       - name: IMAGE
-        value: '$(params.acs-image)'
+        value: '$(params.image-root)/$(params.is-name):$(params.github-repo-revision)'
       - name: ACS_CENTRAL
         value: '$(params.acs-scan-api)'
     runAfter:
