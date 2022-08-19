@@ -23,6 +23,7 @@ spec:
     default: "true"
   - name: acs-image
     description: roxctl image URL on RH registry (free/no auth)
+    default: {{ .Values.devel.roxCTLImage }}
   - name: ACS_CENTRAL
     description: The end-point for the ACS API
     default: $(params.acs-scan-api)
