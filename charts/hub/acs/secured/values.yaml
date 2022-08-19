@@ -1,2 +1,2 @@
 global:
-  localClusterDomain: apps.hub-cluster.blueprints.rhecoeng.com
+  localClusterDomain: AUTOMATIC

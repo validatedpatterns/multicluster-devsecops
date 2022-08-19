@@ -15,14 +15,18 @@ spec:
   params:
   - name: IMAGE
     description: Reference of the image to scan
-  - name: SCAN-IMAGE
+  - name: SCAN_IMAGE
     description: Image containing the roxctl CLI
     default: $(params.acs-image)
   - name: TLS_VERIFY
     description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
     default: "true"
+  - name: acs-image
+    description: roxctl image URL on RH registry (free/no auth)
+    default: {{ .Values.devel.roxCTLImage }}
   - name: ACS_CENTRAL
     description: The end-point for the ACS API
+    default: $(params.acs-scan-api)
 
   steps:
   - name: scan
