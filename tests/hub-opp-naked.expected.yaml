@@ -194,4 +194,3 @@ spec:
     to every managed cluster.
   policies:
   - policy-acs-secured-status
-  - policy-ocm-observability
