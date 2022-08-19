@@ -5,8 +5,6 @@ devel:
   npmbase: quay.io/hybridcloudpatterns/ubi-npm
   namespace: devsecops-ci
   roxCTLImage: registry.access.redhat.com/advanced-cluster-security/rhacs-roxctl-rhel8:3.71.0-5
-  #registry.redhat.io/advanced-cluster-security/rhacs-roxctl-rhel8 
-  #registry.redhat.io/rh-acs/roxctl:3.0.62.0
 
 global:
   options:
