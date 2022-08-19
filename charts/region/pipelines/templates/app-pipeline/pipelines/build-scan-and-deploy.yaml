@@ -73,7 +73,7 @@ spec:
       name: scan-image-acs
     params:
       - name: IMAGE
-        value: '$(params.image-root)/$(params.is-name):$(params.github-repo-revision)'
+        value: '{{ .Values.devel.roxCTLImage }}'
       - name: ACS_CENTRAL
         value: '$(params.acs-scan-api)'
     runAfter:
