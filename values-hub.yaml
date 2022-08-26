@@ -144,7 +144,7 @@ clusterGroup:
       value: "false"
     clusterSelector:
       matchLabels:
-        clustergroup: devel
+        clusterGroup: devel
       matchExpressions:
       - key: vendor
         operator: In
@@ -157,7 +157,7 @@ clusterGroup:
       value: "false"
     clusterSelector:
       matchLabels:
-        clustergroup: prod
+        clusterGroup: prod
       matchExpressions:
       - key: vendor
         operator: In
