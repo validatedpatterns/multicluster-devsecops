@@ -10,7 +10,7 @@ metadata:
     tekton.dev/tags: scan-image
 spec:
   description: >-
-    Uses the Red Hat Advanced Cluster Security APIs to scan 
+    Uses the Red Hat Advanced Cluster Security APIs to scan
     a container image against the current build policies for the cluster.
   params:
   - name: IMAGE

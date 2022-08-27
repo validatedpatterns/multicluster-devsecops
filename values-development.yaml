@@ -23,7 +23,7 @@ clusterGroup:
     - openshift-pipelines
     - devsecops-ci
     - config-demo
-  
+
   subscriptions:
   - name: rhacs-operator  #packageName
     namespace: openshift-operators # operator namespace

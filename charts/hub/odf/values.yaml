@@ -29,7 +29,7 @@ ocs:
       storageClassName: gp2
   storageClass:
     name: ocs-storagecluster-ceph-rgw
-    region: us-west-1  #overwritten 
+    region: us-west-1  #overwritten
     objectStoreName: ocs-storagecluster-cephobjectstore
 
 toolbox:

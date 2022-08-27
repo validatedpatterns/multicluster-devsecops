@@ -1,4 +1,4 @@
-# These are used for post ACS install and for ACS integration 
+# These are used for post ACS install and for ACS integration
 acs:
   integrations: true
 
