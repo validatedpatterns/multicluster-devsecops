@@ -15,7 +15,7 @@ global:
       # Replace <region> with AWS region where S3 bucket was created
       # Replace <cluster-name> and <domain> with your OpenShift cluster values
       # bucketSource: "https://s3.<region>.amazonaws.com/com.redhat.myusername.mybucketname"
-      bucketSource: "https://s3.us-west-2.amazonaws.com/com.redhat.ipbabble.wh-my-bucket" 
+      bucketSource: "https://s3.us-west-2.amazonaws.com/com.redhat.ipbabble.wh-my-bucket"
       # Bucket base name used for xray images
       bucketBaseName: "wh-my-bucket"
 
@@ -33,12 +33,12 @@ global:
 
   quay:
     # Needs to be set consistently between hub and spoke clusters
-    # TODO: Move back to the hub chart, store in a configmap, have an ACM policy distribute to spoke clusters, have spoke look up from configmap 
+    # TODO: Move back to the hub chart, store in a configmap, have an ACM policy distribute to spoke clusters, have spoke look up from configmap
     org:
       name: devel
       email: devel@myorg.com
     repo: example
-    
+
 main:
   clusterGroupName: hub
   opp: false

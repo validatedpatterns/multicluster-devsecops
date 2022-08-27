@@ -12,7 +12,7 @@ build:
         namespace: openshift
         name: cli:latest
   output:
-    to: 
+    to:
       name: cli-tools:latest
 
 imageStream:

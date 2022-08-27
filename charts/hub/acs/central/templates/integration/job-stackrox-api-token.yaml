@@ -9,7 +9,7 @@ metadata:
 spec:
   template:
     spec:
-      containers: 
+      containers:
       - image: {{ .Values.job.image }}
         command:
         - /bin/bash
