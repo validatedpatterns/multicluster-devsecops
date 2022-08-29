@@ -113,7 +113,6 @@ status:
   loadBalancer: {}
 ---
 apiVersion: route.openshift.io/v1
-id: gitea-http
 kind: Route
 metadata:
   annotations:
