@@ -122,6 +122,7 @@ metadata:
   name: gitea
 spec:
   to:
+    kind: Service
     name: gitea
 ---
 apiVersion: apps/v1
