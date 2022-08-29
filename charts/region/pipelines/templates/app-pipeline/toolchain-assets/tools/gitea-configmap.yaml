@@ -29,9 +29,9 @@ data:
     ROOT = /gitea-repositories
 
     [server]
-    ROOT_URL         = http://gitea-{{ .Values.devel.namespace }}.{{ .Values.global.hubClusterDomain }}
-    SSH_DOMAIN       = gitea-{{ .Values.devel.namespace }}.{{ .Values.global.hubClusterDomain }}
-    DOMAIN           = gitea-{{ .Values.devel.namespace }}.{{ .Values.global.hubClusterDomain }}
+    ROOT_URL         = http://gitea-{{ .Values.devel.namespace }}.{{ .Values.global.localClusterDomain }}
+    SSH_DOMAIN       = gitea-{{ .Values.devel.namespace }}.{{ .Values.global.localClusterDomain }}
+    DOMAIN           = gitea-{{ .Values.devel.namespace }}.{{ .Values.global.localClusterDomain }}
     HTTP_PORT        = 3000
     SSH_PORT         = 2022
     DISABLE_SSH      = false
