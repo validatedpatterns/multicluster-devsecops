@@ -30,9 +30,10 @@ spec:
 
           gitea_user = "$(params.GITEA_USER)"
           gitea_pwd = "$(params.GITEA_PASSWORD)"
-          webhookURL = "http://" + os.popen('oc get route el-webhook -o template --template="{{.spec.host}}"').read()
-          giteaURL = "http://" + os.popen('oc get svc gitea -o template --template="{{.spec.clusterIP}}"').read() + ":3000"
-
+          #webhookURL = "http://" + os.popen('oc get route el-webhook -o template --template="{{.spec.host}}"').read()
+          #giteaURL = "http://" + os.popen('oc get svc gitea -o template --template="{{.spec.clusterIP}}"').read() + ":3000"
+          giteaURL = http://gitea-{{ .Values.devel.namespace }}.{{ .Values.global.localClusterDomain }}
+           
           # create admin user
           data_user = {
           'user_name': gitea_user,
