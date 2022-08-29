@@ -15,7 +15,7 @@ spec:
   params:
   - name: IMAGE
     description: Reference of the image to scan
-  - name: SCAN-IMAGE
+  - name: SCAN_IMAGE
     description: Image containing the roxctl CLI
     default: $(params.acs-image)
   - name: TLS_VERIFY
