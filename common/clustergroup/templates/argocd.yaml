@@ -82,7 +82,6 @@ spec:
     - apiGroups:
       - tekton.dev
       kinds:
-      - TaskRun
       - PipelineRun
   server:
     autoscale:
