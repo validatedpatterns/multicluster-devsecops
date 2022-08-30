@@ -1,179 +1,179 @@
 clusterGroup:
-name: hub
-isHubCluster: true
+  name: hub
+  isHubCluster: true
 
-#Namespaces that are expected to be created.
-#The pattern will apply these namespaces
-#and creates an operator group for that namespace
-namespaces:    
-- open-cluster-management
-- vault
-- golang-external-secrets
-- config-demo
-- rhacs-operator
-- stackrox
-- policies
-- devsecops-ci
-- openshift-storage
-- quay-enterprise
+# Namespaces that are expected to be created.
+# The pattern will apply these namespaces
+# and creates an operator group for that namespace
+  namespaces:    
+  - open-cluster-management
+  - vault
+  - golang-external-secrets
+  - config-demo
+  - rhacs-operator
+  - stackrox
+  - policies
+  - devsecops-ci
+  - openshift-storage
+  - quay-enterprise
+ 
+#  subscriptions:  OpenShift Operator subscriptions from OLM/OperatorHub
+#  - name: the Operator package name (required)
+#    namespace: expected namespace as specified by Operator (defaults to openshift-operators)
+#    channel: operator channel from package manifest (required)
+#    csv: Operator CSV from package manifest. 
+#         only used if global.options.useCSV: true in values-global.yaml
 
-#subscriptions:  OpenShift Operator subscriptions from OLM/OperatorHub
-#- name: the Operator package name (required)
-#namespace: expected namespace as specified by Operator (defaults to openshift-operators)
-#channel: operator channel from package manifest (required)
-#csv: Operator CSV from package manifest. 
-#only used if global.options.useCSV: true in values-global.yaml
+  subscriptions:  
+  - name: advanced-cluster-management
+    namespace: open-cluster-management
+    channel: release-2.5
+    csv: advanced-cluster-management.v2.5.0
 
-subscriptions:  
-- name: advanced-cluster-management
-namespace: open-cluster-management
-channel: release-2.5
-csv: advanced-cluster-management.v2.5.0
+  - name: rhacs-operator  #packageName
+    namespace: openshift-operators # operator namespace
+    channel: rhacs-3.71
+    csv: rhacs-operator.v3.71
 
-- name: rhacs-operator  #packageName
-namespace: openshift-operators # operator namespace
-channel: rhacs-3.71
-csv: rhacs-operator.v3.71
+  - name: odf-operator
+    namespace: openshift-storage
+    channel: stable-4.10
+    csv: odf-operator.v4.10.1
 
-- name: odf-operator
-namespace: openshift-storage
-channel: stable-4.10
-csv: odf-operator.v4.10.1
+  - name: quay-operator
+    namespace: openshift-operators
+    channel: stable-3.7
+    csv: quay-operator.v3.7
 
-- name: quay-operator
-namespace: openshift-operators
-channel: stable-3.7
-csv: quay-operator.v3.7
+# The following section is used by  
+# OpenShift GitOps (ArgoCD)
+# Projects are just ArgoCD groupings that can be filtered on.
+  projects:   
+  - hub
+  - opp
+  - config-demo
+  - external-secrets
 
-#The following section is used by  
-#OpenShift GitOps (ArgoCD)
-#Projects are just ArgoCD groupings that can be filtered on.
-projects:   
-- hub
-- opp
-- config-demo
-- external-secrets
+  applications:  
+  - name: acm   #arbitary
+    namespace: open-cluster-management
+    project: opp
+    path: common/acm
+    ignoreDifferences:
+    - group: internal.open-cluster-management.io
+      kind: ManagedClusterInfo
+      jsonPointers:
+        - /spec/loggingCA
 
-applications:  
-- name: acm   #arbitary
-namespace: open-cluster-management
-project: opp
-path: common/acm
-ignoreDifferences:
-- group: internal.open-cluster-management.io
-kind: ManagedClusterInfo
-jsonPointers:
-- /spec/loggingCA
+  - name: acs-central
+    namespace: stackrox
+    project: opp
+    path: charts/hub/acs/central
 
-- name: acs-central
-namespace: stackrox
-project: opp
-path: charts/hub/acs/central
+  - name: acs-secured
+    namespace: stackrox
+    project: opp
+    path: charts/hub/acs/secured
 
-- name: acs-secured
-namespace: stackrox
-project: opp
-path: charts/hub/acs/secured
+  - name: storage
+    namespace: openshift-storage
+    project: opp
+    path: charts/hub/odf
 
-- name: storage
-namespace: openshift-storage
-project: opp
-path: charts/hub/odf
+  - name: quay-registry
+    namespace: quay-enterprise
+    project: opp
+    path: charts/hub/quay
 
-- name: quay-registry
-namespace: quay-enterprise
-project: opp
-path: charts/hub/quay
+  - name: opp-policy
+    namespace: openshift
+    project: opp
+    path: charts/hub/opp
 
-- name: opp-policy
-namespace: openshift
-project: opp
-path: charts/hub/opp
+  - name: vault
+    namespace: vault
+    project: hub
+    chart: vault
+    repoURL: https://helm.releases.hashicorp.com
+    targetRevision: v0.20.0
+    overrides:
+    - name: global.openshift
+      value: "true"
+    - name: injector.enabled
+      value: "false"
+    - name: ui.enabled
+      value: "true"
+    - name: ui.serviceType
+      value: LoadBalancer
+    - name: server.route.enabled
+      value: "true"
+    - name: server.route.host
+      value: null
+    - name: server.route.tls.termination
+      value: edge
+    - name: server.image.repository
+      value: "registry.connect.redhat.com/hashicorp/vault"
+    - name: server.image.tag
+      value: "1.9.2-ubi"
 
-- name: vault
-namespace: vault
-project: hub
-chart: vault
-repoURL: https://helm.releases.hashicorp.com
-targetRevision: v0.20.0
-overrides:
-- name: global.openshift
-value: "true"
-- name: injector.enabled
-value: "false"
-- name: ui.enabled
-value: "true"
-- name: ui.serviceType
-value: LoadBalancer
-- name: server.route.enabled
-value: "true"
-- name: server.route.host
-value: null
-- name: server.route.tls.termination
-value: edge
-- name: server.image.repository
-value: "registry.connect.redhat.com/hashicorp/vault"
-- name: server.image.tag
-value: "1.9.2-ubi"
+  - name: golang-external-secrets
+    namespace: golang-external-secrets
+    project: external-secrets
+    path: common/golang-external-secrets
 
-- name: golang-external-secrets
-namespace: golang-external-secrets
-project: external-secrets
-path: common/golang-external-secrets
+  - name: external-secrets
+    namespace: devsecops-ci
+    project: external-secrets
+    path: charts/hub/external-secrets
 
-- name: external-secrets
-namespace: devsecops-ci
-project: external-secrets
-path: charts/hub/external-secrets
+  - name: cli-tools
+    namespace: openshift
+    project: hub
+    path: charts/hub/cli-tools
 
-- name: cli-tools
-namespace: openshift
-project: hub
-path: charts/hub/cli-tools
+  - name: config-demo
+    namespace: config-demo
+    project: config-demo
+    path: charts/all/config-demo
 
-- name: config-demo
-namespace: config-demo
-project: config-demo
-path: charts/all/config-demo
+# This section is used by ACM
+  managedClusterGroups:
+  - name: development
+    helmOverrides:
+    - name: clusterGroup.isHubCluster
+      value: "false"
+    clusterSelector:
+      matchLabels:
+        clustergroup: devel
+      matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
 
-#This section is used by ACM
-managedClusterGroups:
-- name: development
-helmOverrides:
-- name: clusterGroup.isHubCluster
-value: "false"
-clusterSelector:
-matchLabels:
-clustergroup: devel
-matchExpressions:
-- key: vendor
-operator: In
-values:
-- OpenShift
-
-- name: production
-helmOverrides:
-- name: clusterGroup.isHubCluster
-value: "false"
-clusterSelector:
-matchLabels:
-clustergroup: prod
-matchExpressions:
-- key: vendor
-operator: In
-values:
-- OpenShift
+  - name: production
+    helmOverrides:
+    - name: clusterGroup.isHubCluster
+      value: "false"
+    clusterSelector:
+      matchLabels:
+        clustergroup: prod
+      matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
 
 #
-#Additional applications
-#Be sure to include additional resources your apps will require
-#+X machines
-#+Y RAM
-#+Z CPU
-#- name: vendor-app
-#namespace: default
-#project: vendor
-#path: path/to/myapp
-#repoURL: https://github.com/vendor/applications.git
-#targetRevision: main
+#   Additional applications
+#   Be sure to include additional resources your apps will require
+#   +X machines
+#   +Y RAM
+#   +Z CPU
+#  - name: vendor-app
+#    namespace: default
+#    project: vendor
+#    path: path/to/myapp
+#    repoURL: https://github.com/vendor/applications.git
+#    targetRevision: main
 
