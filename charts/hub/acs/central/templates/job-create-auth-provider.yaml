@@ -27,7 +27,7 @@ spec:
               #!/usr/bin/env bash
               echo "Creating auth provider in RHACS"
               export DATA={\"name\":\"local-cluster\"}
-              curl -X POST -u "admin:$PASSWORD" -k https://central/v1/authProviders --data '{"name": "OpenShit OAuth", "type": "openshift", "enabled": "true"}'
+              curl -X POST -u "admin:$PASSWORD" -k https://central/v1/authProviders --data '{"name": "OpenShit OAuth", "type": "openshift", "enabled": true}'
           imagePullPolicy: Always
           name: create-auth-provider
       dnsPolicy: ClusterFirst
