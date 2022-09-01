@@ -50,3 +50,6 @@ global:
       name: devel
       email: devel@myorg.com
     repo: example
+
+clusterGroup:
+  name: AUTOMATIC
