@@ -9,8 +9,10 @@ spec:
     - name: rox_central_endpoint
       type: string
       description: Secret containing the address:port tuple for StackRox Central (example - rox.stackrox.io:443)
+      default: 'central-stackrox.{{ .Values.global.hubClusterDomain }}:443'
     - name: rox_api_token
       type: string
+      default: acs-api-token
       description: Secret containing the StackRox API token with CI permissions
     - name: file
       type: string
@@ -42,12 +44,9 @@ spec:
           valueFrom:
             secretKeyRef:
               name: $(params.rox_api_token)
-              key: rox_api_token
+              key: token
         - name: ROX_CENTRAL_ENDPOINT
-          valueFrom:
-            secretKeyRef:
-              name: $(params.rox_central_endpoint)
-              key: rox_central_endpoint
+          value: $(params.rox_central_endpoint)
       script: |
         #!/usr/bin/env bash
         set +x

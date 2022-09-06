@@ -6,10 +6,12 @@ spec:
   params:
     - name: rox_central_endpoint
       type: string
-      description: Secret containing the address:port tuple for StackRox Central (example - rox.stackrox.io:443)
+      description: the address:port tuple for StackRox Central (example - rox.stackrox.io:443)
+      default: 'central-stackrox.{{ .Values.global.hubClusterDomain }}:443'
     - name: rox_api_token
       type: string
       description: Secret containing the StackRox API token with CI permissions
+      default: acs-api-token
     - name: image
       type: string
       description: Full name of image to scan (example -- gcr.io/rox/sample:5.0-rc1)
@@ -28,12 +30,9 @@ spec:
           valueFrom:
             secretKeyRef:
               name: $(params.rox_api_token)
-              key: rox_api_token
+              key: token
         - name: ROX_CENTRAL_ENDPOINT
-          valueFrom:
-            secretKeyRef:
-              name: $(params.rox_central_endpoint)
-              key: rox_central_endpoint
+          value: $(params.rox_central_endpoint)
       script: |
         #!/usr/bin/env bash
         set +x

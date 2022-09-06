@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: devsecops-rh-v2
+  name: simple-pipeline
 spec:
   params:
   - default: http://gitea-{{ .Values.devel.namespace }}.{{ .Values.global.localClusterDomain }}/gitea/spring-petclinic
@@ -39,11 +39,11 @@ spec:
   - description: Copy FROM path
     name: FROM_PATH
     type: string
-    default: from
+    default: environments/dev
   - description: Copy TO path
     name: TO_PATH
     type: string
-    default: to
+    default: environments/stage
   tasks:
   - name: create-promote-pull-request
     params:
@@ -84,58 +84,6 @@ spec:
     workspaces:
     - name: output
       workspace: workspace
-  - name: unit-tests
-    params:
-    - name: GOALS
-      value:
-      - package
-      - -f
-      - spring-petclinic
-    runAfter:
-    - crda-scan
-    taskRef:
-      kind: Task
-      name: maven
-    workspaces:
-    - name: source
-      workspace: workspace
-    - name: maven-settings
-      workspace: maven-settings
-  - name: code-analysis
-    params:
-    - name: GOALS
-      value:
-      - install
-      - sonar:sonar
-      - -f
-      - spring-petclinic
-      - -Dsonar.host.url=http://sonarqube:9000
-      - -Dsonar.userHome=/tmp/sonar
-      - -DskipTests=true
-    runAfter:
-    - crda-scan
-    taskRef:
-      kind: Task
-      name: maven
-    workspaces:
-    - name: source
-      workspace: workspace
-    - name: maven-settings
-      workspace: maven-settings
-  - name: dependency-report
-    params:
-    - name: SOURCE_DIR
-      value: spring-petclinic
-    runAfter:
-    - crda-scan
-    taskRef:
-      kind: Task
-      name: dependency-report
-    workspaces:
-    - name: source
-      workspace: workspace
-    - name: maven-settings
-      workspace: maven-settings
   - name: release-app
     params:
     - name: GOALS
@@ -147,9 +95,7 @@ spec:
       - -DaltDeploymentRepository=nexus::default::http://nexus:8081/repository/maven-releases/
       - -DaltSnapshotDeploymentRepository=nexus::default::http://nexus:8081/repository/maven-snapshots/
     runAfter:
-    - code-analysis
-    - unit-tests
-    - dependency-report
+    - source-clone
     taskRef:
       kind: Task
       name: maven
@@ -198,9 +144,7 @@ spec:
     - name: image
       value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
     - name: rox_api_token
-      value: roxsecrets
-    - name: rox_central_endpoint
-      value: roxsecrets
+      value: acs-api-token
     - name: image_digest
       value: $(tasks.build-image.results.IMAGE_DIGEST)
     runAfter:
@@ -213,9 +157,7 @@ spec:
     - name: GIT_REPOSITORY
       value: $(params.APP_MANIFESTS_GIT)
     - name: rox_api_token
-      value: roxsecrets
-    - name: rox_central_endpoint
-      value: roxsecrets
+      value: acs-api-token
     - name: file
       value: deployment.yaml
     - name: deployment_files_path
@@ -233,9 +175,9 @@ spec:
     - name: GIT_REPOSITORY
       value: $(params.APP_MANIFESTS_GIT)
     - name: GIT_USERNAME
-      value: gogs
+      value: $(params.GIT_USERNAME)
     - name: GIT_PASSWORD
-      value: gogs
+      value: $(params.GIT_PASSWORD)
     - name: CURRENT_IMAGE
       value: quay.io/siamaksade/spring-petclinic:latest
     - name: NEW_IMAGE
@@ -303,18 +245,6 @@ spec:
     workspaces:
     - name: simulations
       subPath: spring-petclinic-gatling
-      workspace: workspace
-  - name: crda-scan
-    params:
-    - name: manifest
-      value: pom.xml
-    runAfter:
-    - source-clone
-    taskRef:
-      kind: ClusterTask
-      name: crda-scan
-    workspaces:
-    - name: source
       workspace: workspace
   - name: syft-sbom
     params:

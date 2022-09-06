@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-spring-petclinic
+  namespace: multicluster-devsecops-development
+spec:
+  destination:
+    namespace: devsecops-dev
+    server: https://kubernetes.default.svc
+  project: spring-petclinic
+  source:
+    path: environments/dev
+    repoURL: http://gitea-{{ .Values.devel.namespace }}.{{ .Values.global.localClusterDomain }}/gitea/spring-petclinic-config
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false

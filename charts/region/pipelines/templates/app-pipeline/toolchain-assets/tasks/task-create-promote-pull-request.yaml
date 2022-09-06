@@ -81,7 +81,7 @@ spec:
 
         gitea_pwd = "$(params.GIT_PASSWORD)"
 
-        giteaURL = http://gitea-{{ .Values.devel.namespace }}.{{ .Values.global.localClusterDomain }}
+        giteaURL = "http://gitea-{{ .Values.devel.namespace }}.{{ .Values.global.localClusterDomain }}"
 
 
         branch_result = open("$(results.branch_name.path)")
