@@ -3,7 +3,7 @@ kind: TaskRun
 metadata:
   generateName: init-gitea-
   annotations:
-    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook: PreSync
 spec:
   taskSpec:
     params:
