@@ -59,7 +59,7 @@ clusterGroup:
     - group: apps.openshift.io
       kind: ServiceAccount
       jqPathExpressions:
-      - 'imagePullSecrets[]'
+      - '.spec.template.spec.imagePullSecrets[].name'
 
   - name: quay-integration
     namespace: openshift-operators
