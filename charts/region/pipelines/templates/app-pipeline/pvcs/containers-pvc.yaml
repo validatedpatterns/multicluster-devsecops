@@ -9,5 +9,6 @@ spec:
       storage: 5Gi
   storageClassName: gp2
   volumeMode: Filesystem
+  volumeBindingMode: Immediate
   accessModes:
     - ReadWriteOnce
