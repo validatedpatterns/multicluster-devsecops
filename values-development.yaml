@@ -55,11 +55,11 @@ clusterGroup:
     namespace: devsecops-ci
     project: ci
     path: charts/region/pipelines
-#    ignoreDifferences:
-#    - group: apps.openshift.io
-#      kind: ServiceAccount
-#      jqPathExpressions:
-#      - '.spec.template.spec.imagePullSecrets[].name'
+    ignoreDifferences:
+    - kind: ServiceAccount
+      jsonPointers:
+      - /imagePullSecrets
+      - /secrets
 
   - name: quay-integration
     namespace: openshift-operators
