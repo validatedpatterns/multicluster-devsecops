@@ -1,0 +1,107 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  generateName: init-gitea-
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+spec:
+  taskSpec:
+    params:
+    - name: GITEA_USER
+      type: string
+      description: Gitea admin username
+      default: gitea
+    - name: GITEA_PASSWORD
+      type: string
+      description: Gitea admin password
+      default: openshift
+    stepTemplate:
+      env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+    steps:
+      - name: init-gitea
+        image: quay.io/siamaksade/python-oc
+        script: |
+          #!/usr/bin/env python3
+
+          import os
+          import requests 
+
+          gitea_user = "$(params.GITEA_USER)"
+          gitea_pwd = "$(params.GITEA_PASSWORD)"
+          giteaURL = "http://gitea-{{ .Values.devel.namespace }}.{{ .Values.global.localClusterDomain }}"
+
+          # create admin user
+          data_user = {
+          'user_name': gitea_user,
+          'password': gitea_pwd,
+          'retype': gitea_pwd,
+          'email': 'admin@gitea.com'
+          }
+
+          resp = requests.post(url = giteaURL + "/user/sign_up", data = data_user) 
+
+          if resp.status_code != 200:
+            print("Error creating Gitea admin (status code: {})".format(resp.status_code))
+            print(resp.content)
+          else:
+            print("Created admin user {}:{}".format(gitea_user, gitea_pwd))
+
+          # create git repo spring-petclinic
+          data_repo = '{"clone_addr": "https://github.com/jchraibi/spring-petclinic", "uid": 1, "repo_name": "spring-petclinic"}'
+          headers = {'Content-Type': 'application/json'}
+          resp = requests.post(url = giteaURL + "/api/v1/repos/migrate", headers = headers, auth = (gitea_user, gitea_pwd), data = data_repo)  
+
+          if resp.status_code != 200 and resp.status_code != 201:
+            print("Error creating git repo (status code: {})".format(resp.status_code))
+            print(resp.content)
+          else:
+            print("Created git repo spring-petclinic")
+
+
+          # Added for Pipelines as code - Jaafar #### 
+          # create git repo spring-petclinic
+          data_repo = '{"clone_addr": "https://github.com/jchraibi/nodejs-ex", "uid": 1, "repo_name": "nodejs-ex"}'
+          headers = {'Content-Type': 'application/json'}
+          resp = requests.post(url = giteaURL + "/api/v1/repos/migrate", headers = headers, auth = (gitea_user, gitea_pwd), data = data_repo)  
+
+          if resp.status_code != 200 and resp.status_code != 201:
+            print("Error creating git repo (status code: {})".format(resp.status_code))
+            print(resp.content)
+          else:
+            print("Created git repo nodejs-ex")
+
+
+          # End Added for Pipelines as code - Jaafar #### 
+
+
+
+
+
+          # configure webhook on spring-petclinic
+          # data_webhook = '{"type": "gitea", "config": { "url": "' + webhookURL + '", "content_type": "json"}, "events": ["push"], "active": true}'
+          # headers = {'Content-Type': 'application/json'}
+          # resp = requests.post(url = giteaURL + "/api/v1/repos/" + gitea_user + "/spring-petclinic/hooks", 
+          #                     headers = headers, 
+          #                    auth = (gitea_user, gitea_pwd), 
+          #                    data = data_webhook) 
+
+          # if resp.status_code != 200 and resp.status_code != 201:
+          #  print("Error configuring the webhook (status code: {})".format(resp.status_code))
+          #  print(resp.content)
+          # else:
+          #  print("Configured webhook: " + webhookURL)
+
+          # create git repo spring-petclinic-config
+          data_repo = '{"clone_addr": "https://github.com/jchraibi/spring-petclinic-config.git", "uid": 1, "repo_name": "spring-petclinic-config"}'
+          headers = {'Content-Type': 'application/json'}
+          resp = requests.post(url = giteaURL + "/api/v1/repos/migrate", headers = headers, auth = (gitea_user, gitea_pwd), data = data_repo)  
+
+          if resp.status_code != 200 and resp.status_code != 201:
+            print("Error creating git repo (status code: {})".format(resp.status_code))
+            print(resp.content)
+          else:
+            print("Created git repo spring-petclinic-config")

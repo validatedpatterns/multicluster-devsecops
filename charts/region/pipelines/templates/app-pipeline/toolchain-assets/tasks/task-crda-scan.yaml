@@ -1,0 +1,42 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: crda-scan
+spec:
+  params:
+    - default: pom.xml
+      description: the path and manifest that should be scanned
+      name: manifest
+      type: string
+    - default: spring-petclinic
+      description: application folder name
+      name: application_folder
+      type: string
+  steps:
+    - image: 'quay.io/jchraibi/crda-image:0.1'
+      name: crda-code-scan
+      resources: {}
+      script: >
+        #!/usr/bin/env bash
+
+        set +x
+
+        export NO_COLOR="True"
+
+        echo "---"   echo "Installing tar"
+
+        chmod +x /crda > /dev/null
+
+        echo "## Scanning application manifest $(params.manifest)"
+
+        /crda config set consent_telemetry false
+
+        /crda auth -t b6eb51e7-af6c-4bdb-b006-3005711316ca
+
+        /crda analyse
+        $(workspaces.source.path)/$(params.application_folder)/$(params.manifest)
+
+        echo "## Scan finished ##"
+  workspaces:
+    - description: The workspace consisting of maven project.
+      name: source
