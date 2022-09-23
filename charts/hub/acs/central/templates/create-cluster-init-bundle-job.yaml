@@ -2,10 +2,15 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "5"
   name: create-cluster-init-bundle
+  namespace: stackrox
 spec:
   template:
+    metadata:
+      annotations:
+        argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     spec:
       containers:
         - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
@@ -61,4 +66,4 @@ spec:
       restartPolicy: Never
       serviceAccount: create-cluster-init
       serviceAccountName: create-cluster-init
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 30

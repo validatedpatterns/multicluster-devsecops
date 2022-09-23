@@ -4,14 +4,14 @@ metadata:
   generateName: react-pipelinerun
   namespace: {{ .Values.devel.namespace }}
 spec:
-  params: 
+  params:
     - name: "github-repo-revision"
       value: "main"
     - name: "github-repo-url"
       value: {{ .Values.devel.appURL }}
     - name: "context-dir"
       value: "/"
-    - name: "image-name" 
+    - name: "image-name"
       value: {{ .Values.devel.image }}
     - name: "is-name"
       value: "chat-client"

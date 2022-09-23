@@ -1,16 +1,12 @@
-# The policy needs to be added to the ACM HUB and then it will be pushed on all clusters
-# except the HUB (see placementrule on the bottom)
-{{ if .Values.clusterGroup.isHubCluster }}
----
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
-  name: policy-git-secret
-  namespace: devsecops-ci
+  name: policy-quay-integration-token
+  namespace: openshift-operators
   annotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
     argocd.argoproj.io/sync-options: SkipPrune
-    argocd.argoproj.io/sync-wave: "15"
+    argocd.argoproj.io/sync-wave: "7"
 spec:
   remediationAction: enforce
   disabled: false
@@ -19,7 +15,7 @@ spec:
         apiVersion: policy.open-cluster-management.io/v1
         kind: ConfigurationPolicy
         metadata:
-          name: git-secret-configpolicy
+          name: quay-integration-token-configpolicy
           annotations:
             apps.open-cluster-management.io/deployables: "secret"
         spec:
@@ -28,31 +24,30 @@ spec:
           namespaceSelector:
             include:
               - default
-              - devsecops-ci
+              - openshift-operators
           object-templates:
-            - complianceType: musthave
+            - complianceType: mustonlyhave
               objectDefinition:
                 kind: Secret
                 type: Opaque
                 metadata:
-                  name: git-secret
-                  namespace: devsecops-ci
+                  name: quay-integration
+                  namespace: openshift-operators  # consider changing this to devsecops-ci
                 apiVersion: v1
                 data:
-                  username: '{{ `{{hub fromSecret "devsecops-ci" "git-secret" "username" hub}}` }}'
-                  password: '{{ `{{hub fromSecret "devsecops-ci" "git-secret" "password" hub}}` }}'
+                  token: '{{ `{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}` }}'
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
-  name: git-secret-placement-binding
-  namespace: devsecops-ci
+  name: quay-integration-token-placement-binding
+  namespace: openshift-operators
 placementRef:
-  name: git-secret-placement
+  name: quay-integration-token-placement
   kind: PlacementRule
   apiGroup: apps.open-cluster-management.io
 subjects:
-  - name: policy-git-secret
+  - name: policy-quay-integration-token
     kind: Policy
     apiGroup: policy.open-cluster-management.io
 ---
@@ -60,14 +55,14 @@ subjects:
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
-  name: git-secret-placement
-  namespace: devsecops-ci
+  name: quay-integration-token-placement
+  namespace: openshift-operators
 spec:
   # This will go to both devel and secured clusters
   clusterSelector:
-    # Using matchExpression because I need it in more than one clusterGroup/cluster-group
+    # Using matchExpression because I need it in more than one clustergroup
     matchExpressions:
-      - key: clusterGroup
+      - key: clustergroup
         operator: In
         values:
           - devel
@@ -75,4 +70,3 @@ spec:
   clusterConditions:
     - status: 'True'
       type: ManagedClusterConditionAvailable
-{{ end }}

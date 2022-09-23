@@ -8,7 +8,7 @@ metadata:
   name: stackrox-secured-cluster-services
   namespace: stackrox
 spec:
-  clusterName: acs-secured
+  clusterName: 
   auditLogs:
     collection: Auto
   admissionControl:

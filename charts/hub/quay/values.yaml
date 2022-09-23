@@ -9,15 +9,15 @@ quay:
       managed: true
     - name: monitoring
       managed: true
-    - name: postgres  
-      managed: true 
-    - name: redis 
-      managed: true 
-    - name: objectstorage 
-      managed: true 
-    - name: route 
-      managed: true 
-    - name: tls 
+    - name: postgres
+      managed: true
+    - name: redis
+      managed: true
+    - name: objectstorage
+      managed: true
+    - name: route
+      managed: true
+    - name: tls
       managed: true
     - name: quay
       managed: true
@@ -28,7 +28,7 @@ quay:
     name: quay-init-config-bundle-secret
   setup:
     admin:
-      # Generated password is saved to the 'quay-init-token' secret in the configured namespace  
+      # Generated password is saved to the 'quay-init-token' secret in the configured namespace
       name: quayadmin
       email: quayadmin@example.com
     user:
@@ -50,3 +50,6 @@ global:
       name: devel
       email: devel@myorg.com
     repo: example
+
+clusterGroup:
+  name: AUTOMATIC

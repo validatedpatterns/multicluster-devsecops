@@ -4,7 +4,7 @@ metadata:
   generateName: cosign-pipelinerun
   namespace: {{ .Values.devel.namespace }}
 spec:
-  params: 
+  params:
     - name: "github-repo-revision"
       value: "main"
     - name: "github-repo-url"

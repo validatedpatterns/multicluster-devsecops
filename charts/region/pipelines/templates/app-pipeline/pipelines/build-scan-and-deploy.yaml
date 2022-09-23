@@ -46,19 +46,19 @@ spec:
       - name: output
         workspace: source
   - name: build-from-source
-    taskRef: 
+    taskRef:
       name: react-build
-    runAfter: 
+    runAfter:
     - clone-sources
     workspaces:
       - name: output
         workspace: source
   - name: build-image
-    taskRef: 
+    taskRef:
       name: buildah-to-registry
     params:
       - name: IMAGE
-        value: '$(params.image-root)/$(params.is-name):$(params.github-repo-revision)'
+        value: '$(params.image-root)/$(params.is-name)'
       - name: CONTEXT
         value: '.'
       - name: TLSVERIFY
@@ -66,20 +66,20 @@ spec:
     workspaces:
       - name: source
         workspace: source
-    runAfter: 
+    runAfter:
       - build-from-source
   - name: scan-image
     taskRef:
       name: scan-image-acs
     params:
       - name: IMAGE
-        value: '$(params.acs-image)'
+        value: '{{ .Values.devel.roxCTLImage }}'
       - name: ACS_CENTRAL
         value: '$(params.acs-scan-api)'
     runAfter:
       - build-image
   - name: rollout-latest-image
-    taskRef: 
+    taskRef:
       name: openshift-client
       kind: ClusterTask
     params:
@@ -87,6 +87,5 @@ spec:
         value: |
           set -x
           oc import-image --insecure=true $(params.is-name):latest --from=$(params.image-root)/$(params.is-name):$(params.github-repo-revision) --confirm
-          #oc import-image $(params.is-name):latest
     runAfter:
       - scan-image

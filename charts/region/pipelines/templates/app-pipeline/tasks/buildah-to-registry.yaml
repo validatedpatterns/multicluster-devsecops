@@ -13,7 +13,7 @@ spec:
   description: >-
     Buildah task builds source into a container image and
     then pushes it to a container registry.
-    Buildah Task builds source into a container image using Buildah 
+    Buildah Task builds source into a container image using Buildah
     build tool. It uses Buildah's support for building from Dockerfiles,
     using its buildah bud command.This command executes the directives in the
     Dockerfile to assemble a container image, then pushes that image to a
@@ -36,7 +36,7 @@ spec:
   - name: QUAY_SECRET
     type: string
     description: Name of the secret contain the Quay Enterprise secret.
-    default: quay-pull-secret  
+    default: quay-pull-secret
   - name: TLSVERIFY
     description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
     default: "true"
@@ -62,7 +62,7 @@ spec:
     description: Digest of the image just built.
   - name: IMAGE_URL
     description: Name of the image just built.
- 
+
   steps:
   - name: build
     image: $(params.BUILDER_IMAGE)

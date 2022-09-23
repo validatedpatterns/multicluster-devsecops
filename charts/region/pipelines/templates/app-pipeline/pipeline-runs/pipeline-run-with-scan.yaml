@@ -4,7 +4,7 @@ metadata:
   generateName: react-scan-pipelinerun
   namespace: {{ .Values.devel.namespace }}
 spec:
-  params: 
+  params:
     - name: "github-repo-revision"
       value: "main"
     - name: "github-repo-url"
@@ -16,7 +16,7 @@ spec:
     - name: "is-name"
       value: "chat-client"
     - name: "acs-image"
-      value: {{ .Values.devel.image }}
+      value: {{ .Values.devel.roxCTLImage }}
     - name: "acs-scan-api"
       value: "https://central-stackrox.{{ .Values.global.hubClusterDomain }}"
   pipelineRef:

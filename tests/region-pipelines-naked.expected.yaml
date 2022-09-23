@@ -282,7 +282,7 @@ spec:
       name: buildah-to-registry
     params:
       - name: IMAGE
-        value: '$(params.image-root)/$(params.is-name):$(params.github-repo-revision)'
+        value: '$(params.image-root)/$(params.is-name)'
       - name: CONTEXT
         value: '.'
       - name: TLSVERIFY
@@ -297,7 +297,7 @@ spec:
       name: scan-image-acs
     params:
       - name: IMAGE
-        value: '$(params.acs-image)'
+        value: 'AUTOMATED'
       - name: ACS_CENTRAL
         value: '$(params.acs-scan-api)'
     runAfter:
@@ -311,7 +311,6 @@ spec:
         value: |
           set -x
           oc import-image --insecure=true $(params.is-name):latest --from=$(params.image-root)/$(params.is-name):$(params.github-repo-revision) --confirm
-          #oc import-image $(params.is-name):latest
     runAfter:
       - scan-image
 ---
@@ -915,14 +914,18 @@ spec:
   params:
   - name: IMAGE
     description: Reference of the image to scan
-  - name: SCAN-IMAGE
+  - name: SCAN_IMAGE
     description: Image containing the roxctl CLI
     default: $(params.acs-image)
   - name: TLS_VERIFY
     description: Verify the TLS on the registry endpoint (for push/pull to a non-TLS registry)
     default: "true"
+  - name: acs-image
+    description: roxctl image URL on RH registry (free/no auth)
+    default: AUTOMATED
   - name: ACS_CENTRAL
     description: The end-point for the ACS API
+    default: $(params.acs-scan-api)
 
   steps:
   - name: scan
