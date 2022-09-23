@@ -12,11 +12,11 @@ spec:
       uri: {{ .Values.build.source.git.uri }}
     contextDir: {{ .Values.build.source.contextDir }}
   strategy:
-    type: Docker                      
+    type: Docker
     dockerStrategy:
       dockerfilePath: Dockerfile
       from:
-        kind: ImageStreamTag  
+        kind: ImageStreamTag
         namespace: {{ .Values.build.strategy.dockerStrategy.from.namespace }}
         name: {{ .Values.build.strategy.dockerStrategy.from.name }}
   output:

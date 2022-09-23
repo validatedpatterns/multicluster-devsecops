@@ -1,0 +1,12 @@
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: {{ .Values.clusterGroup.name }}-quay-link
+  namespace: quay-enterprise
+spec:
+  applicationMenu:
+    section: Red Hat applications
+    imageURL: 'https://upload.wikimedia.org/wikipedia/commons/3/3a/OpenShift-LogoType.svg'
+  href: 'https://quay-registry-quay-quay-enterprise.{{ coalesce .Values.global.localClusterDomain .Values.global.hubClusterDomain }}'
+  location: ApplicationMenu
+  text: 'Red Hat Quay Enterprise Registry'

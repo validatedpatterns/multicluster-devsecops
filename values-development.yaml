@@ -4,7 +4,7 @@ devel:
   image: chat-client:latest
   npmbase: quay.io/hybridcloudpatterns/ubi-npm
   namespace: devsecops-ci
-  roxCTLImage: registry.redhat.io/rh-acs/roxctl:3.0.62.0
+  roxCTLImage: registry.access.redhat.com/advanced-cluster-security/rhacs-roxctl-rhel8:3.71.0-5
 
 global:
   options:
@@ -23,7 +23,7 @@ clusterGroup:
     - openshift-pipelines
     - devsecops-ci
     - config-demo
-  
+
   subscriptions:
   - name: rhacs-operator  #packageName
     namespace: openshift-operators # operator namespace
@@ -55,6 +55,11 @@ clusterGroup:
     namespace: devsecops-ci
     project: ci
     path: charts/region/pipelines
+    ignoreDifferences:
+    - kind: ServiceAccount
+      jsonPointers:
+      - /imagePullSecrets
+      - /secrets
 
   - name: quay-integration
     namespace: openshift-operators

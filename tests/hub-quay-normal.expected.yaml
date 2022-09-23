@@ -58,7 +58,7 @@ data:
           echo "[$1] $2 $3 --data $DATA" 1>&2
           AUTH="Fake: dummy"
           if [ $1 = "Basic" ]; then
-              COUNT=$(oc -n $QUAY_NAMESPACE get --ignore-not-found=true secret $QUAY_USER_SECRET | wc -l) 
+              COUNT=$(oc -n $QUAY_NAMESPACE get --ignore-not-found=true secret $QUAY_USER_SECRET | wc -l)
               if [ $COUNT -gt 1 ]; then
                   BASIC=$(oc -n $QUAY_NAMESPACE extract secret/$QUAY_USER_SECRET --keys=basic --to=-)
               fi
@@ -99,13 +99,13 @@ data:
 
       echo "[INFO] Looking for initial token ..."
       SECRET_NAME=quay-init-token
-      COUNT=$(oc -n $QUAY_NAMESPACE get --ignore-not-found=true secret $SECRET_NAME | wc -l) 
+      COUNT=$(oc -n $QUAY_NAMESPACE get --ignore-not-found=true secret $SECRET_NAME | wc -l)
       if [ $COUNT = 0 ]; then
           INITPASS=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 20 ; echo ''  )
 
           echo "[INFO] Destroy any previous secrets ..."
           oc -n $QUAY_NAMESPACE delete --ignore-not-found=true secret $QUAY_USER_SECRET
-          oc -n openshift-operators delete --ignore-not-found=true secret quay-pull-secret  
+          oc -n openshift-operators delete --ignore-not-found=true secret quay-pull-secret
 
           # Invoke API and add quay user to the API - initiates API
           echo "[INFO] Creating default user..."
@@ -114,7 +114,7 @@ data:
           echo "[INFO] Creating $SECRET_NAME ..."
           oc -n $QUAY_NAMESPACE create secret generic $SECRET_NAME --from-literal=token=$JSONTOKEN --from-literal=password=$INITPASS
       fi
-      
+
       TOKEN=$(oc -n $QUAY_NAMESPACE extract secret/$SECRET_NAME --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}')
 
       # Now extract the token and store in the Quay Integration secret in openshift-operators namespace
@@ -136,7 +136,7 @@ data:
 
       echo "[INFO] Looking for our superuser ..."
       COUNT=$(quay_cmd Bearer GET /api/v1/superuser/users/ | grep \"$QUAY_USER\" | wc -l)
-      if [ $COUNT = 0 ]; then    
+      if [ $COUNT = 0 ]; then
           echo "[INFO] Creating $QUAY_USER user ..."
           RESPONSE=$(quay_cmd Bearer POST /api/v1/superuser/users/ "{ \"username\": \"$QUAY_USER\", \"email\": \"$QUAY_USER_EMAIL\", \"access_token\": true}")
 
@@ -180,7 +180,7 @@ data:
       COUNT=$(quay_cmd Bearer GET /api/v1/repository/$QUAY_ORG/$QUAY_REPO | grep -v not_found | wc -l)
       if [ $COUNT = 0 ]; then
           echo "[INFO] Creating $QUAY_REPO repo..."
-          quay_cmd Bearer POST /api/v1/repository "{\"namespace\":\"$QUAY_ORG\", \"repository\":\"$QUAY_REPO\", \"visibility\":\"public\", \"description\":\"Development Repo\", \"repo_kind\":\"image\"}"  
+          quay_cmd Bearer POST /api/v1/repository "{\"namespace\":\"$QUAY_ORG\", \"repository\":\"$QUAY_REPO\", \"visibility\":\"public\", \"description\":\"Development Repo\", \"repo_kind\":\"image\"}"
       fi
 
       echo "[INFO] Looking for $QUAY_ORG members ..."
@@ -255,7 +255,7 @@ metadata:
 spec:
   template:
     spec:
-      containers: 
+      containers:
       - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
         env:
         - name: QUAY_REPO
@@ -294,7 +294,7 @@ metadata:
 spec:
   template:
     spec:
-      containers: 
+      containers:
       - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
         command:
         - /bin/bash
@@ -308,6 +308,35 @@ spec:
       restartPolicy: Never
       serviceAccountName: quay-admin-sa
       terminationGracePeriodSeconds: 60
+---
+# Source: quay/templates/quayRegistry/quay-console-link.yaml
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: hub-quay-link
+  namespace: quay-enterprise
+spec:
+  applicationMenu:
+    section: Red Hat applications
+    imageURL: 'https://upload.wikimedia.org/wikipedia/commons/3/3a/OpenShift-LogoType.svg'
+  href: 'https://quay-registry-quay-quay-enterprise.region.example.com'
+  location: ApplicationMenu
+  text: 'Red Hat Quay Enterprise Registry'
+---
+# Source: quay/templates/quayRegistry/policy-quay-integration.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: quay-integration-token-placement-binding
+  namespace: openshift-operators
+placementRef:
+  name: quay-integration-token-placement
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: policy-quay-integration-token
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
 ---
 # Source: quay/templates/quayRegistry/policy-quay-pull-secret.yaml
 apiVersion: policy.open-cluster-management.io/v1
@@ -324,6 +353,27 @@ subjects:
     kind: Policy
     apiGroup: policy.open-cluster-management.io
 ---
+# Source: quay/templates/quayRegistry/policy-quay-integration.yaml
+# We need to run this on any managed cluster but not on the HUB
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: quay-integration-token-placement
+  namespace: openshift-operators
+spec:
+  # This will go to both devel and secured clusters
+  clusterSelector:
+    # Using matchExpression because I need it in more than one clustergroup
+    matchExpressions:
+      - key: clustergroup
+        operator: In
+        values:
+          - devel
+          - prod
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
+---
 # Source: quay/templates/quayRegistry/policy-quay-pull-secret.yaml
 # We need to run this on any managed cluster but not on the HUB
 apiVersion: apps.open-cluster-management.io/v1
@@ -334,9 +384,9 @@ metadata:
 spec:
   # This will go to both devel and secured clusters
   clusterSelector:
-    # Using matchExpression because I need it in more than one clustergroup
+    # Using matchExpression because I need it in more than one clusterGroup
     matchExpressions:
-      - key: clustergroup
+      - key: clusterGroup
         operator: In
         values:
           - devel
@@ -393,6 +443,46 @@ spec:
                 type: Available
         remediationAction: inform
         severity: medium
+---
+# Source: quay/templates/quayRegistry/policy-quay-integration.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-quay-integration-token
+  namespace: openshift-operators
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: SkipPrune
+    argocd.argoproj.io/sync-wave: "7"
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: quay-integration-token-configpolicy
+          annotations:
+            apps.open-cluster-management.io/deployables: "secret"
+        spec:
+          remediationAction: enforce
+          severity: medium
+          namespaceSelector:
+            include:
+              - default
+              - openshift-operators
+          object-templates:
+            - complianceType: mustonlyhave
+              objectDefinition:
+                kind: Secret
+                type: Opaque
+                metadata:
+                  name: quay-integration
+                  namespace: openshift-operators  # consider changing this to devsecops-ci
+                apiVersion: v1
+                data:
+                  token: '{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}'
 ---
 # Source: quay/templates/quayRegistry/policy-quay-pull-secret.yaml
 apiVersion: policy.open-cluster-management.io/v1

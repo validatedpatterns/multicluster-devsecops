@@ -59,9 +59,9 @@ metadata:
 spec:
   # This will go to all devel clusters
   clusterSelector:
-    # Using matchLabels because I need it in only one clustergroup
+    # Using matchLabels because I need it in only one clusterGroup
     matchLabels:
-      clustergroup: devel 
+      clusterGroup: devel
   clusterConditions:
     - status: 'True'
       type: ManagedClusterConditionAvailable

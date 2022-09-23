@@ -6,3 +6,4 @@ values-secret.yaml
 pattern-vault.init
 vault.init
 *.vscode
+super-linter.log

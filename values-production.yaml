@@ -14,6 +14,7 @@ clusterGroup:
     - rhacs-operator
     - stackrox
     - policies
+    - devsecops-ci
 
   subscriptions:
   - name: rhacs-operator  #packageName
@@ -23,8 +24,8 @@ clusterGroup:
 
   - name: quay-bridge-operator
     namespace: openshift-operators
-    channel: stable-3.6
-    csv: quay-bridge-operator.v3.6.6
+    channel: stable-3.7
+    csv: quay-bridge-operator.v3.7
 
   projects:
     - app

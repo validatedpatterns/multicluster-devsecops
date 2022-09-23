@@ -48,7 +48,7 @@ spec:
       - name: output
         workspace: source
   - name: build-image
-    taskRef: 
+    taskRef:
       name: buildah-to-registry
     params:
       - name: IMAGE
@@ -60,10 +60,10 @@ spec:
     workspaces:
       - name: source
         workspace: source
-    runAfter: 
+    runAfter:
       - build-from-source
   - name: rollout-latest-image
-    taskRef: 
+    taskRef:
       name: openshift-client
       kind: ClusterTask
     params:
