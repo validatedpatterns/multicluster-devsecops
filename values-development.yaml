@@ -22,7 +22,6 @@ clusterGroup:
     - policies
     - openshift-pipelines
     - devsecops-ci
-    - config-demo
 
   subscriptions:
   - name: rhacs-operator  #packageName
@@ -70,11 +69,6 @@ clusterGroup:
     namespace: stackrox
     project: ci
     path: charts/region/acs
-
-  - name: config-demo-test
-    namespace: config-demo
-    project: test-app
-    path: charts/all/config-demo
 
 #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
 #

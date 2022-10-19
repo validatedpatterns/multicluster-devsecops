@@ -10,7 +10,6 @@ clusterGroup:
   clusterName: wh-secured
 
   namespaces:
-    - config-demo
     - rhacs-operator
     - stackrox
     - policies
@@ -32,11 +31,6 @@ clusterGroup:
     - secured
 
   applications:
-  - name: config-demo
-    namespace: config-demo
-    project: app
-    path: charts/all/config-demo
-
   - name: acs-secured
     namespace: stackrox
     project: secured
