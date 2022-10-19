@@ -7,3 +7,4 @@ pattern-vault.init
 vault.init
 *.vscode
 super-linter.log
+! **/archive
