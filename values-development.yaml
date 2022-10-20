@@ -22,6 +22,9 @@ clusterGroup:
     - policies
     - openshift-pipelines
     - devsecops-ci
+#Adding jchraibi #advanced-devsecops to pattern framework
+    - devsecops-dev
+    - devsecops-qa
 
   subscriptions:
   - name: rhacs-operator  #packageName
@@ -43,6 +46,8 @@ clusterGroup:
     - secured
     - ci
     - test-app
+#Adding jchraibi #advanced-devsecops to pattern framework
+    - spring-petclinic
 
   applications:
   - name: acs-secured
@@ -69,6 +74,12 @@ clusterGroup:
     namespace: stackrox
     project: ci
     path: charts/region/acs
+
+#Adding jchraibi #advanced-devsecops to pattern framework
+  - name: staging-spring-petclinic
+    namespace: devsecops-qa
+    project: spring-petclinic
+    path: charts/region/stage/spring-petclinic-config
 
 #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
 #
