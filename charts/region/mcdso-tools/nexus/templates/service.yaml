@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+  {{- include "nexus.labels" . | nindent 4 }}
+  name: {{ .Chart.Name }}
+spec:
+  ports:
+  - name: {{ .Values.service.ports.name }}
+    port: {{ .Values.service.ports.port }}
+    protocol: {{ .Values.service.ports.protocol }}
+    targetPort: {{ .Values.service.ports.targetPort }}
+  selector:
+  {{- include "nexus.selectorLabels" . | nindent 4 }}
+  sessionAffinity: None
+  type: {{ .Values.service.type }}
