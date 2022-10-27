@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pipeline-pvc
+  namespace: devsecops-ci
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+spec:
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: gp2-vp
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
