@@ -7,10 +7,10 @@ metadata:
   name: {{ .Chart.Name }}-repo-pv
 spec:
   accessModes:
-  - ReadWriteOnce
+  - {{ .Values.persistentVolumeClaim.accessModes }}
   resources:
     requests:
-      storage: 5Gi
+      storage: {{ .Values.persistentVolumeClaim.requests.storage }}
 ---
 apiVersion: apps/v1
 kind: Deployment

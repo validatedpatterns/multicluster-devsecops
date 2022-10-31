@@ -3,13 +3,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: {{ .Chart.Name }}-repo
+  {{- include "reports.selectorLabels" . | nindent 4 }}
   name: {{ .Chart.Name }}-repo
 spec:
   ports:
-  - name: {{ .Values.service.ports.name }}
-    port: {{ .Values.service.ports.port }}
-    protocol: {{ .Values.service.ports.protocol }}
-    targetPort: {{ .Values.service.ports.targetPort }}
+  - name: {{ .Values.service.portName }}
+    port: {{ .Values.service.port }}
+    protocol: {{ .Values.service.protocol }}
+    targetPort: {{ .Values.service.targetPort }}
   selector:
   {{- include "reports.selectorLabels" . | nindent 4 }}

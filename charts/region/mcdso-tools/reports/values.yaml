@@ -4,14 +4,11 @@
 
 replicaCount: 1
 
-image:
-  repository: quay.io/hybridcloudpatterns/nexus3:3.16.2
-  pullPolicy: IfNotPresent
-
 containers:
   - name: uploader
-    image: quay.io/chmouel/go-simple-uploader:latest
-    imagePullPolicy: IfNotPresent
+    image: 
+      repository: quay.io/chmouel/go-simple-uploader:latest
+      pullPolicy: IfNotPresent
     volumeMounts:
       - path: /fileuploads
         name: staticfiles
@@ -21,8 +18,9 @@ containers:
       - name: UPLOADER_DIRECTORY
         value: "/fileuploads"
   - name: nginx
-    image: quay.io/siamaksade/nginx:latest
-    imagePullPolicy: IfNotPresent
+    image: 
+      repository: quay.io/siamaksade/nginx:latest
+      pullPolicy: IfNotPresent
     port: 8080
     protocol: TCP
     volumeMounts:
@@ -56,14 +54,19 @@ readinessProbe:
   scheme: HTTP
 
 service:
-  ports:
-    name: 8080-tcp
-    port: 8080
-    protocol: TCP
-    targetPort: 8080
+  port: 8080
+  protocol: TCP
+  targetPort: 8080
   type: ClusterIP
+  portName: 8080-tcp
 
-routeTo:
+route:
   kind: Service
   name: reports-repo
   weight: 100
+
+
+persistentVolumeClaim:
+  accessModes: ReadWriteOnce
+  requests:
+    storage: 5Gi
