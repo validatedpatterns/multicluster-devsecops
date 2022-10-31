@@ -1,6 +1,9 @@
 # Possibly still not the right home...
 devel:
-  appURL: https://github.com/ipbabble/chat-client.git
+  appSrcURL: https://github.com/hybrid-cloud-patterns/spring-petclinic
+  appCfgURL: https://github.com/hybrid-cloud-patterns/spring-petclinic-config
+  gatlingApp: https://github.com/hybrid-cloud-patterns/spring-petclinic-gatling
+  
   image: chat-client:latest
   npmbase: quay.io/hybridcloudpatterns/ubi-npm
   namespace: devsecops-ci
@@ -74,6 +77,21 @@ clusterGroup:
     namespace: stackrox
     project: ci
     path: charts/region/acs
+
+  - name: nexus
+    namespace: 
+    project: cicd
+    path: charts/region/mcdso-tools/nexus
+
+  - name: reports-repo
+    namespace: 
+    project: cicd
+    path: charts/region/mcdso-tools/reports
+
+  - name: sonarqube
+    namespace: 
+    project: cicd
+    path: charts/region/mcdso-tools/sonarqube
 
 #Adding jchraibi #advanced-devsecops to pattern framework
   - name: staging-spring-petclinic
