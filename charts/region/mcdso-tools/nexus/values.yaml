@@ -46,9 +46,6 @@ resources:
     cpu: 200m
     memory: 512Mi
 
-volume:
-  name: nexus-data
-
 persistentVolumeClaim:
   name: nexus-pv
   accessModes: ReadWriteOnce
