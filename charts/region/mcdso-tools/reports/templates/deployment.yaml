@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: reports-repo
+  name: reports-repo-pv
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+  {{- include "reports.labels" . | nindent 4 }}
+  name: {{ .Chart.Name }}-repo
+spec:
+  replicas: {{ .Values.replicaCount}}
+  selector:
+    matchLabels:
+    {{- include "reports.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+      {{- include "reports.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+{{- range .Values.containers }}
+      - name: {{ .name }}
+        image: {{ .image }}
+        imagePullPolicy: {{ .imagePullPolicy }}
+{{- if .env }}
+        env:
+{{- range $key, $value := .env }}
+          - name: {{ $value.name }}
+            value: {{ $value.value | quote }}
+{{- end }}
+{{- end }}
+        volumeMounts:
+{{- range $key, $value := .volumeMounts }}
+        - mountPath: {{ $value.path }}
+          name: {{ $value.name }}
+{{- end }}
+{{- end }}
+{{- range .Values.volumes }}
+      volumes:
+{{- range $key, $value := .vol }}
+{{- if $value.configMap }}
+      - configMap:
+          defaultMode: {{ $value.configMap.mode }}
+          name: {{ $value.configMap.name }}
+        name: {{ $value.name }}
+{{- else }}
+      - name: {{ $value.name }}
+        persistentVolumeClaim:
+          claimName: {{ $value.persistentVolumeClaim.name }}
+{{- end }}
+{{- end }}
+{{- end }}
