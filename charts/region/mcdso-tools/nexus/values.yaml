@@ -4,28 +4,32 @@
 
 replicaCount: 1
 
-image:
-  repository: quay.io/hybridcloudpatterns/nexus3:3.16.2
-  pullPolicy: IfNotPresent
+
 
 containers:
-  port:
-    containerPort: 8081
-    protocol: TCP
-  readinessProbe:
-    path: /
-    port: 8081
-    scheme: HTTP
+  image:
+    repository: quay.io/hybridcloudpatterns/nexus3:3.16.2
+    pullPolicy: IfNotPresent
+  port: 8081
+  protocol: TCP
+  env:
+    - name: CONTEXT_PATH
+      value: /
+  volumeMounts:
+    - mountPath: /nexus-data
+      name: nexus-data
+
+volumes:
+  name: nexus-data
 
 service:
-  ports:
-    name: 8081-tcp
-    port: 8081
-    protocol: TCP
-    targetPort: 8081
+  port: 8081
+  protocol: TCP
+  targetPort: 8081
+  portName: 8081-tcp
   type: ClusterIP
 
-routeTo:
+route:
   kind: Service
   name: nexus
   weight: 100
@@ -48,6 +52,5 @@ volume:
 persistentVolumeClaim:
   name: nexus-pv
   accessModes: ReadWriteOnce
-  resources:
-    requests:
-      storage: 25Gi
+  requests:
+    storage: 25Gi

@@ -38,27 +38,12 @@ app: nexus
 app.kubernetes.io/instance: nexus
 app.kubernetes.io/name: nexus
 app.kubernetes.io/part-of: nexus
-{{ include "nexus.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
 Selector labels
 */}}
 {{- define "nexus.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "nexus.name" . }}
+app: {{ include "nexus.name" . }}
 {{- end }}
 
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "nexus.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "nexus.fullname" .) .Values.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.serviceAccount.name }}
-{{- end }}
-{{- end }}

@@ -7,10 +7,10 @@ metadata:
   name: {{ .Chart.Name }}
 spec:
   ports:
-  - name: {{ .Values.service.ports.name }}
-    port: {{ .Values.service.ports.port }}
-    protocol: {{ .Values.service.ports.protocol }}
-    targetPort: {{ .Values.service.ports.targetPort }}
+  - name: {{ .Values.service.portName }}
+    port: {{ .Values.service.port }}
+    protocol: {{ .Values.service.protocol }}
+    targetPort: {{ .Values.service.targetPort }}
   selector:
   {{- include "nexus.selectorLabels" . | nindent 4 }}
   sessionAffinity: None

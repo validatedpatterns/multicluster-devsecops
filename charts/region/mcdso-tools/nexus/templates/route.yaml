@@ -7,8 +7,8 @@ metadata:
   name: {{ .Chart.Name }}
 spec:
   port:
-    targetPort: {{ .Values.service.ports.name }}
+    targetPort: {{ .Values.service.portName }}
   to:
-    kind: {{ .Values.routeTo.kind }}
-    name: {{ .Values.routeTo.name }}
-    weight: {{ .Values.routeTo.weight }}
+    kind: {{ .Values.route.kind }}
+    name: {{ .Values.route.name }}
+    weight: {{ .Values.route.weight }}

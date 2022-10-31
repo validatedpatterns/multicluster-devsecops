@@ -9,7 +9,7 @@ spec:
   - {{ .Values.persistentVolumeClaim.accessModes }}
   resources:
     requests:
-      storage: {{ .Values.persistentVolumeClaim.resources.requests.storage }}
+      storage: {{ .Values.persistentVolumeClaim.requests.storage }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -29,14 +29,16 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.image.repository }}
+        image: {{ .Values.containers.image.repository }}
         env:
-        - name: CONTEXT_PATH
-          value: /
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- range .Values.containers.env }}
+        - name: {{ .name }}
+          value: {{ .value }}
+{{- end }}
+        imagePullPolicy: {{ .Values.containers.image.pullPolicy }}
         ports:
-        - containerPort: {{ .Values.containers.port.containerPort }}
-          protocol: {{ .Values.containers.port.protocol }}
+        - containerPort: {{ .Values.containers.port }}
+          protocol: {{ .Values.containers.protocol }}
         livenessProbe:
           exec:
             command:
@@ -50,9 +52,9 @@ spec:
         readinessProbe:
           failureThreshold: 3
           httpGet:
-            path: {{ .Values.containers.readinessProbe.path }}
-            port: {{ .Values.containers.readinessProbe.port }}
-            scheme: {{ .Values.containers.readinessProbe.scheme }}
+            path: /
+            port: 8081
+            scheme: HTTP
           initialDelaySeconds: 30
           periodSeconds: 10
           successThreshold: 1
@@ -66,9 +68,11 @@ spec:
             cpu: {{ .Values.resources.requests.cpu}}
         terminationMessagePath: /dev/termination-log
         volumeMounts:
-        - mountPath: /{{ .Values.volume.name }}
-          name: {{ .Values.volume.name }}
+{{- range .Values.containers.volumeMounts }}
+        - mountPath: {{ .mountPath }}
+          name: {{ .name }}
+{{- end }}
       volumes:
-      - name: {{ .Values.volume.name }}
+      - name: {{ .Values.volumes.name }}
         persistentVolumeClaim:
           claimName: {{ .Values.persistentVolumeClaim.name }}
