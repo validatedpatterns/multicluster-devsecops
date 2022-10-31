@@ -32,6 +32,11 @@ spec:
 {{- range .Values.containers }}
       - name: {{ .name }}
         image: {{ .image }}
+{{- if .port }}
+        ports:
+        - containerPort: {{ .port }}
+          protocol: {{ .protocol }}
+{{- end }}
         imagePullPolicy: {{ .imagePullPolicy }}
 {{- if .env }}
         env:
