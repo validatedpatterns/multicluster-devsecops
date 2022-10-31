@@ -3,8 +3,8 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
-    app: reports-repo
-  name: reports-repo-pv
+    app: {{ .Chart.Name }}-repo
+  name: {{ .Chart.Name }}-repo-pv
 spec:
   accessModes:
   - ReadWriteOnce
