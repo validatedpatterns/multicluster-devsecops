@@ -3,14 +3,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: reports-repo
-  name: reports-repo
+    app: {{ .Chart.Name }}-repo
+  name: {{ .Chart.Name }}-repo
 spec:
   ports:
-  - name: 8080-tcp
-    port: 8080
-    protocol: TCP
-    targetPort: 8080
+  - name: {{ .Values.service.ports.name }}
+    port: {{ .Values.service.ports.port }}
+    protocol: {{ .Values.service.ports.protocol }}
+    targetPort: {{ .Values.service.ports.targetPort }}
   selector:
-    app: reports-repo
-    deployment: reports-repo
+  {{- include "reports.selectorLabels" . | nindent 4 }}
