@@ -14,7 +14,7 @@ install: operator-install post-install ## installs the pattern, inits the vault 
 
 
 legacy-install: legacy-deploy post-install ## install the pattern the old way without the operator
-        echo "Installed"
+	echo "Installed"
 
 post-install: ## Post-install tasks - vault init and load-secrets
         @if grep -v -e '^\s\+#' "values-hub.yaml" | grep -q -e "insecureUnsealVaultInsideCluster:\s\+true"; then \
