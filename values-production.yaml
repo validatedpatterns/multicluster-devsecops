@@ -19,12 +19,10 @@ clusterGroup:
   - name: rhacs-operator  #packageName
     namespace: openshift-operators # operator namespace
     channel: rhacs-3.71
-    csv: rhacs-operator.v3.71
 
   - name: quay-bridge-operator
     namespace: openshift-operators
     channel: stable-3.7
-    csv: quay-bridge-operator.v3.7
 
   projects:
     - app
