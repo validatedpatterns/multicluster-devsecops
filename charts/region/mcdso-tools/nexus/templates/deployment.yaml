@@ -4,6 +4,7 @@ metadata:
   labels:
   {{- include "nexus.labels" . | nindent 4 }}
   name: {{ .Values.persistentVolumeClaim.name }}
+  namespace: {{ .Values.global.cicd.namespace }}
 spec:
   accessModes:
   - {{ .Values.persistentVolumeClaim.accessModes }}
@@ -15,6 +16,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.cicd.namespace }}
   labels:
     {{- include "nexus.labels"  . | nindent 4 }}
 spec:

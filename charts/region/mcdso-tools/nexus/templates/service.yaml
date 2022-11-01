@@ -5,6 +5,7 @@ metadata:
   labels:
   {{- include "nexus.labels" . | nindent 4 }}
   name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.cicd.namespace }}
 spec:
   ports:
   - name: {{ .Values.service.portName }}
