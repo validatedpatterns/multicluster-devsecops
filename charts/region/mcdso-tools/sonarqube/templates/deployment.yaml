@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.cicd.namespace }}
   labels:
   {{- include "sonarqube.labels" . | nindent 4 }}
 spec:

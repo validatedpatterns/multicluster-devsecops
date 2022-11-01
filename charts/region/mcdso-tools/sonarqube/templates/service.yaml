@@ -5,6 +5,7 @@ metadata:
   labels:
   {{- include "sonarqube.selectorLabels" . | nindent 4 }}
   name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.cicd.namespace }}
 spec:
   ports:
   - name: {{ .Values.service.portName }}
