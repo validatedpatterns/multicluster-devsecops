@@ -9,7 +9,7 @@ help:
 %:
 	make -f common/Makefile $*
 
-install: operator-install post-install ## installs the pattern, inits the vault and loads the secrets
+install: operator-deploy post-install ## installs the pattern, inits the vault and loads the secrets
 	echo "Installed"
 
 
