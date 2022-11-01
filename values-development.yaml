@@ -19,7 +19,7 @@ global:
     namespace: devsecops-ci
 
 clusterGroup:
-  name: development
+  name: devel
   isHubCluster: false
   clusterName: jrickard-mbp396dev
 
