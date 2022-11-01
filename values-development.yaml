@@ -21,7 +21,7 @@ global:
 clusterGroup:
   name: development
   isHubCluster: false
-  clusterName: wh-dev
+  clusterName: jrickard-mbp396dev
 
   namespaces:
     - stackrox
