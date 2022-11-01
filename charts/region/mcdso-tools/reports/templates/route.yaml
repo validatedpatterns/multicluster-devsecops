@@ -5,6 +5,7 @@ metadata:
   labels:
   {{- include "reports.selectorLabels" . | nindent 4 }}
   name: {{ .Chart.Name }}-repo
+  namespace: {{ .Values.global.cicd.namespace }}
 spec:
   port:
     targetPort: {{ .Values.service.portName }}

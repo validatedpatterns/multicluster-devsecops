@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: reports-repo-nginx-conf
+  namespace: {{ .Values.global.cicd.namespace }}
 data:
   htpasswd: |
     reports:$apr1$MHzwWLP6$P/dRWWfgBe4J8wfId78v71
