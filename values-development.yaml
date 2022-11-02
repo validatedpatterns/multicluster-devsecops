@@ -24,6 +24,7 @@ clusterGroup:
   clusterName: jrickard-mbp396dev
 
   namespaces:
+    - argo-rollouts
     - stackrox
     - policies
     - openshift-pipelines
@@ -51,12 +52,18 @@ clusterGroup:
     - test-app
 #Adding jchraibi #advanced-devsecops to pattern framework
     - spring-petclinic
+    - rollouts
 
   applications:
   - name: acs-secured
     namespace: stackrox
     project: secured
     path: charts/hub/acs/secured
+
+  - name: argo-rollouts
+    namespace: argo-rollouts
+    project: rollouts
+    path: charts/region/rollouts
 
   - name: pipelines
     namespace: devsecops-ci
