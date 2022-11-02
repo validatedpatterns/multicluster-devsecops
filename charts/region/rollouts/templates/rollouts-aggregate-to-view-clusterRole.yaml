@@ -1,0 +1,24 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/component: aggregate-cluster-role
+    app.kubernetes.io/name: argo-rollouts-aggregate-to-view
+    app.kubernetes.io/part-of: argo-rollouts
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+  name: argo-rollouts-aggregate-to-view
+rules:
+- apiGroups:
+  - argoproj.io
+  resources:
+  - rollouts
+  - rollouts/scale
+  - experiments
+  - analysistemplates
+  - clusteranalysistemplates
+  - analysisruns
+  verbs:
+  - get
+  - list
+  - watch
