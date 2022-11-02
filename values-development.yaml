@@ -80,17 +80,17 @@ clusterGroup:
 
   - name: nexus
     namespace: 
-    project: cicd
+    project: ci
     path: charts/region/mcdso-tools/nexus
 
   - name: reports-repo
     namespace: 
-    project: cicd
+    project: ci
     path: charts/region/mcdso-tools/reports
 
   - name: sonarqube
     namespace: 
-    project: cicd
+    project: ci
     path: charts/region/mcdso-tools/sonarqube
 
 #Adding jchraibi #advanced-devsecops to pattern framework
