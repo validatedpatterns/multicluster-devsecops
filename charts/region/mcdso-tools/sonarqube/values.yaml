@@ -11,7 +11,7 @@ replicaCount: 1
 containers:
   name: sonarqube
   image: 
-    repository: quay.io/rcarrata/sonarqube:8.3-community
+    repository: quay.io/hybridcloudpatterns/sonarqube:8.3-community
     pullPolicy: IfNotPresent
   port: 9000
   protocol: TCP
