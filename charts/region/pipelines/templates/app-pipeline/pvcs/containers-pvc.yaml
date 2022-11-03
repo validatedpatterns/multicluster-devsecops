@@ -7,7 +7,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: gp2
+  storageClassName: gp2-vp
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce

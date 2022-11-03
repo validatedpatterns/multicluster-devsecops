@@ -55,6 +55,11 @@ clusterGroup:
     namespace: devsecops-ci
     project: ci
     path: charts/region/pipelines
+    ignoreDifferences:
+    - kind: ServiceAccount
+      jsonPointers:
+      - /imagePullSecrets
+      - /secrets
 
   - name: quay-integration
     namespace: openshift-operators
