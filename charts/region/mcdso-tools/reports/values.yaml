@@ -23,7 +23,7 @@ containers:
         value: "/fileuploads"
   - name: nginx
     image: 
-      repository: quay.io/siamaksade/nginx:latest
+      repository: registry.access.redhat.com/ubi8/nginx-120
       pullPolicy: IfNotPresent
     port: 8080
     protocol: TCP
