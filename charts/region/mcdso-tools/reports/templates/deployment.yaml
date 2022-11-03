@@ -33,7 +33,7 @@ spec:
       containers:
 {{- range .Values.containers }}
       - name: {{ .name }}
-        image: {{ .image }}
+        image: {{ .image.repository }}
 {{- if .port }}
         ports:
         - containerPort: {{ .port }}
