@@ -33,8 +33,8 @@ spec:
       containers:
 {{- range $key, $value := .Values.containers }}
       - name: {{ .name }}
-        image: {{ .image.repository }}
-        imagePullPolicy: {{ .image.pullPolicy }}
+        image: {{ $value.image.repository }}
+        imagePullPolicy: {{ $value.image.pullPolicy }}
 {{- if .port }}
         ports:
         - containerPort: {{ .port }}
