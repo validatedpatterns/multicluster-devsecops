@@ -31,7 +31,7 @@ spec:
       {{- include "reports.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-{{- range .Values.containers }}
+{{- range $key, $value := .Values.containers }}
       - name: {{ .name }}
         image: {{ .image.repository }}
         imagePullPolicy: {{ .image.pullPolicy }}
