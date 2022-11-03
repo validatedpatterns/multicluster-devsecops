@@ -34,12 +34,12 @@ spec:
 {{- range .Values.containers }}
       - name: {{ .name }}
         image: {{ .image.repository }}
+        imagePullPolicy: {{ .image.pullPolicy }}
 {{- if .port }}
         ports:
         - containerPort: {{ .port }}
           protocol: {{ .protocol }}
 {{- end }}
-        imagePullPolicy: {{ .image.pullPolicy }}
 {{- if .env }}
         env:
 {{- range $key, $value := .env }}
