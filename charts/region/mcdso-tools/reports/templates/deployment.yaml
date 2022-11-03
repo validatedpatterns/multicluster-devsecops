@@ -39,7 +39,7 @@ spec:
         - containerPort: {{ .port }}
           protocol: {{ .protocol }}
 {{- end }}
-        imagePullPolicy: {{ .imagePullPolicy }}
+        imagePullPolicy: {{ .image.pullPolicy }}
 {{- if .env }}
         env:
 {{- range $key, $value := .env }}

@@ -11,7 +11,7 @@ replicaCount: 1
 containers:
   - name: uploader
     image: 
-      repository: quay.io/chmouel/go-simple-uploader:latest
+      repository: quay.io/hybridcloudpatterns/go-simple-uploader:latest
       pullPolicy: IfNotPresent
     volumeMounts:
       - path: /fileuploads
