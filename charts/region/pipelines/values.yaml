@@ -13,6 +13,9 @@ global:
     email: SOMEWHERE@EXAMPLE.COM
     dev_revision: main
 
+  app:
+    repo: https://github.com/hybrid-cloud-demos/spring-petclinic
+
   # Should be set consistently with quay enterprise setup
   imageregistry:
     account: PLAINTEXT
@@ -28,7 +31,7 @@ global:
     repo: example
 
 devel:
-  appURL: AUTOMATED
+  appSrcURL: https://github.com/hybrid-cloud-demos/spring-petclinic
   image: AUTOMATED
   namespace: AUTOMATED
   roxCTLImage: AUTOMATED
