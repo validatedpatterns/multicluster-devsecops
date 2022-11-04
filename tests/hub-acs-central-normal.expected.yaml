@@ -142,7 +142,7 @@ spec:
         - /bin/bash
         - -c
         - |
-          ACSTOKEN=$(curl -sk -u "admin:$(oc extract secret/central-htpasswd --keys=password --to=-)" "https://central-stackrox.hub.example.com/v1/apitokens/generate" -d '{"name":"token name", "role": "Admin"}' | jq -r '.token')
+          ACSTOKEN=$(curl -sk -u "admin:$(oc extract secret/central-htpasswd --keys=password --to=-)" "https://central-stackrox.apps.hub.example.com/v1/apitokens/generate" -d '{"name":"token name", "role": "Admin"}' | jq -r '.token')
           oc create secret -n stackrox generic acs-api-token --from-literal=token=$ACSTOKEN
         name: stackrox-api-token
       dnsPolicy: ClusterFirst
@@ -230,7 +230,7 @@ spec:
   applicationMenu:
     section: Red Hat applications
     imageURL: 'https://upload.wikimedia.org/wikipedia/commons/3/3a/OpenShift-LogoType.svg'
-  href: 'https://central-stackrox.region.example.com'
+  href: 'https://central-stackrox.apps.region.example.com'
   location: ApplicationMenu
   text: 'Red Hat Advanced Cluster Security for Kubernetes'
 ---
