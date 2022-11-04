@@ -1,8 +1,0 @@
-global:
-  pattern: none
-  repoURL: none
-  targetRevision: main
-
-
-clusterGroup:
-  managedClusterGroups:
