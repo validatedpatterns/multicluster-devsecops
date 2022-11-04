@@ -28,17 +28,14 @@ clusterGroup:
   - name: rhacs-operator  #packageName
     namespace: openshift-operators # operator namespace
     channel: rhacs-3.71
-    csv: rhacs-operator.v3.71
 
   - name: openshift-pipelines-operator-rh
     namespace: openshift-operators
     channel: pipelines-1.7
-    csv: openshift-pipelines-operator.v1.7.1
 
   - name: quay-bridge-operator
     namespace: openshift-operators
     channel: stable-3.7
-    csv: quay-bridge-operator.v3.7
 
   projects:
     - secured
