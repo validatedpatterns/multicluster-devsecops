@@ -29,7 +29,7 @@ spec:
     name: simulations
   steps:
     - name: run-tests
-      image: {{ .Values.global.app.gatlingImage }}
+      image: {{ .Values.global.app.gatling.image }}
       env:
         - name: PIPELINERUN_NAME
           valueFrom:
