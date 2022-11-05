@@ -25,7 +25,7 @@ spec:
     - description: The branch name used for pull-request
       name: branch_name
   steps:
-    - image: 'docker.io/alpine/git:v2.26.2'
+    - image: {{ .Values.global.git.taskImage }}
       name: promote
       resources: {}
       script: >
