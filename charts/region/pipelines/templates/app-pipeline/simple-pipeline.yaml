@@ -4,7 +4,7 @@ metadata:
   name: simple-pipeline
 spec:
   params:
-  - default: {{ .Values.devel.appSrcURL }}
+  - default: {{ .Values.global.app.petclinic.repo }}
     description: The application git repository
     name: APP_SOURCE_GIT
     type: string
@@ -12,7 +12,7 @@ spec:
     description: The application git revision
     name: APP_SOURCE_REVISION
     type: string
-  - default: {{ .Values.devel.appCfgURL }}
+  - default: {{ .Values.global.app.petclinic.configRepo }}
     description: The application manifests git repository
     name: APP_MANIFESTS_GIT
     type: string
@@ -24,7 +24,7 @@ spec:
     description: The namespace for Stage environments
     name: DEV_NAMESPACE
     type: string
-  - default: {{ .Values.devel.gatlingApp }}
+  - default: {{ .Values.global.app.gatlingImage }}
     description: The application test cases git repository
     name: APP_TESTS_GIT
     type: string
@@ -179,7 +179,7 @@ spec:
     - name: GIT_PASSWORD
       value: $(params.GIT_PASSWORD)
     - name: CURRENT_IMAGE
-      value: quay.io/siamaksade/spring-petclinic:latest
+      value: {{ .Values.global.app.petclinic.image }}
     - name: NEW_IMAGE
       value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
     - name: NEW_DIGEST
