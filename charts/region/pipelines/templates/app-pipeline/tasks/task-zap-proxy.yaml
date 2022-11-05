@@ -28,7 +28,7 @@ spec:
 
   steps:
     - name: zap-proxy
-      image: quay.io/rcarrata/zap2docker-stable:latest
+      image: {{ .Values.global.app.zapImage }}
       env:
         - name: PIPELINERUN_NAME
           valueFrom:
