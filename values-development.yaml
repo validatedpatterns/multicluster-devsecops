@@ -1,9 +1,6 @@
 # Possibly still not the right home...
-devel:
-  appSrcURL: https://github.com/hybrid-cloud-patterns/spring-petclinic
-  appCfgURL: https://github.com/hybrid-cloud-patterns/spring-petclinic-config
-  gatlingApp: https://github.com/hybrid-cloud-patterns/spring-petclinic-gatling
-  
+devel: 
+
   image: chat-client:latest
   npmbase: quay.io/hybridcloudpatterns/ubi-npm
   namespace: devsecops-ci
@@ -35,7 +32,7 @@ global:
 clusterGroup:
   name: devel
   isHubCluster: false
-  clusterName: jrickard-mbp396dev
+  clusterName: PROVIDE_CLUSTERNAME
 
   namespaces:
     - argo-rollouts
@@ -48,17 +45,20 @@ clusterGroup:
     - devsecops-qa
 
   subscriptions:
-  - name: rhacs-operator  #packageName
-    namespace: openshift-operators # operator namespace
-    channel: rhacs-3.71
+    rhacs-operator:
+      name: rhacs-operator  #packageName
+      namespace: openshift-operators # operator namespace
+      channel: rhacs-3.71
 
-  - name: openshift-pipelines-operator-rh
-    namespace: openshift-operators
-    channel: pipelines-1.7
+    openshift-pipelines:
+      name: openshift-pipelines-operator-rh
+      namespace: openshift-operators
+      channel: pipelines-1.7
 
-  - name: quay-bridge-operator
-    namespace: openshift-operators
-    channel: stable-3.7
+    quay-bridge-operator:
+      name: quay-bridge-operator
+      namespace: openshift-operators
+      channel: stable-3.7
 
   projects:
     - secured
@@ -69,56 +69,65 @@ clusterGroup:
     - rollouts
 
   applications:
-  - name: acs-secured
-    namespace: stackrox
-    project: secured
-    path: charts/hub/acs/secured
+    acs-secured:
+      name: acs-secured
+      namespace: stackrox
+      project: secured
+      path: charts/hub/acs/secured
 
-  - name: argo-rollouts
-    namespace: argo-rollouts
-    project: rollouts
-    path: charts/region/rollouts
+    argo-rollouts:
+      name: argo-rollouts
+      namespace: argo-rollouts
+      project: rollouts
+      path: charts/region/rollouts
 
-  - name: pipelines
-    namespace: devsecops-ci
-    project: ci
-    path: charts/region/pipelines
-    ignoreDifferences:
-    - kind: ServiceAccount
-      jsonPointers:
-      - /imagePullSecrets
-      - /secrets
+    pipelines:
+      name: pipelines
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/pipelines
+      ignoreDifferences:
+      - kind: ServiceAccount
+        jsonPointers:
+        - /imagePullSecrets
+        - /secrets
 
-  - name: quay-integration
-    namespace: openshift-operators
-    project: secured
-    path: charts/region/quay
+    quay-integration:
+      name: quay-integration
+      namespace: openshift-operators
+      project: secured
+      path: charts/region/quay
 
-  - name: acs-integration
-    namespace: stackrox
-    project: ci
-    path: charts/region/acs
+    acs-integration:
+      name: acs-integration
+      namespace: stackrox
+      project: ci
+      path: charts/region/acs
 
-  - name: nexus
-    namespace: 
-    project: ci
-    path: charts/region/mcdso-tools/nexus
+    nexus:
+      name: nexus
+      namespace: 
+      project: ci
+      path: charts/region/mcdso-tools/nexus
 
-  - name: reports-repo
-    namespace: 
-    project: ci
-    path: charts/region/mcdso-tools/reports
+    reports-repo:
+      name: reports-repo
+      namespace: 
+      project: ci
+      path: charts/region/mcdso-tools/reports
 
-  - name: sonarqube
-    namespace: 
-    project: ci
-    path: charts/region/mcdso-tools/sonarqube
+    sonarqube:
+      name: sonarqube
+      namespace: 
+      project: ci
+      path: charts/region/mcdso-tools/sonarqube
 
 #Adding jchraibi #advanced-devsecops to pattern framework
-  - name: staging-spring-petclinic
-    namespace: devsecops-qa
-    project: spring-petclinic
-    path: charts/region/stage/spring-petclinic-config
+    staging-spring-petclinic:
+      name: staging-spring-petclinic
+      namespace: devsecops-qa
+      project: spring-petclinic
+      path: charts/region/stage/spring-petclinic-config
 
 #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
 #

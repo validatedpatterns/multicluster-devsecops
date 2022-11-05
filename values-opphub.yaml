@@ -24,21 +24,25 @@ clusterGroup:
 #         only used if global.options.useCSV: true in values-global.yaml
 
   subscriptions:
-  - name: advanced-cluster-management
-    namespace: open-cluster-management
-    channel: release-2.5
+    advanced-cluster-management:
+      name: advanced-cluster-management
+      namespace: open-cluster-management
+      channel: release-2.5
 
-  - name: rhacs-operator  #packageName
-    namespace: openshift-operators # operator namespace
-    channel: rhacs-3.68
+    rhacs-operator:
+      name: rhacs-operator  #packageName
+      namespace: openshift-operators # operator namespace
+      channel: rhacs-3.68
 
-  - name: odf-operator
-    namespace: openshift-storage
-    channel: stable-4.10
+    odf-operator:
+      name: odf-operator
+      namespace: openshift-storage
+      channel: stable-4.10
 
-  - name: quay-operator
-    namespace: openshift-operators
-    channel: stable-3.7
+    quay-operator:
+      name: quay-operator
+      namespace: openshift-operators
+      channel: stable-3.7
 
 # The following section is used by
 # OpenShift GitOps (ArgoCD)
@@ -48,56 +52,61 @@ clusterGroup:
   - golang-external-secrets
 
   applications:
-  - name: acm   #arbitary
-    namespace: open-cluster-management
-    project: opp
-    path: common/acm
-    ignoreDifferences:
-    - group: internal.open-cluster-management.io
-      kind: ManagedClusterInfo
-      jsonPointers:
-        - /spec/loggingCA
+    acm:
+      name: acm   #arbitary
+      namespace: open-cluster-management
+      project: opp
+      path: common/acm
+      ignoreDifferences:
+      - group: internal.open-cluster-management.io
+        kind: ManagedClusterInfo
+        jsonPointers:
+          - /spec/loggingCA
 
-  - name: opp
-    namespace: openshift
-    project: opp
-    path: charts/hub/opp
+    opp:
+      name: opp
+      namespace: openshift
+      project: opp
+      path: charts/hub/opp
 
-  - name: vault
-    namespace: vault
-    project: hub
-    chart: vault
-    repoURL: https://helm.releases.hashicorp.com
-    targetRevision: v0.19.0
-    overrides:
-    - name: global.openshift
-      value: "true"
-    - name: injector.enabled
-      value: "false"
-    - name: ui.enabled
-      value: "true"
-    - name: ui.serviceType
-      value: LoadBalancer
-    - name: server.route.enabled
-      value: "true"
-    - name: server.route.host
-      value: null
-    - name: server.route.tls.termination
-      value: edge
-    - name: server.image.repository
-      value: "registry.connect.redhat.com/hashicorp/vault"
-    - name: server.image.tag
-      value: "1.9.2-ubi"
+    vault:
+      name: vault
+      namespace: vault
+      project: hub
+      chart: vault
+      repoURL: https://helm.releases.hashicorp.com
+      targetRevision: v0.19.0
+      overrides:
+      - name: global.openshift
+        value: "true"
+      - name: injector.enabled
+        value: "false"
+      - name: ui.enabled
+        value: "true"
+      - name: ui.serviceType
+        value: LoadBalancer
+      - name: server.route.enabled
+        value: "true"
+      - name: server.route.host
+        value: null
+      - name: server.route.tls.termination
+        value: edge
+      - name: server.image.repository
+        value: "registry.connect.redhat.com/hashicorp/vault"
+      - name: server.image.tag
+        value: "1.9.2-ubi"
 
-  - name: golang-external-secrets
-    namespace: golang-external-secrets
-    project: golang-external-secrets
-    path: common/golang-external-secrets
+    golang-external-secrets:
+      name: golang-external-secrets
+      namespace: golang-external-secrets
+      project: golang-external-secrets
+      path: common/golang-external-secrets
 
-  - name: cli-tools
-    namespace: openshift
-    project: hub
-    path: charts/hub/cli-tools
+    cli-tools:
+      name: cli-tools
+      namespace: openshift
+      project: hub
+      path: charts/hub/cli-tools
 
 # This section is used by ACM
   managedClusterGroups:
