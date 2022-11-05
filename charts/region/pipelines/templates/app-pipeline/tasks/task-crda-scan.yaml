@@ -13,7 +13,7 @@ spec:
       name: application_folder
       type: string
   steps:
-    - image: 'quay.io/jchraibi/crda-image:0.1'
+    - image: {{ .Values.global.app.crdaImage }}
       name: crda-code-scan
       resources: {}
       script: >

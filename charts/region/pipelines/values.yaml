@@ -18,7 +18,9 @@ global:
   app:
     gatlingImage: quay.io/hybridcloudpatterns/gatling:latest
     zapImage: quay.io/hybridcloudpatterns/zap2docker-stable
-    repo: https://github.com/hybrid-cloud-demos/spring-petclinic
+    source: 
+      repo: https://github.com/hybrid-cloud-demos/spring-petclinic
+      configRepo: https://github.com/hybrid-cloud-demos/spring-petclinic-config
 
   # Should be set consistently with quay enterprise setup
   imageregistry:

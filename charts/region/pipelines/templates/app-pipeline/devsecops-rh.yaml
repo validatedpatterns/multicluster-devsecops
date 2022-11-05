@@ -12,7 +12,7 @@ spec:
     description: The application git revision
     name: APP_SOURCE_REVISION
     type: string
-  - default: https://{{ .Values.global.app.configRepo }} 
+  - default: https://{{ .Values.global.app.petclinic.configRepo }} 
     description: The application manifests git repository
     name: APP_MANIFESTS_GIT
     type: string
