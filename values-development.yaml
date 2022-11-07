@@ -32,7 +32,7 @@ global:
 clusterGroup:
   name: devel
   isHubCluster: false
-  clusterName: PROVIDE_CLUSTERNAME
+  clusterName: jrickard-mbp396dev
 
   namespaces:
     - argo-rollouts
