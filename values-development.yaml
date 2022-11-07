@@ -152,7 +152,7 @@ clusterGroup:
 #  - name: pipelines
 #    namespace: staging
 #
-   project: datacenter
+#   project: datacenter
 #    path: applications/pipeline
 #    repoURL: https://github.com/you/applications.git
 #    targetRevision: main
