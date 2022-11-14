@@ -22,7 +22,6 @@ clusterGroup:
     - policies
     - openshift-pipelines
     - devsecops-ci
-    - config-demo
 
   subscriptions:
     rhacs-operator:

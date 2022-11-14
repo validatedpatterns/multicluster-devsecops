@@ -10,7 +10,6 @@ clusterGroup:
   - open-cluster-management
   - vault
   - golang-external-secrets
-  - config-demo
   - rhacs-operator
   - stackrox
   - policies
@@ -52,7 +51,6 @@ clusterGroup:
   projects:
   - hub
   - opp
-  - config-demo
   - external-secrets
 
   applications:
@@ -156,11 +154,6 @@ clusterGroup:
       # per playbook timeout in seconds
       timeout: 234
       # verbosity: "-v"
-
-  - name: config-demo
-    namespace: config-demo
-    project: config-demo
-    path: charts/all/config-demo
 
 # This section is used by ACM
   managedClusterGroups:
