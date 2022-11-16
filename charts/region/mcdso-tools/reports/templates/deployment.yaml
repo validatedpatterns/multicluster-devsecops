@@ -40,15 +40,9 @@ spec:
         - containerPort: {{ .port }}
           protocol: {{ .protocol }}
 {{- end }}
+{{- if .env }}
         env:
 {{- range $key, $value := .env }}
-{{- if eq .name "nginx" }}
-          - name: {{ .name }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ .secretKeyRef.name }}
-                key: {{ .secretKeyRef.key }}
-{{- else }}
           - name: {{ $value.name }}
             value: {{ $value.value | quote }}
 {{- end }}
@@ -67,6 +61,10 @@ spec:
           defaultMode: {{ $value.configMap.mode }}
           name: {{ $value.configMap.name }}
         name: {{ $value.name }}
+{{- else if $value.secret }}
+      - name: {{ $value.name }}
+        secret:
+          secretName: {{ $value.secret.secretName }}
 {{- else }}
       - name: {{ $value.name }}
         persistentVolumeClaim:

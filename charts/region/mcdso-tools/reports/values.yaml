@@ -32,15 +32,8 @@ containers:
         name: nginx-conf
       - path: /fileuploads
         name: staticfiles
-    env:
-      - name: USERNAME
-        secretKeyRef:
-          name: reports-nginx-htpasswd
-          key: username
-      - name: PASSWORD
-        secretKeyRef:
-          name: reports-nginx-htpasswd
-          key: password
+      - path: /etc/nginx/conf.d/
+        name: htpasswd
 
 volumes:
   - container: uploader
@@ -57,6 +50,10 @@ volumes:
       configMap:
         name: reports-repo-nginx-conf
         mode: 420
+    - name: htpasswd
+      secret:
+        secretName: reports-nginx-htpasswd
+        
   
 port:
   containerPort: 8080
