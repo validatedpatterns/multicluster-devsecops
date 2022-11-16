@@ -1,4 +1,7 @@
 global:
+  cicd:
+    namespace: devsecops-ci
+
   git:
     hostname: github.com
     account: PLAINTEXT
