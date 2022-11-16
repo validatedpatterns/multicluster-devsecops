@@ -2,6 +2,9 @@
 global:
   pattern: multicluster-devsecops
 
+  cicd:
+    namespace: devsecops-ci
+
   options:
     useCSV: false
     syncPolicy: Automatic
