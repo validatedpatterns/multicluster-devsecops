@@ -74,3 +74,10 @@ persistentVolumeClaim:
   accessModes: ReadWriteOnce
   requests:
     storage: 5Gi
+
+secretStore:
+  name: vault-backend
+  kind: ClusterSecretStore
+
+devsecops:
+  key: secret/data/hub/reports-nginx-config
