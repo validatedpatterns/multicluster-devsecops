@@ -42,7 +42,7 @@ spec:
 {{- end }}
 {{- if eq .name "nginx" }}
         env:
-          - name: HTPASSWD
+          - name: {{ .env.name }}
             valueFrom:
               secretKeyRef:
                 name: {{ .env.secretKeyRef.name }}
