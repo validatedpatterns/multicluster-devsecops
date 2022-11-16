@@ -1,0 +1,10 @@
+FROM image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
+
+ENV COSIGN_VER=1.13.1
+
+#Install Cosign 
+RUN  dnf install -y \
+     https://github.com/sigstore/cosign/releases/download/v${COSIGN_VER}/cosign-${COSIGN_VER}.x86_64.rpm \
+     && dnf clean all 
+
+CMD ["/usr/bin/cosign"]
