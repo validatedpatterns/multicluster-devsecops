@@ -81,3 +81,8 @@ secretStore:
 
 devsecops:
   key: secret/data/hub/reports-nginx-config
+  namespaces:
+    - devsecops-ci
+
+clusterGroup:
+  isHubCluster: true
