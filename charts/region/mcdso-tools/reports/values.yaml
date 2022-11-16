@@ -35,7 +35,7 @@ containers:
     env:
       name: HTPASSWD
       secretKeyRef:
-        name: reports-nginx-config
+        name: reports-nginx-htpasswd
         key: reports
         
 
