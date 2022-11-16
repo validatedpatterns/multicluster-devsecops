@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: cosign-image-deploy
+  namespace: {{ .Values.global.ciNamespace }}
+spec:
+  params:
+    - name: github-repo-revision
+      type: string
+      description: Git branch
+      default: main
+    - name: github-repo-url
+      type: string
+      description: Github repo
+      default: {{ .Values.devel.appURL }}
+    - name: context-dir
+      type: string
+    - name: is-name
+      type: string
+      default: chat-client
+  workspaces:
+    - name: source
+  tasks:
+  - name: build cosign image
+    taskRef:
+      name: cosign-image-build
+    workspaces:
+      - name: output
+        workspace: source
