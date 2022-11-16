@@ -40,16 +40,15 @@ spec:
         - containerPort: {{ .port }}
           protocol: {{ .protocol }}
 {{- end }}
-{{- if eq .name "nginx" }}
-        env:
-          - name: {{ .env.name }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ .env.secretKeyRef.name }}
-                key: {{ .env.secretKeyRef.key }}
-{{- else }}
         env:
 {{- range $key, $value := .env }}
+{{- if eq .name "nginx" }}
+          - name: {{ .name }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ .secretKeyRef.name }}
+                key: {{ .secretKeyRef.key }}
+{{- else }}
           - name: {{ $value.name }}
             value: {{ $value.value | quote }}
 {{- end }}
