@@ -106,19 +106,19 @@ clusterGroup:
 
     nexus:
       name: nexus
-      namespace: 
+      namespace: devsecops-ci
       project: ci
       path: charts/region/mcdso-tools/nexus
 
     reports-repo:
       name: reports-repo
-      namespace: 
+      namespace: devsecops-ci
       project: ci
       path: charts/region/mcdso-tools/reports
 
     sonarqube:
       name: sonarqube
-      namespace: 
+      namespace: devsecops-ci
       project: ci
       path: charts/region/mcdso-tools/sonarqube
 
