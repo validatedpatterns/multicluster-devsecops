@@ -33,11 +33,14 @@ containers:
       - path: /fileuploads
         name: staticfiles
     env:
-      name: HTPASSWD
-      secretKeyRef:
-        name: reports-nginx-htpasswd
-        key: reports
-        
+      - name: USERNAME
+        secretKeyRef:
+          name: reports-nginx-htpasswd
+          key: username
+      - name: PASSWORD
+        secretKeyRef:
+          name: reports-nginx-htpasswd
+          key: password
 
 volumes:
   - container: uploader
