@@ -27,3 +27,8 @@ gitsecret:
   key: secret/data/hub/git
   namespaces:
     - devsecops-ci
+
+devsecops:
+  key: secret/data/hub/reports-nginx-config
+  namespaces:
+    - devsecops-ci
