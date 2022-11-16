@@ -40,7 +40,14 @@ spec:
         - containerPort: {{ .port }}
           protocol: {{ .protocol }}
 {{- end }}
-{{- if .env }}
+{{- if eq .name "nginx" }}
+        env:
+          - name: HTPASSWD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .env.secretKeyRef.name }}
+                key: {{ .env.secretKeyRef.key }}
+{{- else }}
         env:
 {{- range $key, $value := .env }}
           - name: {{ $value.name }}

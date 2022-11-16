@@ -32,6 +32,12 @@ containers:
         name: nginx-conf
       - path: /fileuploads
         name: staticfiles
+    env:
+      name: HTPASSWD
+      secretKeyRef:
+        name: reports-nginx-config
+        key: reports
+        
 
 volumes:
   - container: uploader
