@@ -122,6 +122,18 @@ clusterGroup:
       project: ci
       path: charts/region/mcdso-tools/sonarqube
 
+    cosign:
+      name: cosign
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/cosign
+
+    rekor:
+      name: rekor
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/rekor
+
 #Adding jchraibi #advanced-devsecops to pattern framework
     staging-spring-petclinic:
       name: staging-spring-petclinic
