@@ -28,12 +28,14 @@ containers:
     port: 8080
     protocol: TCP
     volumeMounts:
-      - path: /etc/nginx/conf.d/
+      - path: /etc/nginx/conf.d/nginx.conf
         name: nginx-conf
+        subPath: nginx.conf
       - path: /fileuploads
         name: staticfiles
-      - path: /etc/nginx/conf.d/
+      - path: /etc/nginx/conf.d/htpasswd
         name: htpasswd
+        subPath: htpasswd
 
 volumes:
   - container: uploader

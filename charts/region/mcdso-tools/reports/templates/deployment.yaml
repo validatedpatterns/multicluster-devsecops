@@ -51,6 +51,7 @@ spec:
 {{- range $key, $value := .volumeMounts }}
         - mountPath: {{ $value.path }}
           name: {{ $value.name }}
+          subPath: {{ $value.subPath }}
 {{- end }}
 {{- end }}
 {{- range .Values.volumes }}
