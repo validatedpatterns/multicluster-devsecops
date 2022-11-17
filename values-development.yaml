@@ -134,6 +134,12 @@ clusterGroup:
       project: ci
       path: charts/region/rekor
 
+    roxctl:
+      name: roxctl
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/roxctl
+
 #Adding jchraibi #advanced-devsecops to pattern framework
     staging-spring-petclinic:
       name: staging-spring-petclinic
