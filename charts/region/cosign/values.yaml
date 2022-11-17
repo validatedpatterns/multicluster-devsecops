@@ -4,7 +4,7 @@
 name: cosign
 namespace: openshift
 
-source: https://github.com/hybrid-cloud-patterns/multicluster-devsecops
+source: https://github.com/hybrid-cloud-demos/devsecops-tools
 sourceContext: containerFiles/cosign
 sourceRevision: latest
 sourceImageStream: cli:latest

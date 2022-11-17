@@ -1,10 +1,10 @@
-# Default values forekor
+# Default values for rekor.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 name: rekor
 namespace: openshift
 
-source: https://github.com/hybrid-cloud-patterns/multicluster-devsecops
+source: https://github.com/hybrid-cloud-demos/devsecops-tools
 sourceContext: containerFiles/rekor
 sourceRevision: latest
 sourceImageStream: cli:latest
