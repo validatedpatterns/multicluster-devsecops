@@ -14,7 +14,7 @@ spec:
   strategy:
     type: Docker
     dockerStrategy:
-      dockerfilePath: Dockerfile
+      dockerfilePath: Containerfile
       from:
         kind: ImageStreamTag
         namespace: {{ .Values.namespace }}
