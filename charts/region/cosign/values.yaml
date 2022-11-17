@@ -1,0 +1,13 @@
+# Default values for cosign.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+name: cosign
+namespace: openshift
+
+source: https://github.com/hybrid-cloud-patterns/multicluster-devsecops
+sourceContext: containerFiles/cosign
+sourceRevision: latest
+sourceImageStream: cli:latest
+
+#Default Registry
+registry_root: image-registry.openshift-image-registry.svc:5000/openshift/cli
