@@ -10,7 +10,7 @@ spec:
     type: Git
     git:
       uri: {{ .Values.source }}
-  contextDir: {{ .Values.sourceContext }}
+    contextDir: {{ .Values.sourceContext }}
   strategy:
     type: Docker
     dockerStrategy:
