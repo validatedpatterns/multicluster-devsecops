@@ -1,6 +1,5 @@
 # Possibly still not the right home...
 devel: 
-
   image: chat-client:latest
   npmbase: quay.io/hybridcloudpatterns/ubi-npm
   namespace: devsecops-ci
@@ -18,9 +17,9 @@ global:
   app:
     gatling:
       image: quay.io/hybridcloudpatterns/gatling:latest
-      repo: https://github.com/hybrid-cloud-patterns/spring-petclinic-gatling
+      repo: https://github.com/hybrid-cloud-demos/spring-petclinic-gatling
     zapImage: quay.io/hybridcloudpatterns/zap2docker-stable
-    crdaImage: quay.io/jchraibi/crda-image:0.1
+    crdaImage: quay.io/hybridcloudpatterns/crda-image:0.1
     petclinic:
       repo: https://github.com/hybrid-cloud-demos/spring-petclinic
       configRepo: https://github.com/hybrid-cloud-demos/spring-petclinic-config
@@ -32,7 +31,7 @@ global:
 clusterGroup:
   name: devel
   isHubCluster: false
-  clusterName: jrickard-mbp396dev
+  clusterName: INSERT_DEVEL_CLUSTER_NAME
 
   namespaces:
     - argo-rollouts
@@ -40,7 +39,6 @@ clusterGroup:
     - policies
     - openshift-pipelines
     - devsecops-ci
-#Adding jchraibi #advanced-devsecops to pattern framework
     - devsecops-dev
     - devsecops-qa
 
@@ -108,19 +106,19 @@ clusterGroup:
       name: nexus
       namespace: devsecops-ci
       project: ci
-      path: charts/region/mcdso-tools/nexus
+      path: charts/region/nexus
 
     reports-repo:
       name: reports-repo
       namespace: devsecops-ci
       project: ci
-      path: charts/region/mcdso-tools/reports
+      path: charts/region/reports
 
     sonarqube:
       name: sonarqube
       namespace: devsecops-ci
       project: ci
-      path: charts/region/mcdso-tools/sonarqube
+      path: charts/region/sonarqube
 
     cosign:
       name: cosign
