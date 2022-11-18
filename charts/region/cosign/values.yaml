@@ -11,3 +11,6 @@ sourceImageStream: cli:latest
 
 #Default Registry
 registry_root: image-registry.openshift-image-registry.svc:5000/openshift/cli
+
+job:
+  image: image-registry.openshift-image-registry.svc:5000/openshift/cosign:latest
