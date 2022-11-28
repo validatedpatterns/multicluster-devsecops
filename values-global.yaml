@@ -14,7 +14,7 @@ global:
     namespace: "openshift-storage"
 
   imageregistry:
-    account: jrickard0
+    account: PLAINTEXT
     hostname: quay.io
     type: quay
 

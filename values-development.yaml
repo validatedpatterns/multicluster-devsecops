@@ -31,7 +31,8 @@ global:
 clusterGroup:
   name: devel
   isHubCluster: false
-  clusterName: INSERT_DEVEL_CLUSTER_NAME
+  clusterName: jrickard-mbp396dev
+  #clusterName: INSERT_DEVEL_CLUSTER_NAME
 
   namespaces:
     - argo-rollouts
