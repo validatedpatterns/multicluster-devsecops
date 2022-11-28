@@ -15,9 +15,9 @@ spec:
         - -c
         - |
           export COSIGN_PASSWORD=$(openssl rand -base64 32) 
-          cosign key-generate 
-          oc wait --for=condition=Available=true deploymentconfig/xraylabdb -n {{ .Values.global.xraylab.namespace }} --timeout=900s
-        name: wait-for-xraylab-database
+          cosign key-generate k8s://openshift-pipelines/signing-secrets
+          oc create secret generic cosign-pubkey --from-file=cosign.pub 
+        name: create-cosign-pubkey
       dnsPolicy: ClusterFirst
       restartPolicy: Never
       serviceAccount: pipeline

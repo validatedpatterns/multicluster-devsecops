@@ -14,3 +14,33 @@ registry_root: image-registry.openshift-image-registry.svc:5000/openshift/cli
 
 job:
   image: image-registry.openshift-image-registry.svc:5000/openshift/cosign:latest
+
+rbac:
+  roles:
+    - name: cosign-mgmt
+      apiGroups:
+        - ""
+      scope:
+        cluster: false
+        namespace: openshift-pipelines
+      resources:
+        - secrets
+      verbs:
+        - "get"
+        - "list"
+        - "patch"
+        - "create"
+        - "update"
+  roleBindings:
+    - name: cosign-mgmt
+      scope:
+        cluster: false
+        namespace: openshift-pipelines
+      subjects:
+        kind: ServiceAccount
+        name: pipelines
+        namespace: openshift-pipelines
+        apiGroup: ""
+      roleRef:
+        kind: Role
+        name: cosign-mgmt
