@@ -33,6 +33,6 @@ jobs:
           VALIDATE_YAML: false
           VALIDATE_ANSIBLE: false
           VALIDATE_TEKTON: false
-          # VALIDATE_DOCKERFILE_HADOLINT: false
+          VALIDATE_DOCKERFILE_HADOLINT: false
           # VALIDATE_MARKDOWN: false
           # VALIDATE_NATURAL_LANGUAGE: false
