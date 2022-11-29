@@ -1,4 +1,7 @@
 global:
+  cicd:
+    namespace: devsecops-ci
+
   git:
     hostname: github.com
     account: PLAINTEXT
@@ -26,4 +29,9 @@ imageregistrysecret:
 gitsecret:
   key: secret/data/hub/git
   namespaces:
-    -devsecops-ci
+    - devsecops-ci
+
+devsecops:
+  key: secret/data/hub/devsecops
+  namespaces:
+    - devsecops-ci

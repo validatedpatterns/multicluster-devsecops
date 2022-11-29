@@ -1,0 +1,68 @@
+# Default values for sonarqube.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  cicd:
+    namespace: devsecops-ci
+
+replicaCount: 1
+
+containers:
+  name: sonarqube
+  image: 
+    repository: quay.io/hybridcloudpatterns/sonarqube:8.3-community
+    pullPolicy: IfNotPresent
+  port: 9000
+  protocol: TCP
+  volumeMounts:
+    - mountPath: /opt/sq/temp
+      name: sonarqube-temp
+    - mountPath: /opt/sq/conf
+      name: sonarqube-conf
+    - mountPath: /opt/sq/data
+      name: sonarqube-data
+    - mountPath: /opt/sq/extensions
+      name: sonarqube-extensions
+    - mountPath: /opt/sq/logs
+      name: sonarqube-logs
+
+volumes:
+- name: sonarqube-temp
+  emptyDir: '{}'
+- name: sonarqube-conf
+  emptyDir: '{}'
+- name: sonarqube-data
+  emptyDir: '{}'
+- name: sonarqube-extensions
+  emptyDir: '{}'
+- name: sonarqube-logs
+  emptyDir: '{}'
+
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 9000
+  protocol: TCP
+  portName: 9000-tcp
+
+route:
+  tls:
+    termination: edge
+  kind: Service
+  name: sonarqube
+  weight: 100
+  wildcardPolicy: None
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  limits:
+    cpu: "1"
+    memory: 4Gi
+  requests:
+    cpu: 200m
+    memory: 512Mi

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: petclinic-build-workspace
+spec:
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: gp2-vp
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce

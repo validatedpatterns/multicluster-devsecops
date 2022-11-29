@@ -15,7 +15,7 @@ This pattern depends on having three clusters.
 * Central Hub - where all the infrastructure components run.
   * Advanced cluster management
   * Advanced cluster security
-  * Image registry and supporting stoage
+  * Image registry and supporting stage
   * Secrets management
 * Developement - where CI/CD pipelines and testing run
 * Production - where the applications run

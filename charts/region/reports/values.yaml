@@ -1,0 +1,96 @@
+# Default values for reports.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  cicd:
+    namespace: devsecops-ci
+
+replicaCount: 1
+
+containers:
+  - name: uploader
+    image: 
+      repository: quay.io/hybridcloudpatterns/go-simple-uploader:latest
+      pullPolicy: IfNotPresent
+    volumeMounts:
+      - path: /fileuploads
+        name: staticfiles
+    env:
+      - name: UPLOADER_PORT
+        value: "9000"
+      - name: UPLOADER_DIRECTORY
+        value: "/fileuploads"
+  - name: nginx
+    image: 
+      repository: quay.io/hybridcloudpatterns/nginx:latest
+      pullPolicy: IfNotPresent
+    port: 8080
+    protocol: TCP
+    volumeMounts:
+      - path: /etc/nginx/conf.d/nginx.conf
+        name: nginx-conf
+        subPath: nginx.conf
+      - path: /fileuploads
+        name: staticfiles
+      - path: /etc/nginx/conf.d/htpasswd
+        name: htpasswd
+        subPath: htpasswd
+
+volumes:
+  - container: uploader
+    vol:
+    - name: nexus-data
+      persistentVolumeClaim:
+        name: nexus-pv
+  - container: nginx
+    vol:
+    - name: staticfiles
+      persistentVolumeClaim:
+        name: reports-repo-pv
+    - name: nginx-conf
+      configMap:
+        name: reports-repo-nginx-conf
+        mode: 420
+    - name: htpasswd
+      secret:
+        secretName: reports-nginx-htpasswd
+        
+  
+port:
+  containerPort: 8080
+  protocol: TCP
+readinessProbe:
+  path: /
+  port: 8080
+  scheme: HTTP
+
+service:
+  port: 8080
+  protocol: TCP
+  targetPort: 8080
+  type: ClusterIP
+  portName: 8080-tcp
+
+route:
+  kind: Service
+  name: reports-repo
+  weight: 100
+
+
+persistentVolumeClaim:
+  accessModes: ReadWriteOnce
+  requests:
+    storage: 5Gi
+
+secretStore:
+  name: vault-backend
+  kind: ClusterSecretStore
+
+devsecops:
+  key: secret/data/hub/reports-nginx-config
+  namespaces:
+    - devsecops-ci
+
+clusterGroup:
+  isHubCluster: true

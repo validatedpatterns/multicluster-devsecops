@@ -1,0 +1,62 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.cicd.namespace }}
+  labels:
+  {{- include "sonarqube.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+    {{- include "sonarqube.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+      {{- include "sonarqube.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Values.containers.name }}
+        imagePullPolicy: {{ .Values.containers.image.pullPolicy }}
+        image: {{ .Values.containers.image.repository }}
+        ports:
+        - containerPort: {{ .Values.containers.port }}
+          protocol: {{ .Values.containers.protocol }}
+        volumeMounts:
+{{- range .Values.containers.volumeMounts }}
+        - mountPath: {{ .mountPath }}
+          name: {{ .name }}
+{{- end }}
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /
+            port: 9000
+            scheme: HTTP
+          initialDelaySeconds: 45
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /
+            port: 9000
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
+      volumes:
+{{- range .Values.volumes }}
+      - name: {{ .name }}
+        emptyDir: {{ .emptyDir }}
+{{- end }}

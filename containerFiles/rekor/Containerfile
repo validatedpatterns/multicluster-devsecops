@@ -1,0 +1,9 @@
+FROM image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
+
+ENV REKOR_VER=1.0.1
+
+#Install Rekor
+RUN wget -O /usr/local/bin/rekor https://github.com/sigstore/rekor/releases/download/v${REKOR_VER}/rekor-cli-linux-amd64 \
+     && chmod +x /usr/local/bin/rekor
+
+CMD ["/usr/local/bin/rekor"]
