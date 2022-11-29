@@ -31,7 +31,6 @@ global:
 clusterGroup:
   name: devel
   isHubCluster: false
-  clusterName: jrickard-mbp396dev
   #clusterName: INSERT_DEVEL_CLUSTER_NAME
 
   namespaces:
