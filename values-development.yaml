@@ -31,7 +31,6 @@ global:
 clusterGroup:
   name: devel
   isHubCluster: false
-  #clusterName: INSERT_DEVEL_CLUSTER_NAME
 
   namespaces:
     - argo-rollouts
