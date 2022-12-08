@@ -15,7 +15,7 @@ This pattern depends on having three clusters.
 * Central Hub - where all the infrastructure components run.
   * Red Hat Advanced Cluster Management
   * Red Hat Advanced Cluster Security (Central)
-  * Red Hat Quay Enterprise 
+  * Red Hat Quay Enterprise
   * Secrets management
 * Development - where CI/CD pipelines and testing run
   * Red Hat OpenShift Pipelines
