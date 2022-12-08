@@ -4,8 +4,6 @@ kind: ConfigMap
 metadata:
   name: reports-repo-nginx-conf
   namespace: {{ .Values.global.cicd.namespace }}
-  annotations:
-    argocd.argoproj.io/sync-wave: "5"
 data:
   nginx.conf: "types {\n    text/plain    yaml yml;\n}\n\nserver {\n    listen 8080
     default_server;\n    gzip on;\n\n\tlocation /upload {\n\t\tsatisfy any;\n\t\tauth_basic
