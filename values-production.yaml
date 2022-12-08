@@ -7,7 +7,6 @@ global:
 clusterGroup:
   name: production
   isHubCluster: false
-  clusterName: wh-secured
 
   namespaces:
     - rhacs-operator
