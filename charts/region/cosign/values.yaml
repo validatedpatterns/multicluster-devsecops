@@ -19,7 +19,7 @@ rbac:
   roles:
     - name: cosign-mgmt
       apiGroups:
-        - ""
+        - '""'
       scope:
         cluster: false
         namespace: openshift-pipelines
@@ -40,7 +40,7 @@ rbac:
         kind: ServiceAccount
         name: pipelines
         namespace: openshift-pipelines
-        apiGroup: ""
+        apiGroup: '""'
       roleRef:
         kind: Role
         name: cosign-mgmt
