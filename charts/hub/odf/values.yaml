@@ -26,7 +26,6 @@ ocs:
       memory: 5Gi
     pvc:
       storage: 2Ti
-      storageClassName: gp2
   storageClass:
     name: ocs-storagecluster-ceph-rgw
     region: us-west-1  #overwritten
@@ -39,6 +38,9 @@ toolbox:
 global:
   hub:
     region: us-west-1
+
+clusterGroup:
+  storageClass: gp2
 
 #Define the odf storageSystem parameters
 storageSystem:
