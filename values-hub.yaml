@@ -95,6 +95,11 @@ clusterGroup:
       namespace: openshift
       project: opp
       path: charts/hub/opp
+      ignoreDifferences:
+      - group: operators.openshift.io
+        kind: Console
+        jsonPointers: 
+          - /spec/plugins
 
     vault:
       name: vault

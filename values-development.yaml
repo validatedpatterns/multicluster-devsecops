@@ -31,7 +31,7 @@ global:
 clusterGroup:
   name: devel
   isHubCluster: false
-  storageClass: standard
+  storageClass: gp2
 
   namespaces:
     - argo-rollouts
