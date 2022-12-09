@@ -1,0 +1,27 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+allowVolumeExpansion: true
+metadata:
+  name: {{ .Values.clusterGroup.storageClass }}-vp
+{{- if eq .Values.clusterGroup.storageClass "standard" }}
+parameters:
+  replication-type: none
+  type: pd-standard
+provisioner: kubernetes.io/gce-pd
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+{{- else if eq .Values.clusterGroup.storageClass "managed-premium" }}
+parameters: 
+  kind: Managed
+  storageaccounttype: Premium_LRS
+provisioner: kubernetes.io/azure-disk
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+{{- else }}
+parameters:
+  encrypted: "true"
+  type: {{ .Values.clusterGroup.storageClass }}
+provisioner: kubernetes.io/aws-ebs
+reclaimPolicy: Delete
+volumeBindingMode: Immediate
+{{- end }}
