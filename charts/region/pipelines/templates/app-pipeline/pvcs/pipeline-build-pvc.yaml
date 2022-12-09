@@ -6,7 +6,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: gp2-vp
+  storageClassName: {{ .Values.clusterGroup.storageClass }}-vp
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
