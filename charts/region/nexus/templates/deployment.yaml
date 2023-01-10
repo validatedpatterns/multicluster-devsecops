@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+  {{- include "nexus.labels" . | nindent 4 }}
+  name: {{ .Values.persistentVolumeClaim.name }}
+  namespace: {{ .Values.global.cicd.namespace }}
+spec:
+  accessModes:
+  - {{ .Values.persistentVolumeClaim.accessModes }}
+  resources:
+    requests:
+      storage: {{ .Values.persistentVolumeClaim.requests.storage }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.cicd.namespace }}
+  labels:
+    {{- include "nexus.labels"  . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "nexus.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "nexus.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ .Values.containers.image.repository }}
+        env:
+{{- range .Values.containers.env }}
+        - name: {{ .name }}
+          value: {{ .value }}
+{{- end }}
+        imagePullPolicy: {{ .Values.containers.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.containers.port }}
+          protocol: {{ .Values.containers.protocol }}
+        livenessProbe:
+          exec:
+            command:
+            - echo
+            - ok
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 8081
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            memory: {{ .Values.resources.limits.memory }}
+            cpu: {{ .Values.resources.limits.cpu }}
+          requests:
+            memory: {{ .Values.resources.requests.memory }}
+            cpu: {{ .Values.resources.requests.cpu}}
+        terminationMessagePath: /dev/termination-log
+        volumeMounts:
+{{- range .Values.containers.volumeMounts }}
+        - mountPath: {{ .mountPath }}
+          name: {{ .name }}
+{{- end }}
+      volumes:
+      - name: {{ .Values.volumes.name }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistentVolumeClaim.name }}

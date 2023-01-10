@@ -1,6 +1,5 @@
 # Possibly still not the right home...
-devel:
-  appURL: https://github.com/ipbabble/chat-client.git
+devel: 
   image: chat-client:latest
   npmbase: quay.io/hybridcloudpatterns/ubi-npm
   namespace: devsecops-ci
@@ -11,70 +10,140 @@ global:
     useCSV: False
     syncPolicy: Automatic
     installPlanApproval: Automatic
+  
+  cicd:
+    namespace: devsecops-ci
+
+  app:
+    gatling:
+      image: quay.io/hybridcloudpatterns/gatling:latest
+      repo: https://github.com/hybrid-cloud-demos/spring-petclinic-gatling
+    zapImage: quay.io/hybridcloudpatterns/zap2docker-stable
+    crdaImage: quay.io/hybridcloudpatterns/crda-image:0.1
+    petclinic:
+      repo: https://github.com/hybrid-cloud-demos/spring-petclinic
+      configRepo: https://github.com/hybrid-cloud-demos/spring-petclinic-config
+      image: quay.io/hybridcloudpatterns/spring-petclinic:latest
+
+  git:
+    taskImage: image-registry.openshift-image-registry.svc:5000/openshift/tools
 
 clusterGroup:
-  name: development
+  name: devel
   isHubCluster: false
-  clusterName: wh-dev
+  storageClass: gp2
 
   namespaces:
+    - argo-rollouts
     - stackrox
     - policies
     - openshift-pipelines
     - devsecops-ci
-    - config-demo
+    - devsecops-dev
+    - devsecops-qa
 
   subscriptions:
-  - name: rhacs-operator  #packageName
-    namespace: openshift-operators # operator namespace
-    channel: rhacs-3.71
-    csv: rhacs-operator.v3.71
+    rhacs-operator:
+      name: rhacs-operator  #packageName
+      namespace: openshift-operators # operator namespace
+      channel: rhacs-3.71
 
-  - name: openshift-pipelines-operator-rh
-    namespace: openshift-operators
-    channel: pipelines-1.7
-    csv: openshift-pipelines-operator.v1.7.1
+    openshift-pipelines:
+      name: openshift-pipelines-operator-rh
+      namespace: openshift-operators
+      channel: pipelines-1.7
 
-  - name: quay-bridge-operator
-    namespace: openshift-operators
-    channel: stable-3.7
-    csv: quay-bridge-operator.v3.7
+    quay-bridge-operator:
+      name: quay-bridge-operator
+      namespace: openshift-operators
+      channel: stable-3.7
 
   projects:
     - secured
     - ci
     - test-app
+#Adding jchraibi #advanced-devsecops to pattern framework
+    - spring-petclinic
+    - rollouts
 
   applications:
-  - name: acs-secured
-    namespace: stackrox
-    project: secured
-    path: charts/hub/acs/secured
+    acs-secured:
+      name: acs-secured
+      namespace: stackrox
+      project: secured
+      path: charts/hub/acs/secured
 
-  - name: pipelines
-    namespace: devsecops-ci
-    project: ci
-    path: charts/region/pipelines
-    ignoreDifferences:
-    - kind: ServiceAccount
-      jsonPointers:
-      - /imagePullSecrets
-      - /secrets
+    argo-rollouts:
+      name: argo-rollouts
+      namespace: argo-rollouts
+      project: rollouts
+      path: charts/region/rollouts
 
-  - name: quay-integration
-    namespace: openshift-operators
-    project: secured
-    path: charts/region/quay
+    pipelines:
+      name: pipelines
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/pipelines
+      ignoreDifferences:
+      - kind: ServiceAccount
+        jsonPointers:
+        - /imagePullSecrets
+        - /secrets
 
-  - name: acs-integration
-    namespace: stackrox
-    project: ci
-    path: charts/region/acs
+    quay-integration:
+      name: quay-integration
+      namespace: openshift-operators
+      project: secured
+      path: charts/region/quay
 
-  - name: config-demo-test
-    namespace: config-demo
-    project: test-app
-    path: charts/all/config-demo
+    acs-integration:
+      name: acs-integration
+      namespace: stackrox
+      project: ci
+      path: charts/region/acs
+
+    nexus:
+      name: nexus
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/nexus
+
+    reports-repo:
+      name: reports-repo
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/reports
+
+    sonarqube:
+      name: sonarqube
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/sonarqube
+
+    cosign:
+      name: cosign
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/cosign
+
+    rekor:
+      name: rekor
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/rekor
+
+    roxctl:
+      name: roxctl
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/roxctl
+
+#Adding jchraibi #advanced-devsecops to pattern framework
+    staging-spring-petclinic:
+      name: staging-spring-petclinic
+      namespace: devsecops-qa
+      project: spring-petclinic
+      path: charts/region/stage/spring-petclinic-config
 
 #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
 #
@@ -90,7 +159,8 @@ clusterGroup:
 #
 #  - name: pipelines
 #    namespace: staging
-#    project: datacenter
+#
+#   project: datacenter
 #    path: applications/pipeline
 #    repoURL: https://github.com/you/applications.git
 #    targetRevision: main

@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+  name: create-cosign-pubkey
+  namespace: openshift-pipelines
+spec:
+  template:
+    spec:
+      containers:
+      - image: {{ .Values.job.image }}
+        command:
+        - /bin/bash
+        - -c
+        - |
+          export COSIGN_PASSWORD=$(openssl rand -base64 32) 
+          cosign key-generate k8s://openshift-pipelines/signing-secrets
+          oc create secret generic cosign-pubkey --from-file=cosign.pub 
+        name: create-cosign-pubkey
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      serviceAccount: pipeline
+      serviceAccountName: pipeline
+      terminationGracePeriodSeconds: 60

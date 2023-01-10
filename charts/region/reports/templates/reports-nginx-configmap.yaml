@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: reports-repo-nginx-conf
+  namespace: {{ .Values.global.cicd.namespace }}
+data:
+  nginx.conf: "types {\n    text/plain    yaml yml;\n}\n\nserver {\n    listen 8080
+    default_server;\n    gzip on;\n\n\tlocation /upload {\n\t\tsatisfy any;\n\t\tauth_basic
+    \"Welcome to the Jungle!\"; #For Basic Auth\n    \tauth_basic_user_file conf.d/htpasswd;
+    \ #For Basic Auth\n\t\tdeny all;\n\n\t\tproxy_set_header  Host $host;\n\t\tproxy_set_header
+    \ X-Real-IP $remote_addr;\n\t\tproxy_set_header  X-Forwarded-Proto https;\n\t\tproxy_set_header
+    \ X-Forwarded-For $remote_addr;\n\t\tproxy_set_header  X-Forwarded-Host $remote_addr;\n\n\t\tproxy_pass
+    http://localhost:9000;\n\t}\n\n\tlocation /private {\n\t\troot /fileuploads;\n\n\t\tsatisfy
+    any;\n\t\tauth_basic \"Welcome to the Jungle!\"; #For Basic Auth\n    \tauth_basic_user_file
+    conf.d/htpasswd;  #For Basic Auth\n\t\tdeny all;\n\n\t    autoindex
+    on;\n\t    autoindex_exact_size off;\n\t    autoindex_localtime on;\n\t}\n\n\tlocation
+    / {\n\t\troot /fileuploads;\n\t    autoindex on;\n\t    autoindex_exact_size off;\n\t
+    \   autoindex_localtime on;\n\t}\n}\n"

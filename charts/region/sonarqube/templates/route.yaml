@@ -1,0 +1,18 @@
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+  {{- include "sonarqube.selectorLabels" . | nindent 4 }}
+  name: {{ .Values.route.name }}
+  namespace: {{ .Values.global.cicd.namespace }}
+spec:
+  port:
+    targetPort: {{ .Values.service.portName }}
+  tls:
+    termination: {{ .Values.route.tls.termination }}
+  to:
+    kind: {{ .Values.route.kind }}
+    name: {{ .Values.route.name }}
+    weight: {{ .Values.route.weight }}
+  wildcardPolicy: {{ .Values.route.wildcardPolicy }}

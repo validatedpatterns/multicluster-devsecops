@@ -1,0 +1,46 @@
+# Default values for cosign.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+name: cosign
+namespace: openshift
+
+source: https://github.com/hybrid-cloud-demos/devsecops-tools
+sourceContext: containerFiles/cosign
+sourceRevision: latest
+sourceImageStream: cli:latest
+
+#Default Registry
+registry_root: image-registry.openshift-image-registry.svc:5000/openshift/cli
+
+job:
+  image: image-registry.openshift-image-registry.svc:5000/openshift/cosign:latest
+
+rbac:
+  roles:
+    - name: cosign-mgmt
+      apiGroups:
+        - '""'
+      scope:
+        cluster: false
+        namespace: openshift-pipelines
+      resources:
+        - secrets
+      verbs:
+        - "get"
+        - "list"
+        - "patch"
+        - "create"
+        - "update"
+  roleBindings:
+    - name: cosign-mgmt
+      scope:
+        cluster: false
+        namespace: openshift-pipelines
+      subjects:
+        kind: ServiceAccount
+        name: pipelines
+        namespace: openshift-pipelines
+        apiGroup: '""'
+      roleRef:
+        kind: Role
+        name: cosign-mgmt

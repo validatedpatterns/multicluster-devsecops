@@ -1,0 +1,75 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: {{ .Chart.Name }}-repo
+  name: {{ .Chart.Name }}-repo-pv
+  namespace: {{ .Values.global.cicd.namespace }}
+spec:
+  accessModes:
+  - {{ .Values.persistentVolumeClaim.accessModes }}
+  resources:
+    requests:
+      storage: {{ .Values.persistentVolumeClaim.requests.storage }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+  {{- include "reports.labels" . | nindent 4 }}
+  name: {{ .Chart.Name }}-repo
+  namespace: {{ .Values.global.cicd.namespace }}
+spec:
+  replicas: {{ .Values.replicaCount}}
+  selector:
+    matchLabels:
+    {{- include "reports.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+      {{- include "reports.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+{{- range $key, $value := .Values.containers }}
+      - name: {{ .name }}
+        image: {{ $value.image.repository }}
+        imagePullPolicy: {{ $value.image.pullPolicy }}
+{{- if .port }}
+        ports:
+        - containerPort: {{ .port }}
+          protocol: {{ .protocol }}
+{{- end }}
+{{- if .env }}
+        env:
+{{- range $key, $value := .env }}
+          - name: {{ $value.name }}
+            value: {{ $value.value | quote }}
+{{- end }}
+{{- end }}
+        volumeMounts:
+{{- range $key, $value := .volumeMounts }}
+        - mountPath: {{ $value.path }}
+          name: {{ $value.name }}
+          subPath: {{ $value.subPath }}
+{{- end }}
+{{- end }}
+{{- range .Values.volumes }}
+      volumes:
+{{- range $key, $value := .vol }}
+{{- if $value.configMap }}
+      - configMap:
+          defaultMode: {{ $value.configMap.mode }}
+          name: {{ $value.configMap.name }}
+        name: {{ $value.name }}
+{{- else if $value.secret }}
+      - name: {{ $value.name }}
+        secret:
+          secretName: {{ $value.secret.secretName }}
+{{- else }}
+      - name: {{ $value.name }}
+        persistentVolumeClaim:
+          claimName: {{ $value.persistentVolumeClaim.name }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -7,42 +7,38 @@ global:
 clusterGroup:
   name: production
   isHubCluster: false
-  clusterName: wh-secured
+  storageClass: gp2
 
   namespaces:
-    - config-demo
     - rhacs-operator
     - stackrox
     - policies
     - devsecops-ci
 
   subscriptions:
-  - name: rhacs-operator  #packageName
-    namespace: openshift-operators # operator namespace
-    channel: rhacs-3.71
-    csv: rhacs-operator.v3.71
+    rhacs-operator:
+      name: rhacs-operator  #packageName
+      namespace: openshift-operators # operator namespace
+      channel: rhacs-3.71
 
-  - name: quay-bridge-operator
-    namespace: openshift-operators
-    channel: stable-3.7
-    csv: quay-bridge-operator.v3.7
+    quay-bridge-operator:
+      name: quay-bridge-operator
+      namespace: openshift-operators
+      channel: stable-3.7
 
   projects:
     - app
     - secured
 
   applications:
-  - name: config-demo
-    namespace: config-demo
-    project: app
-    path: charts/all/config-demo
+    acs-secured:
+      name: acs-secured
+      namespace: stackrox
+      project: secured
+      path: charts/hub/acs/secured
 
-  - name: acs-secured
-    namespace: stackrox
-    project: secured
-    path: charts/hub/acs/secured
-
-  - name: quay-integration
-    namespace: openshift-operators
-    project: secured
-    path: charts/region/quay
+    quay-integration:
+      name: quay-integration
+      namespace: openshift-operators
+      project: secured
+      path: charts/region/quay

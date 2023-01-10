@@ -12,6 +12,18 @@ global:
     username: PLAINTEXT
     email: SOMEWHERE@EXAMPLE.COM
     dev_revision: main
+    taskImage: image-registry.openshift-image-registry.svc:5000/openshift/tools
+
+  app:
+    gatling:
+      image: quay.io/hybridcloudpatterns/gatling:latest
+      repo: https://github.com/hybrid-cloud-patterns/spring-petclinic-gatling
+    zapImage: quay.io/hybridcloudpatterns/zap2docker-stable
+    crdaImage: quay.io/jchraibi/crda-image:0.1
+    petclinic:
+      repo: https://github.com/hybrid-cloud-demos/spring-petclinic
+      configRepo: https://github.com/hybrid-cloud-demos/spring-petclinic-config
+      image: quay.io/hybridcloudpatterns/spring-petclinic:latest
 
   # Should be set consistently with quay enterprise setup
   imageregistry:
@@ -28,7 +40,6 @@ global:
     repo: example
 
 devel:
-  appURL: AUTOMATED
   image: AUTOMATED
   namespace: AUTOMATED
   roxCTLImage: AUTOMATED
