@@ -9,7 +9,7 @@
        fi
        if [ -z "$QUAY_USER" ]; then
            QUAY_USER=developer1
-@@ -314,13 +314,13 @@
+@@ -311,13 +311,13 @@
  apiVersion: console.openshift.io/v1
  kind: ConsoleLink
  metadata:

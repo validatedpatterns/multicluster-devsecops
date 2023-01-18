@@ -118,9 +118,6 @@ data:
 
       TOKEN=$(oc -n $QUAY_NAMESPACE extract secret/$SECRET_NAME --keys=token --to=- | grep access_token | cut -d : -f2 | awk -F\" '{print $2}')
 
-      # Now extract the token and store in the Quay Integration secret in openshift-operators namespace
-      # oc create secret -n openshift-operators generic quay-integration --from-literal=token=$TOKEN
-
       echo "[INFO] Checking our bearer token is still valid ..."
       COUNT=$(quay_cmd Bearer GET /api/v1/superuser/users/ | grep \"$QUAY_USER\" | wc -l)
       if [ $COUNT = 0 ]; then
@@ -324,21 +321,6 @@ spec:
   location: ApplicationMenu
   text: 'Red Hat Quay Enterprise Registry'
 ---
-# Source: quay/templates/quayRegistry/policy-quay-integration.yaml
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  name: quay-integration-token-placement-binding
-  namespace: openshift-operators
-placementRef:
-  name: quay-integration-token-placement
-  kind: PlacementRule
-  apiGroup: apps.open-cluster-management.io
-subjects:
-  - name: policy-quay-integration-token
-    kind: Policy
-    apiGroup: policy.open-cluster-management.io
----
 # Source: quay/templates/quayRegistry/policy-quay-pull-secret.yaml
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
@@ -353,27 +335,6 @@ subjects:
   - name: policy-quay-pull-secret
     kind: Policy
     apiGroup: policy.open-cluster-management.io
----
-# Source: quay/templates/quayRegistry/policy-quay-integration.yaml
-# We need to run this on any managed cluster but not on the HUB
-apiVersion: apps.open-cluster-management.io/v1
-kind: PlacementRule
-metadata:
-  name: quay-integration-token-placement
-  namespace: openshift-operators
-spec:
-  # This will go to both devel and secured clusters
-  clusterSelector:
-    # Using matchExpression because I need it in more than one clustergroup
-    matchExpressions:
-      - key: clustergroup
-        operator: In
-        values:
-          - devel
-          - prod
-  clusterConditions:
-    - status: 'True'
-      type: ManagedClusterConditionAvailable
 ---
 # Source: quay/templates/quayRegistry/policy-quay-pull-secret.yaml
 # We need to run this on any managed cluster but not on the HUB
@@ -444,46 +405,6 @@ spec:
                 type: Available
         remediationAction: inform
         severity: medium
----
-# Source: quay/templates/quayRegistry/policy-quay-integration.yaml
-apiVersion: policy.open-cluster-management.io/v1
-kind: Policy
-metadata:
-  name: policy-quay-integration-token
-  namespace: openshift-operators
-  annotations:
-    argocd.argoproj.io/compare-options: IgnoreExtraneous
-    argocd.argoproj.io/sync-options: SkipPrune
-    argocd.argoproj.io/sync-wave: "7"
-spec:
-  remediationAction: enforce
-  disabled: false
-  policy-templates:
-    - objectDefinition:
-        apiVersion: policy.open-cluster-management.io/v1
-        kind: ConfigurationPolicy
-        metadata:
-          name: quay-integration-token-configpolicy
-          annotations:
-            apps.open-cluster-management.io/deployables: "secret"
-        spec:
-          remediationAction: enforce
-          severity: medium
-          namespaceSelector:
-            include:
-              - default
-              - openshift-operators
-          object-templates:
-            - complianceType: mustonlyhave
-              objectDefinition:
-                kind: Secret
-                type: Opaque
-                metadata:
-                  name: quay-integration
-                  namespace: openshift-operators  # consider changing this to devsecops-ci
-                apiVersion: v1
-                data:
-                  token: '{{hub fromSecret "openshift-operators" "quay-integration" "token" hub}}'
 ---
 # Source: quay/templates/quayRegistry/policy-quay-pull-secret.yaml
 apiVersion: policy.open-cluster-management.io/v1
