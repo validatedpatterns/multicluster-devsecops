@@ -1,7 +1,6 @@
 clusterGroup:
   name: hub
   isHubCluster: true
-  insecureUnsealVaultInsideCluster: true
   storageClass: gp2
 
 # Namespaces that are expected to be created.
