@@ -1,5 +1,58 @@
 # Changes
 
+## January 29, 2023
+
+* Stop extracting the HUB's CA via an imperative job running on the imported cluster.
+  Just use ACM to push the HUB's CA out to the managed clusters.
+
+## January 23, 2023
+
+* Add initial support for running ESO on ACM-imported clusters
+
+## January 18, 2023
+
+* Add validate-schema target
+
+## January 13, 2023
+
+* Simplify the secrets paths when using argo hosted sites
+
+## January 10, 2023
+
+* vaultPrefixes is now optional in the v2 secret spec and defaults to ["hub"]
+
+## December 9, 2022
+
+* Dropped insecureUnsealVaultInsideCluster (and file_unseal) entirely. Now
+  vault is always unsealed via a cronjob in the cluster. It is recommended to
+  store the imperative/vaultkeys secret offline securely and then delete it.
+
+## December 8, 2022
+
+* Removed the legacy installation targets:
+  `deploy upgrade legacy-deploy legacy-upgrade`
+  Patterns must now use the operator-based installation
+
+## November 29, 2022
+
+* Upgraded vault-helm to 0.23.0
+* Enable vault-ssl by default
+
+## November 22, 2022
+
+* Implemented a new format for the values-secret.yaml. Example can be found in examples/ folder
+* Now the order of values-secret file lookup is the following:
+  1. ~/values-secret-<patternname>.yaml
+  2. ~/values-secret.yaml
+  3. <patterngitrepo>/values-secret.yaml.template
+* Add support for ansible vault encrypted values-secret files. You can now encrypt your values-secret file
+  at rest with `ansible-vault encrypt ~/values-secret.yaml`. When running `make load-secrets` if an encrypted
+  file is encountered the user will be prompted automatically for the password to decrypt it.
+
+## November 6, 2022
+
+* Add support for /values-<CloudPlatform>-<clusterGroup>.yaml (e.g. /values-AWS-group-one.yaml)
+
 ## October 28, 2022
 
 * Updated vault helm chart to v0.22.1 and vault containers to 1.12.0

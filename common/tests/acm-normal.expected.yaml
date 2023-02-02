@@ -19,6 +19,9 @@ data:
   install-config.yaml: CgphcGlWZXJzaW9uOiB2MQptZXRhZGF0YToKICBuYW1lOiAnYXp1cmUtdXMnIApiYXNlRG9tYWluOiBibHVlcHJpbnRzLnJoZWNvZW5nLmNvbQpjb250cm9sUGxhbmU6CiAgYXJjaGl0ZWN0dXJlOiBhbWQ2NAogIGh5cGVydGhyZWFkaW5nOiBFbmFibGVkCiAgbmFtZTogY29udHJvbFBsYW5lCiAgcmVwbGljYXM6IDMKICBwbGF0Zm9ybToKICAgIGF6dXJlOgogICAgICB0eXBlOiBTdGFuZGFyZF9EOHNfdjMKY29tcHV0ZToKLSBoeXBlcnRocmVhZGluZzogRW5hYmxlZAogIGFyY2hpdGVjdHVyZTogYW1kNjQKICBuYW1lOiAnd29ya2VyJwogIHJlcGxpY2FzOiAzCiAgcGxhdGZvcm06CiAgICBhenVyZToKICAgICAgdHlwZTogU3RhbmRhcmRfRDhzX3YzCm5ldHdvcmtpbmc6CiAgY2x1c3Rlck5ldHdvcms6CiAgLSBjaWRyOiAxMC4xMjguMC4wLzE0CiAgICBob3N0UHJlZml4OiAyMwogIG1hY2hpbmVOZXR3b3JrOgogIC0gY2lkcjogMTAuMC4wLjAvMTYKICBuZXR3b3JrVHlwZTogT3BlblNoaWZ0U0ROCiAgc2VydmljZU5ldHdvcms6CiAgLSAxNzIuMzAuMC4wLzE2CnBsYXRmb3JtOiB7CiAgImF6dXJlIjogewogICAgImJhc2VEb21haW5SZXNvdXJjZUdyb3VwTmFtZSI6ICJkb2pvLWRucy16b25lcyIsCiAgICAicmVnaW9uIjogImVhc3R1cyIKICB9Cn0KcHVsbFNlY3JldDogIiIgIyBza2lwLCBoaXZlIHdpbGwgaW5qZWN0IGJhc2VkIG9uIGl0J3Mgc2VjcmV0cwpzc2hLZXk6ICIiICAgICAjIHNraXAsIGhpdmUgd2lsbCBpbmplY3QgYmFzZWQgb24gaXQncyBzZWNyZXRz 
 type: Opaque
 ---
+# Source: acm/templates/policies/acm-hub-ca-policy.yaml
+# This pushes out the HUB's Certificate Authorities on to the imported clusters
+---
 # Source: acm/templates/provision/clusterpool.yaml
 apiVersion: hive.openshift.io/v1
 kind: ClusterClaim
@@ -26,6 +29,7 @@ metadata:
   name: 'one-acm-provision-edge'
   annotations:
     argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     cluster.open-cluster-management.io/createmanagedcluster: "true"
   labels:
     clusterClaimName: one-acm-provision-edge
@@ -40,6 +44,7 @@ metadata:
   name: 'two-acm-provision-edge'
   annotations:
     argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     cluster.open-cluster-management.io/createmanagedcluster: "true"
   labels:
     clusterClaimName: two-acm-provision-edge
@@ -54,6 +59,7 @@ metadata:
   name: 'three-acm-provision-edge'
   annotations:
     argocd.argoproj.io/sync-wave: "20"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     cluster.open-cluster-management.io/createmanagedcluster: "true"
   labels:
     clusterClaimName: three-acm-provision-edge
@@ -68,6 +74,7 @@ metadata:
   name: "aws-ap-acm-provision-edge"
   annotations:
     argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
     cloud: aws
     region: 'ap-southeast-2'
@@ -97,6 +104,7 @@ metadata:
   name: "azure-us-acm-provision-edge"
   annotations:
     argocd.argoproj.io/sync-wave: "10"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
     cloud: azure
     region: 'eastus'
@@ -377,6 +385,7 @@ kind: ManagedClusterSet
 metadata:
   annotations:
     cluster.open-cluster-management.io/submariner-broker-ns: acm-provision-edge-broker
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   name: acm-provision-edge
 spec:
   clusterSelector:
@@ -391,6 +400,22 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
 spec: {}
+---
+# Source: acm/templates/policies/acm-hub-ca-policy.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: acm-hub-ca-policy-placement-binding
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+placementRef:
+  name: acm-hub-ca-policy-placement
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: acm-hub-ca-policy
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
 ---
 # Source: acm/templates/policies/application-policies.yaml
 apiVersion: policy.open-cluster-management.io/v1
@@ -440,6 +465,22 @@ subjects:
     kind: Policy
     apiGroup: policy.open-cluster-management.io
 ---
+# Source: acm/templates/policies/acm-hub-ca-policy.yaml
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: acm-hub-ca-policy-placement
+spec:
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - key: local-cluster
+        operator: NotIn
+        values:
+          - 'true'
+---
 # Source: acm/templates/policies/application-policies.yaml
 apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
@@ -481,6 +522,42 @@ spec:
         operator: In
         values:
           - OpenShift
+---
+# Source: acm/templates/policies/acm-hub-ca-policy.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: acm-hub-ca-policy
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: acm-hub-ca-config-policy
+        spec:
+          remediationAction: enforce
+          severity: medium
+          namespaceSelector:
+            include:
+              - default
+          object-templates:
+            - complianceType: mustonlyhave
+              objectDefinition:
+                kind: Secret
+                apiVersion: v1
+                type: Opaque
+                metadata:
+                  name: hub-ca
+                  namespace: imperative
+                data:
+                  hub-kube-root-ca.crt: '{{hub fromConfigMap "" "kube-root-ca.crt" "ca.crt" | base64enc hub}}'
+                  hub-openshift-service-ca.crt: '{{hub fromConfigMap "" "openshift-service-ca.crt" "service-ca.crt" | base64enc hub}}'
 ---
 # Source: acm/templates/policies/application-policies.yaml
 # TODO: Also create a GitOpsCluster.apps.open-cluster-management.io
@@ -527,6 +604,7 @@ spec:
                       valueFiles:
                       - "/values-global.yaml"
                       - "/values-acm-edge.yaml"
+                      - '/values-{{ (lookup "config.openshift.io/v1" "Infrastructure" "" "cluster").spec.platformSpec.type }}-acm-edge.yaml'
                       # We cannot use $.Values.global.clusterVersion because that gets resolved to the
                       # hub's cluster version, whereas we want to include the spoke cluster version
                       - '/values-{{ printf "%d.%d" ((semver (lookup "operator.openshift.io/v1" "OpenShiftControllerManager" "" "cluster").status.version).Major) ((semver (lookup "operator.openshift.io/v1" "OpenShiftControllerManager" "" "cluster").status.version).Minor) }}-acm-edge.yaml'
@@ -549,6 +627,8 @@ spec:
                       # Requires ACM 2.6 or higher (I could not come up with something less terrible to get maj.min)
                       - name: global.clusterVersion
                         value: '{{ printf "%d.%d" ((semver (lookup "operator.openshift.io/v1" "OpenShiftControllerManager" "" "cluster").status.version).Major) ((semver (lookup "operator.openshift.io/v1" "OpenShiftControllerManager" "" "cluster").status.version).Minor) }}'
+                      - name: global.clusterPlatform
+                        value: 
                       - name: clusterGroup.name
                         value: acm-edge
                       - name: clusterGroup.isHubCluster
@@ -614,6 +694,7 @@ spec:
                       valueFiles:
                       - "/values-global.yaml"
                       - "/values-acm-provision-edge.yaml"
+                      - '/values-{{ (lookup "config.openshift.io/v1" "Infrastructure" "" "cluster").spec.platformSpec.type }}-acm-provision-edge.yaml'
                       # We cannot use $.Values.global.clusterVersion because that gets resolved to the
                       # hub's cluster version, whereas we want to include the spoke cluster version
                       - '/values-{{ printf "%d.%d" ((semver (lookup "operator.openshift.io/v1" "OpenShiftControllerManager" "" "cluster").status.version).Major) ((semver (lookup "operator.openshift.io/v1" "OpenShiftControllerManager" "" "cluster").status.version).Minor) }}-acm-provision-edge.yaml'
@@ -636,6 +717,8 @@ spec:
                       # Requires ACM 2.6 or higher (I could not come up with something less terrible to get maj.min)
                       - name: global.clusterVersion
                         value: '{{ printf "%d.%d" ((semver (lookup "operator.openshift.io/v1" "OpenShiftControllerManager" "" "cluster").status.version).Major) ((semver (lookup "operator.openshift.io/v1" "OpenShiftControllerManager" "" "cluster").status.version).Minor) }}'
+                      - name: global.clusterPlatform
+                        value: 
                       - name: clusterGroup.name
                         value: acm-provision-edge
                       - name: clusterGroup.isHubCluster

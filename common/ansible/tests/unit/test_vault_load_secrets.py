@@ -26,7 +26,18 @@ from unittest.mock import call, patch
 from ansible.module_utils import basic
 from ansible.module_utils.common.text.converters import to_bytes
 
+# TODO(bandini): I could not come up with something better to force the imports to be existing
+# when we 'import vault_load_secrets'
+sys.path.insert(1, "./ansible/plugins/module_utils")
 sys.path.insert(1, "./ansible/plugins/modules")
+import load_secrets_common  # noqa: E402
+
+sys.modules["ansible.module_utils.load_secrets_common"] = load_secrets_common
+import load_secrets_v1  # noqa: E402
+import load_secrets_v2  # noqa: E402
+
+sys.modules["ansible.module_utils.load_secrets_v1"] = load_secrets_v1
+sys.modules["ansible.module_utils.load_secrets_v2"] = load_secrets_v2
 import vault_load_secrets  # noqa: E402
 
 
@@ -69,7 +80,15 @@ class TestMyModule(unittest.TestCase):
         )
         self.mock_module_helper.start()
         self.addCleanup(self.mock_module_helper.stop)
-        self.testdir = os.path.dirname(os.path.abspath(__file__))
+        self.testdir_v1 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "v1")
+        self.testfile = open("/tmp/ca.crt", "w")
+
+    def tearDown(self):
+        self.testfile.close()
+        try:
+            os.remove("/tmp/ca.crt")
+        except OSError:
+            pass
 
     def test_module_fail_when_required_args_missing(self):
         with self.assertRaises(AnsibleFailJson):
@@ -87,7 +106,7 @@ class TestMyModule(unittest.TestCase):
 
         ret = ansible_err.exception.args[0]
         self.assertEqual(ret["failed"], True)
-        self.assertEqual(ret["error"], "Missing values-secrets.yaml file")
+        self.assertEqual(ret["error"], "Missing /tmp/nonexisting file")
         self.assertEqual(
             ret["msg"], "Values secrets file does not exist: /tmp/nonexisting"
         )
@@ -96,13 +115,15 @@ class TestMyModule(unittest.TestCase):
         set_module_args(
             {
                 "values_secrets": os.path.join(
-                    self.testdir,
+                    self.testdir_v1,
                     "values-secret-empty-files.yaml",
                 )
             }
         )
 
-        with patch.object(vault_load_secrets, "run_command") as mock_run_command:
+        with patch.object(
+            load_secrets_v1.LoadSecretsV1, "_run_command"
+        ) as mock_run_command:
             stdout = "configuration updated"
             stderr = ""
             ret = 0
@@ -134,7 +155,7 @@ class TestMyModule(unittest.TestCase):
             "values-secret-broken3.yaml",
         ):
             with self.assertRaises(AnsibleFailJson) as ansible_err:
-                set_module_args({"values_secrets": os.path.join(self.testdir, i)})
+                set_module_args({"values_secrets": os.path.join(self.testdir_v1, i)})
                 vault_load_secrets.main()
 
             ret = ansible_err.exception.args[0]
@@ -144,13 +165,15 @@ class TestMyModule(unittest.TestCase):
         set_module_args(
             {
                 "values_secrets": os.path.join(
-                    self.testdir,
+                    self.testdir_v1,
                     "values-secret-empty-secrets.yaml",
-                )
+                ),
             }
         )
 
-        with patch.object(vault_load_secrets, "run_command") as mock_run_command:
+        with patch.object(
+            load_secrets_v1.LoadSecretsV1, "_run_command"
+        ) as mock_run_command:
             stdout = "configuration updated"
             stderr = ""
             ret = 0
@@ -165,7 +188,7 @@ class TestMyModule(unittest.TestCase):
 
         calls = [
             call(
-                "cat '/home/michele/.ssh/id_rsa.pub' | oc exec -n vault vault-0 -i -- sh -c 'cat - > /tmp/vcontent'; oc exec -n vault vault-0 -i -- sh -c 'base64 --wrap=0 /tmp/vcontent | vault kv put secret/hub/publickey b64content=- content=@/tmp/vcontent; rm /tmp/vcontent'",  # noqa: E501
+                "cat '/tmp/ca.crt' | oc exec -n vault vault-0 -i -- sh -c 'cat - > /tmp/vcontent'; oc exec -n vault vault-0 -i -- sh -c 'base64 --wrap=0 /tmp/vcontent | vault kv put secret/hub/publickey b64content=- content=@/tmp/vcontent; rm /tmp/vcontent'",  # noqa: E501
                 attempts=3,
             ),
         ]
@@ -173,10 +196,12 @@ class TestMyModule(unittest.TestCase):
 
     def test_ensure_command_called(self):
         set_module_args(
-            {"values_secrets": os.path.join(self.testdir, "values-secret.yaml")}
+            {"values_secrets": os.path.join(self.testdir_v1, "values-secret-good.yaml")}
         )
 
-        with patch.object(vault_load_secrets, "run_command") as mock_run_command:
+        with patch.object(
+            load_secrets_v1.LoadSecretsV1, "_run_command"
+        ) as mock_run_command:
             stdout = "configuration updated"
             stderr = ""
             ret = 0
@@ -195,7 +220,7 @@ class TestMyModule(unittest.TestCase):
                 attempts=3,
             ),
             call(
-                "oc exec -n vault vault-0 -i -- sh -c \"vault kv put 'secret/hub/googleapi' key='lskdjflskjdflsdjflsdkjfldsjkfldsj'\"",  # noqa: E501
+                "oc exec -n vault vault-0 -i -- sh -c \"vault kv put 'secret/hub/googleapi' key='test123'\"",  # noqa: E501
                 attempts=3,
             ),
             call(
@@ -219,11 +244,11 @@ class TestMyModule(unittest.TestCase):
                 attempts=3,
             ),
             call(
-                "cat '/home/michele/ca.crt' | oc exec -n vault vault-0 -i -- sh -c 'cat - > /tmp/vcontent'; oc exec -n vault vault-0 -i -- sh -c 'base64 --wrap=0 /tmp/vcontent | vault kv put secret/hub/cluster_alejandro_ca b64content=- content=@/tmp/vcontent; rm /tmp/vcontent'",  # noqa: E501
+                "cat '/tmp/ca.crt' | oc exec -n vault vault-0 -i -- sh -c 'cat - > /tmp/vcontent'; oc exec -n vault vault-0 -i -- sh -c 'base64 --wrap=0 /tmp/vcontent | vault kv put secret/hub/cluster_alejandro_ca b64content=- content=@/tmp/vcontent; rm /tmp/vcontent'",  # noqa: E501
                 attempts=3,
             ),
             call(
-                "cat '/home/michele/ca.crt' | oc exec -n vault vault-0 -i -- sh -c 'cat - > /tmp/vcontent'; oc exec -n vault vault-0 -i -- sh -c 'base64 --wrap=0 /tmp/vcontent | vault kv put secret/region-one/ca b64content=- content=@/tmp/vcontent; rm /tmp/vcontent'",  # noqa: E501
+                "cat '/tmp/ca.crt' | oc exec -n vault vault-0 -i -- sh -c 'cat - > /tmp/vcontent'; oc exec -n vault vault-0 -i -- sh -c 'base64 --wrap=0 /tmp/vcontent | vault kv put secret/region-one/ca b64content=- content=@/tmp/vcontent; rm /tmp/vcontent'",  # noqa: E501
                 attempts=3,
             ),
         ]
@@ -232,14 +257,18 @@ class TestMyModule(unittest.TestCase):
     def test_ensure_good_template_checking(self):
         set_module_args(
             {
-                "values_secrets": os.path.join(self.testdir, "mcg-values-secret.yaml"),
+                "values_secrets": os.path.join(
+                    self.testdir_v1, "mcg-values-secret.yaml"
+                ),
                 "check_missing_secrets": True,
                 "values_secret_template": os.path.join(
-                    self.testdir, "template-mcg-working.yaml"
+                    self.testdir_v1, "template-mcg-working.yaml"
                 ),
             }
         )
-        with patch.object(vault_load_secrets, "run_command") as mock_run_command:
+        with patch.object(
+            load_secrets_v1.LoadSecretsV1, "_run_command"
+        ) as mock_run_command:
             stdout = "configuration updated"
             stderr = ""
             ret = 0
@@ -263,14 +292,18 @@ class TestMyModule(unittest.TestCase):
     def test_ensure_bad_template_checking(self):
         set_module_args(
             {
-                "values_secrets": os.path.join(self.testdir, "mcg-values-secret.yaml"),
+                "values_secrets": os.path.join(
+                    self.testdir_v1, "mcg-values-secret.yaml"
+                ),
                 "check_missing_secrets": True,
                 "values_secret_template": os.path.join(
-                    self.testdir, "template-mcg-missing.yaml"
+                    self.testdir_v1, "template-mcg-missing.yaml"
                 ),
             }
         )
-        with patch.object(vault_load_secrets, "run_command") as mock_run_command:
+        with patch.object(
+            load_secrets_v1.LoadSecretsV1, "_run_command"
+        ) as mock_run_command:
             stdout = "configuration updated"
             stderr = ""
             ret = 0
@@ -283,6 +316,70 @@ class TestMyModule(unittest.TestCase):
             assert (
                 result.exception.args[0]["args"][1]
                 == "Values secret yaml is missing needed secrets from the templates: {'secrets.config-demo.foo'}"
+            )
+            assert mock_run_command.call_count == 0
+
+    def test_ensure_fqdn_secrets(self):
+        set_module_args(
+            {"values_secrets": os.path.join(self.testdir_v1, "values-secret-fqdn.yaml")}
+        )
+
+        with patch.object(
+            load_secrets_v1.LoadSecretsV1, "_run_command"
+        ) as mock_run_command:
+            stdout = "configuration updated"
+            stderr = ""
+            ret = 0
+            mock_run_command.return_value = ret, stdout, stderr  # successful execution
+
+            with self.assertRaises(AnsibleExitJson) as result:
+                vault_load_secrets.main()
+            self.assertTrue(
+                result.exception.args[0]["changed"]
+            )  # ensure result is changed
+            assert mock_run_command.call_count == 3
+
+        calls = [
+            call(
+                "oc exec -n vault vault-0 -i -- sh -c \"vault kv put 'secret/hub/test' secret1='foo'\"",  # noqa: E501
+                attempts=3,
+            ),
+            call(
+                "oc exec -n vault vault-0 -i -- sh -c \"vault kv put 'secret/region-one.blueprints.rhecoeng.com/config-demo' secret='region123'\"",  # noqa: E501
+                attempts=3,
+            ),
+            call(
+                "cat '/tmp/ca.crt' | oc exec -n vault vault-0 -i -- sh -c 'cat - > /tmp/vcontent'; oc exec -n vault vault-0 -i -- sh -c 'base64 --wrap=0 /tmp/vcontent | vault kv put secret/region-one/ca b64content=- content=@/tmp/vcontent; rm /tmp/vcontent'",  # noqa: E501
+                attempts=3,
+            ),
+        ]
+        mock_run_command.assert_has_calls(calls)
+
+    def test_ensure_check_missing_secrets_errors_out(self):
+        set_module_args(
+            {
+                "values_secrets": os.path.join(
+                    self.testdir_v1, "mcg-values-secret.yaml"
+                ),
+                "check_missing_secrets": True,
+                "values_secret_template": "",
+            }
+        )
+        with patch.object(
+            load_secrets_v1.LoadSecretsV1, "_run_command"
+        ) as mock_run_command:
+            stdout = "configuration updated"
+            stderr = ""
+            ret = 0
+            mock_run_command.return_value = ret, stdout, stderr
+
+            with self.assertRaises(AnsibleFailJson) as result:
+                vault_load_secrets.main()
+            self.assertTrue(result.exception.args[0]["failed"])
+            # In case of failure args[1] contains the msg of the failure
+            assert (
+                result.exception.args[0]["args"][1]
+                == "No values_secret_template defined and check_missing_secrets set to True"
             )
             assert mock_run_command.call_count == 0
 
