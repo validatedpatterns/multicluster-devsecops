@@ -19,6 +19,4 @@ post-install: ## Post-install tasks - vault init and load-secrets
 	echo "Done"
 
 test:
-	make -f common/Makefile CHARTS="$(wildcard charts/all/*)" PATTERN_OPTS="-f values-global.yaml -f values-hub.yaml" test
-	make -f common/Makefile CHARTS="$(wildcard charts/hub/[b-z]*) $(wildcard charts/hub/acs/*)" PATTERN_OPTS="-f values-global.yaml -f values-hub.yaml" test
-	#make -f common/Makefile CHARTS="$(wildcard charts/region/*)" PATTERN_OPTS="-f values-region-one.yaml" test
+	@make -f common/Makefile PATTERN_OPTS="-f values-global.yaml -f values-hub.yaml" test
