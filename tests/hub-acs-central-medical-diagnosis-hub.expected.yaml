@@ -1,0 +1,538 @@
+---
+# Source: acs/templates/rbac/cluster-init-bundle-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: create-cluster-init
+  namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+---
+# Source: acs/templates/rbac/cluster-init-bundle-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  name: create-cluster-init
+  namespace: stackrox
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - create
+      - patch
+      - update
+  - apiGroups:
+      - platform.stackrox.io
+    resources:
+      - securedclusters
+    verbs:
+      - get
+      - list
+      - patch
+      - update
+---
+# Source: acs/templates/rbac/cluster-init-bundle-rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: create-cluster-init
+  namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: create-cluster-init
+subjects:
+  - kind: ServiceAccount
+    name: create-cluster-init
+    namespace: stackrox
+---
+# Source: acs/templates/create-cluster-init-bundle-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "5"
+  name: create-cluster-init-bundle
+  namespace: stackrox
+spec:
+  template:
+    metadata:
+      annotations:
+        argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    spec:
+      containers:
+        - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+          env:
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: central-htpasswd
+                  key: password
+          command:
+            - /bin/bash
+            - -c
+            - |
+              #!/usr/bin/env bash
+              if kubectl get secret/sensor-tls &> /dev/null; then
+                echo "cluster-init bundle has already been configured, doing nothing"
+                exit 0
+              else
+
+                # Wait for central to be ready
+                attempt_counter=0
+                max_attempts=20
+                echo "Waiting for central to be available..."
+                until $(curl -k --output /dev/null --silent --head --fail https://central); do
+                    if [ ${attempt_counter} -eq ${max_attempts} ];then
+                      echo "Max attempts reached"
+                      exit 1
+                    fi
+
+                    printf '.'
+                    attempt_counter=$(($attempt_counter+1))
+                    echo "Made attempt $attempt_counter, waiting..."
+                done
+
+                echo "Configuring cluster-init bundle"
+                export DATA={\"name\":\"local-cluster\"}
+                curl -k -o /tmp/bundle.json -X POST -u "admin:$PASSWORD" -H "Content-Type: application/json" --data $DATA https://central/v1/cluster-init/init-bundles
+
+                echo "Bundle received"
+                cat /tmp/bundle.json
+
+                echo "Applying bundle"
+                # No jq in container, python to the rescue
+                cat /tmp/bundle.json | python3 -c "import sys, json; print(json.load(sys.stdin)['kubectlBundle'])" | base64 -d | oc apply -f -
+                # Touch SecuredCluster to force operator to reconcile
+                oc label SecuredCluster local-cluster cluster-init-job-status=created
+
+                echo "ACS Cluster init bundle generated and applied"
+              fi
+          imagePullPolicy: Always
+          name: create-cluster-init-bundle
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      serviceAccount: create-cluster-init
+      serviceAccountName: create-cluster-init
+      terminationGracePeriodSeconds: 30
+---
+# Source: acs/templates/integration/job-stackrox-api-token.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+  name: get-stackrox-api-token
+  namespace: stackrox
+spec:
+  template:
+    spec:
+      containers:
+      - image: image-registry.openshift-image-registry.svc:5000/openshift/cli-tools:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          ACSTOKEN=$(curl -sk -u "admin:$(oc extract secret/central-htpasswd --keys=password --to=-)" "https://central-stackrox.apps.hub.example.com/v1/apitokens/generate" -d '{"name":"token name", "role": "Admin"}' | jq -r '.token')
+          oc create secret -n stackrox generic acs-api-token --from-literal=token=$ACSTOKEN
+        name: stackrox-api-token
+      dnsPolicy: ClusterFirst
+      activeDeadlineSeconds: 300
+      restartPolicy: Never
+      serviceAccountName: create-cluster-init
+      terminationGracePeriodSeconds: 60
+---
+# Source: acs/templates/job-create-auth-provider.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "7"
+  name: create-auth-provider
+  namespace: stackrox
+spec:
+  template:
+    metadata:
+      annotations:
+        argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    spec:
+      containers:
+        - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+          env:
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: central-htpasswd
+                  key: password
+          command:
+            - /bin/bash
+            - -c
+            - |
+              #!/usr/bin/env bash
+              echo "Creating auth provider in RHACS"
+              export DATA={\"name\":\"local-cluster\"}
+              curl -X POST -u "admin:$PASSWORD" -k https://central/v1/authProviders --data '{"name": "OpenShift OAuth", "type": "openshift", "enabled": true}'
+          imagePullPolicy: Always
+          name: create-auth-provider
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      serviceAccount: create-cluster-init
+      serviceAccountName: create-cluster-init
+      terminationGracePeriodSeconds: 30
+---
+# Source: acs/templates/central-stackrox-central-services.yaml
+apiVersion: platform.stackrox.io/v1alpha1
+kind: Central
+metadata:
+  namespace: stackrox
+  name: stackrox-central-services
+spec:
+  central:
+    exposure:
+      loadBalancer:
+        enabled: false
+        port: 443
+      nodePort:
+        enabled: false
+      route:
+        enabled: true
+    persistence:
+      persistentVolumeClaim:
+        claimName: stackrox-db
+  egress:
+    connectivityPolicy: Online
+  scanner:
+    analyzer:
+      scaling:
+        autoScaling: Enabled
+        maxReplicas: 5
+        minReplicas: 2
+        replicas: 3
+    scannerComponent: Enabled
+---
+# Source: acs/templates/acs-console-link.yaml
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: hub-acs-link
+  namespace: stackrox
+spec:
+  applicationMenu:
+    section: Red Hat applications
+    imageURL: 'https://upload.wikimedia.org/wikipedia/commons/3/3a/OpenShift-LogoType.svg'
+  href: 'https://central-stackrox.apps.region.example.com'
+  location: ApplicationMenu
+  text: 'Red Hat Advanced Cluster Security for Kubernetes'
+---
+# Source: acs/templates/integration/policy-acs-integrations-token.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: acs-integrations-token-placement-binding
+placementRef:
+  name: acs-integrations-token-placement
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: policy-acs-integrations-token
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+# Source: acs/templates/policy/secured-cluster-secret-placement-binding.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: secured-cluster-secret-placement-binding
+  namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+placementRef:
+  name: secured-cluster-secret-placement
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: secured-cluster-secret-policy
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+---
+# Source: acs/templates/integration/policy-acs-integrations-token.yaml
+# We need to run this on any managed cluster but not on the HUB
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: acs-integrations-token-placement
+spec:
+  # This will go to all devel clusters
+  clusterSelector:
+    # Using matchLabels because I need it in only one clusterGroup
+    matchLabels:
+      clusterGroup: devel
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
+---
+# Source: acs/templates/policy/secured-cluster-secret-placement-rule.yaml
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: secured-cluster-secret-placement
+  namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  # This will go to all managed clusters
+  clusterConditions:
+    - status: 'True'
+      type: ManagedClusterConditionAvailable
+---
+# Source: acs/templates/integration/policy-acs-integrations-token.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: policy-acs-integrations-token
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: SkipPrune
+    argocd.argoproj.io/sync-wave: "7"
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: acs-api-token-configpolicy
+          annotations:
+            apps.open-cluster-management.io/deployables: "secret"
+        spec:
+          remediationAction: enforce
+          severity: medium
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - default
+          object-templates:
+            - complianceType: mustonlyhave
+              objectDefinition:
+                kind: Secret
+                type: Opaque
+                metadata:
+                  name: acs-api-token
+                  namespace: stackrox
+                apiVersion: v1
+                data:
+                  token: '{{hub fromSecret "stackrox" "acs-api-token" "token" hub}}'
+---
+# Source: acs/templates/policy/policy-acs-central-status.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    policy.open-cluster-management.io/categories: SI System and Information Integrity
+    policy.open-cluster-management.io/controls: SI-5 Security Alerts Advisories and
+      Directives
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  labels:
+    open-cluster-management.io/policy-set: openshift-plus
+  name: policy-acs-central-status
+  namespace: policies
+spec:
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: policy-acs-central-status
+      spec:
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: central
+              namespace: stackrox
+            status:
+              conditions:
+              - status: "True"
+                type: Available
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: scanner-db
+              namespace: stackrox
+            status:
+              conditions:
+              - status: "True"
+                type: Available
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: scanner
+              namespace: stackrox
+            status:
+              conditions:
+              - status: "True"
+                type: Available
+        remediationAction: inform
+        severity: medium
+---
+# Source: acs/templates/policy/policy-acs-secured-status.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    policy.open-cluster-management.io/categories: SI System and Information Integrity
+    policy.open-cluster-management.io/controls: SI-5 Security Alerts Advisories and
+      Directives
+    policy.open-cluster-management.io/standards: NIST SP 800-53
+  labels:
+    open-cluster-management.io/policy-set: openshift-plus
+  name: policy-acs-secured-status
+  namespace: policies
+spec:
+  disabled: false
+  policy-templates:
+  - objectDefinition:
+      apiVersion: policy.open-cluster-management.io/v1
+      kind: ConfigurationPolicy
+      metadata:
+        name: policy-acs-secured-status
+      spec:
+        object-templates:
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: sensor
+              namespace: stackrox
+            status:
+              conditions:
+              - status: "True"
+                type: Available
+        - complianceType: musthave
+          objectDefinition:
+            apiVersion: apps/v1
+            kind: DaemonSet
+            metadata:
+              name: collector
+              namespace: stackrox
+            status:
+              numberMisscheduled: 0
+        remediationAction: inform
+        severity: medium
+---
+# Source: acs/templates/policy/secured-cluster-secret-policy.yaml
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: secured-cluster-secret-policy
+  namespace: stackrox
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/sync-options: SkipPrune
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: secured-cluster-secret
+          annotations:
+            apps.open-cluster-management.io/deployables: "secret"
+#            policy.open-cluster-management.io/trigger-update: "2"
+        spec:
+          remediationAction: enforce
+          severity: medium
+          namespaceSelector:
+            exclude:
+              - kube-*
+            include:
+              - default
+              - rhacs-operator
+              - stackrox
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                data:
+                  admission-control-cert.pem: '{{hub fromSecret "stackrox" "admission-control-tls" "admission-control-cert.pem" hub}}'
+                  admission-control-key.pem: '{{hub fromSecret "stackrox" "admission-control-tls" "admission-control-key.pem" hub}}'
+                  ca.pem: '{{hub fromSecret "stackrox" "admission-control-tls" "ca.pem" hub}}'
+                kind: Secret
+                metadata:
+                  name: admission-control-tls
+                  namespace: stackrox
+                type: Opaque
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                data:
+                  sensor-cert.pem: '{{hub fromSecret "stackrox" "sensor-tls" "sensor-cert.pem" hub}}'
+                  sensor-key.pem: '{{hub fromSecret "stackrox" "sensor-tls" "sensor-key.pem" hub}}'
+                  ca.pem: '{{hub fromSecret "stackrox" "sensor-tls" "ca.pem" hub}}'
+                  acs-host: '{{hub fromSecret "stackrox" "sensor-tls" "acs-host" hub}}'
+                kind: Secret
+                metadata:
+                  name: sensor-tls
+                  namespace: stackrox
+                type: Opaque
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                data:
+                  collector-cert.pem: '{{hub fromSecret "stackrox" "collector-tls" "collector-cert.pem" hub}}'
+                  collector-key.pem: '{{hub fromSecret "stackrox" "collector-tls" "collector-key.pem" hub}}'
+                  ca.pem: '{{hub fromSecret "stackrox" "collector-tls" "ca.pem" hub}}'
+                kind: Secret
+                metadata:
+                  name: collector-tls
+                  namespace: stackrox
+                type: Opaque
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                data:
+                  cert.pem: '{{hub fromSecret "stackrox" "scanner-tls" "cert.pem" hub}}'
+                  key.pem: '{{hub fromSecret "stackrox" "scanner-tls" "key.pem" hub}}'
+                  ca.pem: '{{hub fromSecret "stackrox" "scanner-tls" "ca.pem" hub}}'
+                kind: Secret
+                metadata:
+                  name: scanner-tls
+                  namespace: stackrox
+                type: Opaque
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                data:
+                  cert.pem: '{{hub fromSecret "stackrox" "scanner-db-tls" "cert.pem" hub}}'
+                  key.pem: '{{hub fromSecret "stackrox" "scanner-db-tls" "key.pem" hub}}'
+                  ca.pem: '{{hub fromSecret "stackrox" "scanner-db-tls" "ca.pem" hub}}'
+                kind: Secret
+                metadata:
+                  name: scanner-db-tls
+                  namespace: stackrox
+                type: Opaque

@@ -311,7 +311,7 @@ spec:
 apiVersion: console.openshift.io/v1
 kind: ConsoleLink
 metadata:
-  name: hub-quay-link
+  name: example-quay-link
   namespace: quay-enterprise
 spec:
   applicationMenu:
