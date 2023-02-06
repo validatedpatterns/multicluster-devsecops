@@ -23,5 +23,5 @@ spec:
     cephObjectStores: {}
   mirroring: {}
   multiCloudGateway:
-    dbStorageClassName: {{ .Values.clusterGroup.storageClass }}
+    dbStorageClassName: {{ .Values.cloudProvider.storageClass }}
     reconcileStrategy: standalone

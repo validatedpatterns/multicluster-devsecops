@@ -6,7 +6,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: {{ .Values.clusterGroup.storageClass }}-vp
+  storageClassName: {{ .Values.cloudProvider.storageClass }}-vp
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
