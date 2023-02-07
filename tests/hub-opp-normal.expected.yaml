@@ -1,12 +1,12 @@
 ---
 # Source: opp/templates/ocm-observability-bucket-claim.yaml
-apiVersion: operator.openshift.io/v1
-kind: Console
-metadata:
-  name: cluster
-spec:
-  plugins:
-  - odf-console
+#apiVersion: operator.openshift.io/v1
+#kind: Console
+#metadata:
+#  name: cluster
+#spec:
+#  plugins:
+#  - odf-console
 ---
 # Source: opp/templates/clusterset-binding.yaml
 apiVersion: cluster.open-cluster-management.io/v1beta1
