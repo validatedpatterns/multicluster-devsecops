@@ -7,7 +7,6 @@ global:
 clusterGroup:
   name: production
   isHubCluster: false
-  storageClass: gp2
 
   namespaces:
     - rhacs-operator
