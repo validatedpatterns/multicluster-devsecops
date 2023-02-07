@@ -83,6 +83,7 @@ data:
         jobs:
         - name: test
           playbook: ansible/test.yml
+          timeout: 234
         namespace: imperative
         roleName: imperative-role
         roleYaml: ""
@@ -91,7 +92,6 @@ data:
         serviceAccountName: imperative-sa
         valuesConfigMap: helm-values-configmap
         verbosity: ""
-      insecureUnsealVaultInsideCluster: true
       isHubCluster: true
       managedClusterGroups:
       - acmlabels:
@@ -136,9 +136,7 @@ data:
         - name: clusterGroup.isHubCluster
           value: "false"
         hostedArgoSites:
-        - bearerKeyPath: secret/data/hub/cluster_perth
-          caKeyPath: secret/data/hub/cluster_perth_ca
-          domain: perth1.beekhof.net
+        - domain: perth1.beekhof.net
           name: perth
         - domain: syd.beekhof.net
           name: sydney
@@ -174,6 +172,7 @@ data:
         hostname: github.com
       hubClusterDomain: apps.hub.example.com
       localClusterDomain: apps.region.example.com
+      multiClusterTarget: all
       namespace: pattern-namespace
       options:
         installPlanApproval: Automatic
@@ -190,8 +189,6 @@ data:
     secretStore:
       kind: ClusterSecretStore
       name: vault-backend
-    secretsBase:
-      key: secret/data/hub
 ---
 # Source: pattern-clustergroup/templates/imperative/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -340,7 +337,7 @@ spec:
               # on a per-job basis
               command:
                 - timeout
-                - "600"
+                - "234"
                 - ansible-playbook
                 - -e
                 - "@/values/values.yaml"
@@ -418,10 +415,8 @@ spec:
                 - ansible-playbook
                 - -e
                 - "@/values/values.yaml"
-                - -e
-                - '{"file_unseal": false}'
                 - -t
-                - 'vault_init,vault_unseal,vault_secrets_init'
+                - 'vault_init,vault_unseal,vault_secrets_init,vault_spokes_init'
                 - "common/ansible/playbooks/vault/vault.yaml"
               volumeMounts:                
                 - name: git
@@ -528,6 +523,8 @@ spec:
           value: region.example.com
         - name: global.clusterVersion
           value: ""
+        - name: global.clusterPlatform
+          value: ""
         - name: global.hubClusterDomain
           value: apps.hub.example.com
         - name: global.localClusterDomain
@@ -581,6 +578,8 @@ spec:
           value: region.example.com
         - name: global.clusterVersion
           value: ""
+        - name: global.clusterPlatform
+          value: ""
         - name: global.hubClusterDomain
           value: apps.hub.example.com
         - name: global.localClusterDomain
@@ -629,10 +628,8 @@ spec:
         value: argo-edge
       - name: clusterGroup.targetCluster
         value: perth
-      - name: clusterGroup.hostedSite.bearerKeyPath
+      - name: clusterGroup.hostedSite.secretsPath
         value: secret/data/hub/cluster_perth
-      - name: clusterGroup.hostedSite.caKeyPath
-        value: secret/data/hub/cluster_perth_ca
       - name: clusterGroup.isHubCluster
         value: "false"
   destination:
@@ -691,10 +688,8 @@ spec:
         value: argo-edge
       - name: clusterGroup.targetCluster
         value: perth
-      - name: clusterGroup.hostedSite.bearerKeyPath
+      - name: clusterGroup.hostedSite.secretsPath
         value: secret/data/hub/cluster_perth
-      - name: clusterGroup.hostedSite.caKeyPath
-        value: secret/data/hub/cluster_perth_ca
       - name: clusterGroup.isHubCluster
         value: "false"
   destination:
@@ -753,10 +748,8 @@ spec:
         value: argo-edge
       - name: clusterGroup.targetCluster
         value: sydney
-      - name: clusterGroup.hostedSite.bearerKeyPath
+      - name: clusterGroup.hostedSite.secretsPath
         value: secret/data/hub/cluster_sydney
-      - name: clusterGroup.hostedSite.caKeyPath
-        value: secret/data/hub/cluster_sydney_ca
       - name: clusterGroup.isHubCluster
         value: "false"
   destination:
@@ -815,10 +808,8 @@ spec:
         value: argo-edge
       - name: clusterGroup.targetCluster
         value: sydney
-      - name: clusterGroup.hostedSite.bearerKeyPath
+      - name: clusterGroup.hostedSite.secretsPath
         value: secret/data/hub/cluster_sydney
-      - name: clusterGroup.hostedSite.caKeyPath
-        value: secret/data/hub/cluster_sydney_ca
       - name: clusterGroup.isHubCluster
         value: "false"
   destination:
@@ -1008,6 +999,5 @@ spec:
   name: openshift-pipelines-operator-rh
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  channel: stable
   installPlanApproval: Automatic
   startingCSV: redhat-openshift-pipelines.v1.5.2
