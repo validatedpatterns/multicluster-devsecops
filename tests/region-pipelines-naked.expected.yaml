@@ -65,10 +65,10 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 allowVolumeExpansion: true
 metadata:
-  name: -vp
+  name: default-rwo-vp
 parameters:
   encrypted: "true"
-  type: 
+  type: default-rwo
 provisioner: kubernetes.io/aws-ebs
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
@@ -82,7 +82,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: -vp
+  storageClassName: default-rwo-vp
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce

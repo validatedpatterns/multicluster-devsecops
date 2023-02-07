@@ -179,5 +179,5 @@ spec:
     cephObjectStores: {}
   mirroring: {}
   multiCloudGateway:
-    dbStorageClassName: gp2
+    dbStorageClassName: default-rwo
     reconcileStrategy: standalone
