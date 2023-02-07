@@ -1,3 +1,6 @@
+cloudProvider:
+  storageClass: default-rwo
+
 ocs:
   namespace: openshift-storage
   mon:
