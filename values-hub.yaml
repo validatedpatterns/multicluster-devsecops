@@ -37,7 +37,7 @@ clusterGroup:
     odf:
       name: odf-operator
       namespace: openshift-storage
-      channel: stable-4.10
+      channel: stable-4.12
 
     quay:
       name: quay-operator
