@@ -14,23 +14,23 @@ global:
     namespace: "openshift-storage"
 
   imageregistry:
-    account: PLAINTEXT
+    account: mbuenviaje44
     hostname: quay.io
     type: quay
 
   git:
     hostname: github.com
-    account: PLAINTEXT
-    username: PLAINTEXT
-    email: SOMEWHERE@EXAMPLE.COM
+    account: migbuen44
+    username: migbuen44
+    email: migbuen44@gmail.com
     dev_revision: main
 
   quay:
     # Needs to be set consistently between hub and spoke clusters
     # TODO: Move back to the hub chart, store in a configmap, have an ACM policy distribute to spoke clusters, have spoke look up from configmap
     org:
-      name: devel
-      email: devel@myorg.com
+      name: mbuenviaje44
+      email: mbuenviaje@deloitte.com
     repo: example
   opp: false
 
