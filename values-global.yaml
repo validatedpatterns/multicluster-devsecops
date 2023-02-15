@@ -20,9 +20,9 @@ global:
 
   git:
     hostname: github.com
-    account: PLAINTEXT
-    username: PLAINTEXT
-    email: SOMEWHERE@EXAMPLE.COM
+    account: AdrianHammond
+    username: AdrianHammond
+    email: asdrian.hammond@redhat.com
     dev_revision: main
 
   quay:
