@@ -15,6 +15,7 @@ clusterGroup:
   - devsecops-ci
   - openshift-storage
   - quay-enterprise
+  - dynatrace
 
 #  subscriptions:  OpenShift Operator subscriptions from OLM/OperatorHub
 #  - name: the Operator package name (required)
@@ -43,6 +44,11 @@ clusterGroup:
       name: quay-operator
       namespace: openshift-operators
       channel: stable-3.7
+
+    dynatrace:
+      name: dynatrace-operator
+      namespace: dynatrace
+      channel: alpha
 
 # The following section is used by
 # OpenShift GitOps (ArgoCD)
