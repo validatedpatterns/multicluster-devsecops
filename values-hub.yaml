@@ -48,7 +48,7 @@ clusterGroup:
     dynatrace:
       name: dynatrace-operator
       namespace: dynatrace
-      channel: alpha-0.10.2
+      channel: alpha
 
 # The following section is used by
 # OpenShift GitOps (ArgoCD)
