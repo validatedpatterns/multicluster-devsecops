@@ -46,7 +46,7 @@ clusterGroup:
       channel: stable-3.7
 
     dynatrace:
-      name: dynatrace-operator
+      name: dynatrace
       namespace: dynatrace
       channel: alpha
 
