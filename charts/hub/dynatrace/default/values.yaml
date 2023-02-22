@@ -15,7 +15,7 @@
 # may be set to "kubernetes", "openshift", or "gke-autopilot"
 platform: "openshift"
 
-image: ""
+image: "registry.connect.redhat.com/dynatrace/dynatrace-operator:v0.10.1"
 customPullSecret: ""
 installCRD: false
 
