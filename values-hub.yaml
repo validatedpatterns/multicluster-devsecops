@@ -133,7 +133,7 @@ clusterGroup:
     dynatrace:
       name: dynatrace-operator
       namespace: dynatrace
-      project: dynatrace
+      project: hub
       path: charts/hub/dynatrace/default
 
   imperative:
