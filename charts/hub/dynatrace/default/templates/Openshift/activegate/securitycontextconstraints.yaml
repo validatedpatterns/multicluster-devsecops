@@ -37,7 +37,34 @@ users:
   - system:serviceaccount:{{ .Release.Namespace }}:dynatrace-activegate
   - system:serviceaccount:{{ .Release.Namespace }}:dynatrace-kubernetes-monitoring
 volumes:
-  - "*"
+  - awsElasticBlockStore	
+  - azureDisk	
+  - azureFile	
+  - cephFS	
+  - cinder	
+  - configMap	
+  - csi	
+  - downwardAPI	
+  - emptyDir	
+  - ephemeral	
+  - fc	
+  - flexVolume	
+  - flocker	
+  - gcePersistentDisk	
+  - gitRepo	
+  - glusterfs	
+  - iscsi	
+  - nfs	
+  - persistentVolumeClaim	
+  - photonPersistentDisk	
+  - portworxVolume	
+  - projected	
+  - quobyte	
+  - rbd	
+  - scaleIO	
+  - secret	
+  - storageOS	
+  - vsphere
 
 allowHostDirVolumePlugin: false
 allowHostIPC: false
