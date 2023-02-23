@@ -37,34 +37,7 @@ supplementalGroups:
 users:
   - system:serviceaccount:{{ .Release.Namespace }}:dynatrace-webhook
 volumes:
-  - awsElasticBlockStore	
-  - azureDisk	
-  - azureFile	
-  - cephFS	
-  - cinder	
-  - configMap	
-  - csi	
-  - downwardAPI	
-  - emptyDir	
-  - ephemeral	
-  - fc	
-  - flexVolume	
-  - flocker	
-  - gcePersistentDisk	
-  - gitRepo	
-  - glusterfs	
-  - iscsi	
-  - nfs	
-  - persistentVolumeClaim	
-  - photonPersistentDisk	
-  - portworxVolume	
-  - projected	
-  - quobyte	
-  - rbd	
-  - scaleIO	
-  - secret	
-  - storageOS	
-  - vsphere
+  - "*"
 
 allowHostDirVolumePlugin: false
 allowHostIPC: false
