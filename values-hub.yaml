@@ -47,7 +47,7 @@ clusterGroup:
 
     dynatrace:
       name: dynatrace-operator
-      namespace: dynatrace
+      namespace: openshift-operators
       channel: alpha
       source: certified-operators
 
