@@ -47,7 +47,7 @@ clusterGroup:
 
     devspaces:
       name: devspaces
-      namespace: openshift-devspaces
+      namespace: openshift-operators
       channel: stable      
 
 # The following section is used by
