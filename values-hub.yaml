@@ -27,7 +27,7 @@ clusterGroup:
     acm:
       name: advanced-cluster-management
       namespace: open-cluster-management
-      channel: release-2.6
+      channel: release-2.7
 
     acs:
       name: rhacs-operator  #packageName
@@ -37,7 +37,7 @@ clusterGroup:
     odf:
       name: odf-operator
       namespace: openshift-storage
-      channel: stable-4.10
+      channel: stable-4.12
 
     quay:
       name: quay-operator
