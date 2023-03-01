@@ -45,10 +45,10 @@ clusterGroup:
       namespace: openshift-operators
       channel: stable-3.7
 
-    devspaces:
-      name: devspaces
-      namespace: openshift-operators
-      channel: stable      
+    # devspaces:
+    #   name: devspaces
+    #   namespace: openshift-operators
+    #   channel: stable      
 
 # The following section is used by
 # OpenShift GitOps (ArgoCD)
