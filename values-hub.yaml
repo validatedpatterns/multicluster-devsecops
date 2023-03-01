@@ -33,17 +33,17 @@ clusterGroup:
     acs:
       name: rhacs-operator  #packageName
       namespace: openshift-operators # operator namespace
-      channel: rhacs-3.71
+      channel: rhacs-3.74
 
     odf:
       name: odf-operator
       namespace: openshift-storage
-      channel: stable-4.12
+      channel: stable-4.11
 
     quay:
       name: quay-operator
       namespace: openshift-operators
-      channel: stable-3.7
+      channel: stable-3.8
 
     devspaces:
       name: devspaces
