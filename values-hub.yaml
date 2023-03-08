@@ -131,7 +131,7 @@ clusterGroup:
       path: charts/hub/cli-tools
 
     observability:
-      name: dynatrace-operator
+      name: observability
       namespace: dynatrace
       project: hub
       path: charts/hub/dynatrace/agents
