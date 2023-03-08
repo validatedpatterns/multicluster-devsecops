@@ -130,11 +130,11 @@ clusterGroup:
       project: hub
       path: charts/hub/cli-tools
 
-    dynatrace:
+    observability:
       name: dynatrace-operator
       namespace: dynatrace
       project: hub
-      path: charts/hub/dynatrace/default
+      path: charts/hub/dynatrace/agents
 
   imperative:
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
