@@ -24,25 +24,26 @@ clusterGroup:
 #         only used if global.options.useCSV: true in values-global.yaml
 
   subscriptions:
+# If specific channels are required then uncomment channel line and add the name of the channel
     acm:
       name: advanced-cluster-management
       namespace: open-cluster-management
-      channel: release-2.6
+#      channel: 
 
     acs:
       name: rhacs-operator  #packageName
       namespace: openshift-operators # operator namespace
-      channel: rhacs-3.71
+#      channel: 
 
     odf:
       name: odf-operator
       namespace: openshift-storage
-      channel: stable-4.10
+#      channel: 
 
     quay:
       name: quay-operator
       namespace: openshift-operators
-      channel: stable-3.7
+#      channel: 
 
 # The following section is used by
 # OpenShift GitOps (ArgoCD)
