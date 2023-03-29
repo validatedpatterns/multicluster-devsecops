@@ -69,7 +69,7 @@ metadata:
 parameters:
   encrypted: "true"
   type: default-rwo
-provisioner: kubernetes.io/aws-ebs
+provisioner: 
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 ---
