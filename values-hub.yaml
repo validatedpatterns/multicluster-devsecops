@@ -28,22 +28,18 @@ clusterGroup:
     acm:
       name: advanced-cluster-management
       namespace: open-cluster-management
-#      channel: 
 
     acs:
       name: rhacs-operator  #packageName
       namespace: openshift-operators # operator namespace
-#      channel: 
 
     odf:
       name: odf-operator
       namespace: openshift-storage
-#      channel: 
 
     quay:
       name: quay-operator
       namespace: openshift-operators
-#      channel: 
 
 # The following section is used by
 # OpenShift GitOps (ArgoCD)
