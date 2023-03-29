@@ -1,2 +1,2 @@
 cloudProvider:
-  storageClass: gp2-csi
+  storageClass: gp3-csi
