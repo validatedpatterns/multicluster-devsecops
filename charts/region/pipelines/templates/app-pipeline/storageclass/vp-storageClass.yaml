@@ -7,21 +7,21 @@ metadata:
 parameters:
   replication-type: none
   type: pd-standard
-provisioner: kubernetes.io/gce-pd
+provisioner: {{ .Values.cloudProvider.provisioner }}
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 {{- else if eq .Values.cloudProvider.storageClass "managed-premium" }}
 parameters: 
   kind: Managed
   storageaccounttype: Premium_LRS
-provisioner: kubernetes.io/azure-disk
+provisioner: {{ .Values.cloudProvider.provisioner }}
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 {{- else }}
 parameters:
   encrypted: "true"
   type: {{ .Values.cloudProvider.storageClass }}
-provisioner: kubernetes.io/aws-ebs
+provisioner: {{ .Values.cloudProvider.provisioner }}
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 {{- end }}
