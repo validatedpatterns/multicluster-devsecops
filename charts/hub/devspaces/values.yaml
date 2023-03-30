@@ -1,0 +1,3 @@
+secretStore:
+  name: vault-backend
+  kind: ClusterSecretStore

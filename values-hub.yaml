@@ -15,6 +15,7 @@ clusterGroup:
   - devsecops-ci
   - openshift-storage
   - quay-enterprise
+  - openshift-devspaces
 
 #  subscriptions:  OpenShift Operator subscriptions from OLM/OperatorHub
 #  - name: the Operator package name (required)
@@ -41,6 +42,11 @@ clusterGroup:
       name: quay-operator
       namespace: openshift-operators
 
+    devspaces:
+      name: devspaces
+      namespace: openshift-operators
+      channel: stable      
+
 # The following section is used by
 # OpenShift GitOps (ArgoCD)
 # Projects are just ArgoCD groupings that can be filtered on.
@@ -48,6 +54,7 @@ clusterGroup:
   - hub
   - opp
   - external-secrets
+  - devspaces
 
   applications:
     acm:
@@ -119,6 +126,12 @@ clusterGroup:
       namespace: openshift
       project: hub
       path: charts/hub/cli-tools
+
+    devspaces:
+      name: devspaces
+      namespace: openshift-devspaces
+      project: devspaces
+      path: charts/hub/devspaces    
 
   imperative:
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm

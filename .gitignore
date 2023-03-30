@@ -9,3 +9,4 @@ vault.init
 super-linter.log
 /archive
 
+ocp-connection.txt
