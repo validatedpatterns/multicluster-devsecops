@@ -13,6 +13,7 @@ clusterGroup:
     - stackrox
     - policies
     - devsecops-ci
+    - production
 
   subscriptions:
     rhacs-operator:
@@ -26,6 +27,7 @@ clusterGroup:
   projects:
     - app
     - secured
+    - spring-petclinic
 
   applications:
     acs-secured:
@@ -39,3 +41,10 @@ clusterGroup:
       namespace: openshift-operators
       project: secured
       path: charts/region/quay
+
+    staging-spring-petclinic:
+      name: staging-spring-petclinic
+      namespace: production
+      project: spring-petclinic
+      path: charts/region/stage/spring-petclinic-config
+
