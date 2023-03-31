@@ -1,0 +1,4 @@
+
+cloudProvider:
+  strageClass: managed-premium
+  provisioner: kubernetes.io/azure-disk
