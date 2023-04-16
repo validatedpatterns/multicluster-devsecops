@@ -127,12 +127,12 @@ clusterGroup:
     # imagePullPolicy is set to always: imperative.imagePullPolicy
     # For additional overrides that apply to the jobs, please refer to
     # https://hybrid-cloud-patterns.io/imperative-actions/#additional-job-customizations
-    jobs:
-    - name: regional-ca
+    #jobs:
+    #- name: regional-ca
       # ansible playbook to be run
-      playbook: ansible/playbooks/on-hub-get-regional-ca.yml
+      # playbook: common/ansible/playbooks/hello-world/hello-world.yaml
       # per playbook timeout in seconds
-      timeout: 234
+      # timeout: 234
       # verbosity: "-v"
 
 # This section is used by ACM
