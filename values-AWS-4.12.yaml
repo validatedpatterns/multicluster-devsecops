@@ -1,0 +1,3 @@
+cloudProvider:
+  storageClass: gp3-csi
+  provisioner: ebs.csi.aws.com
