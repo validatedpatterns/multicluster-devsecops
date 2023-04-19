@@ -30,16 +30,19 @@ spec:
             metadata:
               name: thanos-object-storage
               namespace: open-cluster-management-observability
+            type: Opaque
             stringData:
               thanos.yaml: |
                 type: s3
                 config:
                   bucket: '{{ `{{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "obc-openshift-storage-obc-observability").spec.endpoint.bucketName }}` }}'
                   endpoint: '{{ `{{ (lookup "objectbucket.io/v1alpha1" "ObjectBucket" "" "obc-openshift-storage-obc-observability").spec.endpoint.bucketHost }}` }}'
-                  insecure: true
-                  access_key: '{{ `{{ (lookup "v1" "Secret" "openshift-storage" "noobaa-admin").data.AWS_ACCESS_KEY_ID }}` }}'
-                  secret_key: '{{ `{{ (lookup "v1" "Secret" "openshift-storage" "noobaa-admin").data.AWS_SECRET_ACCESS_KEY }}` }}'
-              type: Opaque
+                  insecure: false
+                  access_key: '{{ `{{ (lookup "v1" "Secret" "openshift-storage" "noobaa-admin").data.AWS_ACCESS_KEY_ID | base64dec }}` }}'
+                  secret_key: '{{ `{{ (lookup "v1" "Secret" "openshift-storage" "noobaa-admin").data.AWS_SECRET_ACCESS_KEY | base64dec }}` }}'
+                  http_config:
+                    tls_config:
+                      insecure_skip_verify: true
         - complianceType: musthave
           objectDefinition:
             apiVersion: observability.open-cluster-management.io/v1beta2
