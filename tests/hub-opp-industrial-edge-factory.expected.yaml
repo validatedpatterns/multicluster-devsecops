@@ -145,6 +145,7 @@ spec:
                   access_key: '{{ (lookup "v1" "Secret" "openshift-storage" "noobaa-admin").data.AWS_ACCESS_KEY_ID | base64dec }}'
                   secret_key: '{{ (lookup "v1" "Secret" "openshift-storage" "noobaa-admin").data.AWS_SECRET_ACCESS_KEY | base64dec }}'
                   http_config:
+                    insecure_skip_verify: true
                     tls_config:
                       insecure_skip_verify: true
         - complianceType: musthave
