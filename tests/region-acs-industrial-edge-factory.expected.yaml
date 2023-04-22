@@ -8,6 +8,15 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-5"
 ---
+# Source: quay/templates/stackrox-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: roxsecrets
+  namespace: devsecops-ci
+stringData:
+  rox_central_endpoint: central-stackrox.apps.hub.example.com:443
+---
 # Source: quay/templates/rbac/role-acs-integration.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

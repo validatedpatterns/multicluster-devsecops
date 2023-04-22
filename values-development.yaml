@@ -17,12 +17,12 @@ global:
   app:
     gatling:
       image: quay.io/hybridcloudpatterns/gatling:latest
-      repo: https://github.com/hybrid-cloud-demos/spring-petclinic-gatling
+      repo: https://github.com/day0hero/spring-petclinic-gatling
     zapImage: quay.io/hybridcloudpatterns/zap2docker-stable
     crdaImage: quay.io/hybridcloudpatterns/crda-image:0.1
     petclinic:
-      repo: https://github.com/hybrid-cloud-demos/spring-petclinic
-      configRepo: https://github.com/hybrid-cloud-demos/spring-petclinic-config
+      repo: https://github.com/day0hero/spring-petclinic
+      configRepo: https://github.com/day0hero/spring-petclinic-config
       image: quay.io/hybridcloudpatterns/spring-petclinic:latest
 
   git:
@@ -140,6 +140,13 @@ clusterGroup:
       namespace: devsecops-qa
       project: spring-petclinic
       path: charts/region/stage/spring-petclinic-config
+
+    
+    dev-spring-petclinic:
+      name: dev-spring-petclinic
+      namespace: devsecops-dev
+      project: spring-petclinic
+      path: charts/region/spring-petclinic-config
 
 #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
 #

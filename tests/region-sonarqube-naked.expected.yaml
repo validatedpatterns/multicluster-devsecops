@@ -10,7 +10,7 @@ metadata:
 spec:
   ports:
   - name: 9000-tcp
-    port: 80
+    port: 9000
     protocol: TCP
     targetPort: 9000
   selector:

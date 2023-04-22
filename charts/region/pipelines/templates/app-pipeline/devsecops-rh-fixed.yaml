@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: simple-pipeline
+  name: devsecops-rh-v2-fixed
 spec:
   params:
   - default: {{ .Values.global.app.petclinic.repo }}
@@ -12,7 +12,7 @@ spec:
     description: The application git revision
     name: APP_SOURCE_REVISION
     type: string
-  - default: {{ .Values.global.app.petclinic.configRepo }}
+  - default: {{ .Values.global.app.petclinic.configRepo }} 
     description: The application manifests git repository
     name: APP_MANIFESTS_GIT
     type: string
@@ -43,7 +43,7 @@ spec:
   - description: Copy TO path
     name: TO_PATH
     type: string
-    default: environments/stage
+    default: environments/staging
   tasks:
   - name: create-promote-pull-request
     params:
@@ -84,6 +84,58 @@ spec:
     workspaces:
     - name: output
       workspace: workspace
+  - name: unit-tests
+    params:
+    - name: GOALS
+      value:
+      - package
+      - -f
+      - spring-petclinic
+    runAfter:
+    - crda-scan
+    taskRef:
+      kind: Task
+      name: maven
+    workspaces:
+    - name: source
+      workspace: workspace
+    - name: maven-settings
+      workspace: maven-settings
+  - name: code-analysis
+    params:
+    - name: GOALS
+      value:
+      - install
+      - sonar:sonar
+      - -f
+      - spring-petclinic
+      - -Dsonar.host.url=http://sonarqube:9000
+      - -Dsonar.userHome=/tmp/sonar
+      - -DskipTests=true
+    runAfter:
+    - crda-scan
+    taskRef:
+      kind: Task
+      name: maven
+    workspaces:
+    - name: source
+      workspace: workspace
+    - name: maven-settings
+      workspace: maven-settings
+  - name: dependency-report
+    params:
+    - name: SOURCE_DIR
+      value: spring-petclinic
+    runAfter:
+    - crda-scan
+    taskRef:
+      kind: Task
+      name: dependency-report
+    workspaces:
+    - name: source
+      workspace: workspace
+    - name: maven-settings
+      workspace: maven-settings
   - name: release-app
     params:
     - name: GOALS
@@ -95,7 +147,9 @@ spec:
       - -DaltDeploymentRepository=nexus::default::http://nexus:8081/repository/maven-releases/
       - -DaltSnapshotDeploymentRepository=nexus::default::http://nexus:8081/repository/maven-snapshots/
     runAfter:
-    - source-clone
+    - code-analysis
+    - unit-tests
+    - dependency-report
     taskRef:
       kind: Task
       name: maven
@@ -113,21 +167,23 @@ spec:
     - name: PATH_CONTEXT
       value: spring-petclinic/target
     - name: IMAGE_NAME
-      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}//spring-petclinic
+      #jrickard - value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}/spring-petclinic
     - name: IMAGE_TAG
       value: $(params.APP_IMAGE_TAG)
     runAfter:
     - syft-sbom
     taskRef:
       kind: Task
-      name: s2i-java-11
+      name: s2i-java-11-fixed
     workspaces:
     - name: source
       workspace: workspace
   - name: image-scan
     params:
     - name: image
-      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}//spring-petclinic
+      #jrickard - value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}/spring-petclinic
     - name: rox_api_token
       value: acs-api-token
     - name: output_format
@@ -142,9 +198,13 @@ spec:
   - name: image-check
     params:
     - name: image
-      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}//spring-petclinic
+      #jrickard - value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}/spring-petclinic
     - name: rox_api_token
       value: acs-api-token
+# jrickard removed
+#    - name: rox_central_endpoint
+#      value: roxsecrets
     - name: image_digest
       value: $(tasks.build-image.results.IMAGE_DIGEST)
     runAfter:
@@ -158,6 +218,9 @@ spec:
       value: $(params.APP_MANIFESTS_GIT)
     - name: rox_api_token
       value: acs-api-token
+# jrickard removed
+#    - name: rox_central_endpoint
+#      value: roxsecrets
     - name: file
       value: deployment.yaml
     - name: deployment_files_path
@@ -175,13 +238,14 @@ spec:
     - name: GIT_REPOSITORY
       value: $(params.APP_MANIFESTS_GIT)
     - name: GIT_USERNAME
-      value: $(params.GIT_USERNAME)
+      value: gogs
     - name: GIT_PASSWORD
-      value: $(params.GIT_PASSWORD)
+      value: gogs
     - name: CURRENT_IMAGE
       value: {{ .Values.global.app.petclinic.image }}
     - name: NEW_IMAGE
-      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}//spring-petclinic
+      #jrickard-value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}/spring-petclinic
     - name: NEW_DIGEST
       value: $(tasks.build-image.results.IMAGE_DIGEST)
     - name: KUSTOMIZATION_PATH
@@ -236,6 +300,18 @@ spec:
     workspaces:
     - name: simulations
       subPath: spring-petclinic-gatling
+      workspace: workspace
+  - name: crda-scan
+    params:
+    - name: manifest
+      value: pom.xml
+    runAfter:
+    - source-clone
+    taskRef:
+      kind: ClusterTask
+      name: crda-scan
+    workspaces:
+    - name: source
       workspace: workspace
   - name: syft-sbom
     params:

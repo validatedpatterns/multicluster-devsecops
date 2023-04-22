@@ -1,12 +1,15 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: petclinic-build-workspace
+  name: pipeline-pvc
+  namespace: devsecops-ci
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
 spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: {{ .Values.cloudProvider.storageClass }}-vp
+  storageClassName: gp3-csi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
