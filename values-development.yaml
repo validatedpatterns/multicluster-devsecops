@@ -1,33 +1,3 @@
-# Possibly still not the right home...
-devel: 
-  image: chat-client:latest
-  npmbase: quay.io/hybridcloudpatterns/ubi-npm
-  namespace: devsecops-ci
-  roxCTLImage: registry.access.redhat.com/advanced-cluster-security/rhacs-roxctl-rhel8:3.71.0-5
-
-global:
-  options:
-    useCSV: False
-    syncPolicy: Automatic
-    installPlanApproval: Automatic
-  
-  cicd:
-    namespace: devsecops-ci
-
-  app:
-    gatling:
-      image: quay.io/hybridcloudpatterns/gatling:latest
-      repo: https://github.com/hybrid-cloud-demos/spring-petclinic-gatling
-    zapImage: quay.io/hybridcloudpatterns/zap2docker-stable
-    crdaImage: quay.io/hybridcloudpatterns/crda-image:0.1
-    petclinic:
-      repo: https://github.com/hybrid-cloud-demos/spring-petclinic
-      configRepo: https://github.com/hybrid-cloud-demos/spring-petclinic-config
-      image: quay.io/hybridcloudpatterns/spring-petclinic:latest
-
-  git:
-    taskImage: image-registry.openshift-image-registry.svc:5000/openshift/tools
-
 clusterGroup:
   name: devel
   isHubCluster: false
@@ -85,6 +55,15 @@ clusterGroup:
         jsonPointers:
         - /imagePullSecrets
         - /secrets
+      overrides:
+      - name: devel.image
+        value: chat-client:latest
+      - name: devel.npmbase
+        value: quay.io/hybridcloudpatterns/ubi-npm
+      - name: devel.namespace
+        value: devsecops-ci
+      - name: devel.roxCTLImage
+        value: registry.access.redhat.com/advanced-cluster-security/rhacs-roxctl-rhel8:3.71.0-5
 
     quay-integration:
       name: quay-integration

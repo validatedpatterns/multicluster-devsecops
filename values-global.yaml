@@ -14,25 +14,36 @@ global:
     namespace: "openshift-storage"
 
   imageregistry:
-    account: PLAINTEXT
+    account: claudiol
     hostname: quay.io
     type: quay
 
   git:
     hostname: github.com
-    account: PLAINTEXT
-    username: PLAINTEXT
-    email: SOMEWHERE@EXAMPLE.COM
+    account: claudiol
+    username: claudiol
+    email: claudiol@redhat.com
     dev_revision: main
+    taskImage: image-registry.openshift-image-registry.svc:5000/openshift/tools
 
-  quay:
-    # Needs to be set consistently between hub and spoke clusters
     # TODO: Move back to the hub chart, store in a configmap, have an ACM policy distribute to spoke clusters, have spoke look up from configmap
     org:
       name: devel
       email: devel@myorg.com
     repo: example
   opp: false
+
+  app:
+    gatling:
+      image: quay.io/claudiol/gatling:latest
+      repo: github.com/claudiol/spring-petclinic-gatling
+    zapImage: quay.io/hybridcloudpatterns/zap2docker-stable
+    crdaImage: quay.io/hybridcloudpatterns/crda-image:0.1
+    petclinic:
+      repo: github.com/claudiol/spring-petclinic
+      branch: stone-soup-updates
+      configRepo: github.com/claudiol/spring-petclinic-config
+      image: quay.io/claudiol/spring-petclinic:latest
 
 main:
   clusterGroupName: hub
