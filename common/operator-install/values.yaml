@@ -1,9 +1,0 @@
-main:
-  git:
-    repoURL: https://github.com/pattern-clone/mypattern
-    revision: main
-
-  gitops:
-    channel: "gitops-1.8"
-
-  clusterGroupName: default
