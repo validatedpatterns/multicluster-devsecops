@@ -296,18 +296,34 @@ data:
       targetCluster: in-cluster
     enabled: all
     global:
+      app:
+        crdaImage: quay.io/hybridcloudpatterns/crda-image:0.1
+        gatling:
+          image: quay.io/claudiol/gatling:latest
+          repo: github.com/claudiol/spring-petclinic-gatling
+        petclinic:
+          branch: stone-soup-updates
+          configRepo: github.com/claudiol/spring-petclinic-config
+          image: quay.io/claudiol/spring-petclinic:latest
+          repo: github.com/claudiol/spring-petclinic
+        zapImage: quay.io/hybridcloudpatterns/zap2docker-stable
       cicd:
         namespace: devsecops-ci
       clusterDomain: region.example.com
       git:
-        account: PLAINTEXT
+        account: claudiol
         dev_revision: main
-        email: SOMEWHERE@EXAMPLE.COM
+        email: claudiol@redhat.com
         hostname: github.com
-        username: PLAINTEXT
+        org:
+          email: devel@myorg.com
+          name: devel
+        repo: example
+        taskImage: image-registry.openshift-image-registry.svc:5000/openshift/tools
+        username: claudiol
       hubClusterDomain: apps.hub.example.com
       imageregistry:
-        account: PLAINTEXT
+        account: claudiol
         hostname: quay.io
         type: quay
       localClusterDomain: apps.region.example.com
@@ -318,11 +334,6 @@ data:
         syncPolicy: Automatic
         useCSV: false
       pattern: mypattern
-      quay:
-        org:
-          email: devel@myorg.com
-          name: devel
-        repo: example
       repoURL: https://github.com/pattern-clone/mypattern
       secure-registry:
         namespace: openshift-storage

@@ -122,7 +122,7 @@ spec:
       name: application_folder
       type: string
   steps:
-    - image: quay.io/jchraibi/crda-image:0.1
+    - image: quay.io/hybridcloudpatterns/crda-image:0.1
       name: crda-code-scan
       resources: {}
       script: >
@@ -320,7 +320,7 @@ metadata:
   name: devsecops-rh-v2
 spec:
   params:
-  - default: https://https://github.com/hybrid-cloud-demos/spring-petclinic
+  - default: https://github.com/claudiol/spring-petclinic
     description: The application git repository
     name: APP_SOURCE_GIT
     type: string
@@ -328,7 +328,7 @@ spec:
     description: The application git revision
     name: APP_SOURCE_REVISION
     type: string
-  - default: https://https://github.com/hybrid-cloud-demos/spring-petclinic-config 
+  - default: https://github.com/claudiol/spring-petclinic-config 
     description: The application manifests git repository
     name: APP_MANIFESTS_GIT
     type: string
@@ -347,7 +347,7 @@ spec:
   - description: Git username to update GitOps files
     name: GIT_USERNAME
     type: string
-    default: PLAINTEXT
+    default: claudiol
   - description: Git password to update GitOps files
     name: GIT_PASSWORD
     type: string
@@ -553,7 +553,7 @@ spec:
     - name: GIT_PASSWORD
       value: gogs
     - name: CURRENT_IMAGE
-      value: quay.io/hybridcloudpatterns/spring-petclinic:latest
+      value: quay.io/claudiol/spring-petclinic:latest
     - name: NEW_IMAGE
       value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
     - name: NEW_DIGEST
@@ -655,7 +655,7 @@ metadata:
   name: simple-pipeline
 spec:
   params:
-  - default: https://github.com/hybrid-cloud-demos/spring-petclinic
+  - default: github.com/claudiol/spring-petclinic
     description: The application git repository
     name: APP_SOURCE_GIT
     type: string
@@ -663,7 +663,7 @@ spec:
     description: The application git revision
     name: APP_SOURCE_REVISION
     type: string
-  - default: https://github.com/hybrid-cloud-demos/spring-petclinic-config
+  - default: github.com/claudiol/spring-petclinic-config
     description: The application manifests git repository
     name: APP_MANIFESTS_GIT
     type: string
@@ -675,14 +675,14 @@ spec:
     description: The namespace for Stage environments
     name: DEV_NAMESPACE
     type: string
-  - default: https://github.com/hybrid-cloud-patterns/spring-petclinic-gatling
+  - default: github.com/claudiol/spring-petclinic-gatling
     description: The application test cases git repository
     name: APP_TESTS_GIT
     type: string
   - description: Git username to update GitOps files
     name: GIT_USERNAME
     type: string
-    default: PLAINTEXT
+    default: claudiol
   - description: Git password to update GitOps files
     name: GIT_PASSWORD
     type: string
@@ -830,7 +830,7 @@ spec:
     - name: GIT_PASSWORD
       value: $(params.GIT_PASSWORD)
     - name: CURRENT_IMAGE
-      value: quay.io/hybridcloudpatterns/spring-petclinic:latest
+      value: quay.io/claudiol/spring-petclinic:latest
     - name: NEW_IMAGE
       value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
     - name: NEW_DIGEST
@@ -1262,7 +1262,7 @@ spec:
     name: simulations
   steps:
     - name: run-tests
-      image: quay.io/hybridcloudpatterns/gatling:latest
+      image: quay.io/claudiol/gatling:latest
       env:
         - name: PIPELINERUN_NAME
           valueFrom:
