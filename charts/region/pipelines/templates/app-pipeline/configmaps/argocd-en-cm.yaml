@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-env-configmap
+  namespace: {{ .Values.global.cicd.namespace }}
+data:
+  ARGOCD_SERVER: development-gitops-server.{{ .Values.global.pattern }}-development.svc:443

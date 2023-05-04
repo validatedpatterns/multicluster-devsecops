@@ -68,6 +68,10 @@ spec:
     - mountPath: /env-params
       name: envparams
     workingDir: /env-params
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
+
   - command:
     - s2i
     - build
@@ -88,6 +92,10 @@ spec:
     - mountPath: /env-params
       name: envparams
     workingDir: $(workspaces.source.path)
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
+
   - command:
     - buildah
     - bud
@@ -110,16 +118,42 @@ spec:
     - mountPath: /gen-source
       name: gen-source
     workingDir: /gen-source
-
-  - args:
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
+  - command:
+    - /bin/sh
+    - -c
+    args:
     - |-
       buildah from --storage-driver=vfs --tls-verify=$(params.TLSVERIFY) '$(params.IMAGE_NAME):$(params.IMAGE_TAG)' > imgname
+      buildah run --user=root --storage-driver=vfs `cat imgname` -- sh -c `dnf update -y`
       buildah run --user=root --storage-driver=vfs `cat imgname` -- sh -c 'rpm -e $(rpm -qa *dnf*) $(rpm -qa *libsolv*) $(rpm -qa *hawkey*) $(rpm -qa yum*) $(rpm -qa *dnf*) $(rpm -qa *subscription-manager*)'
       buildah run --user=root --storage-driver=vfs `cat imgname` -- sh -c 'rpm -e $(rpm -qa *rpm*)'
       buildah commit --storage-driver=vfs --tls-verify=$(params.TLSVERIFY) `cat imgname` '$(params.IMAGE_NAME):$(params.IMAGE_TAG)'
-    command:
+    image: registry.redhat.io/rhel8/buildah@sha256:180c4d9849b6ab0e5465d30d4f3a77765cf0d852ca1cb1efb59d6e8c9f90d467
+    name: update
+    resources: {}
+    volumeMounts:
+    - mountPath: /var/lib/containers
+      name: varlibcontainers
+    - mountPath: /gen-source
+      name: gen-source
+    workingDir: /gen-source
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
+
+  - command:
     - /bin/sh
     - -c
+    args:
+    - |-
+      buildah from --storage-driver=vfs --tls-verify=$(params.TLSVERIFY) '$(params.IMAGE_NAME):$(params.IMAGE_TAG)' > imgname
+      buildah run --user=root --storage-driver=vfs `cat imgname` -- sh -c `dnf update -y`
+      buildah run --user=root --storage-driver=vfs `cat imgname` -- sh -c 'rpm -e $(rpm -qa *dnf*) $(rpm -qa *libsolv*) $(rpm -qa *hawkey*) $(rpm -qa yum*) $(rpm -qa *dnf*) $(rpm -qa *subscription-manager*)'
+      buildah run --user=root --storage-driver=vfs `cat imgname` -- sh -c 'rpm -e $(rpm -qa *rpm*)'
+      buildah commit --storage-driver=vfs --tls-verify=$(params.TLSVERIFY) `cat imgname` '$(params.IMAGE_NAME):$(params.IMAGE_TAG)'
     image: registry.redhat.io/rhel8/buildah@sha256:180c4d9849b6ab0e5465d30d4f3a77765cf0d852ca1cb1efb59d6e8c9f90d467
     name: remove-package-mgr
     resources: {}
@@ -129,6 +163,9 @@ spec:
     - mountPath: /gen-source
       name: gen-source
     workingDir: /gen-source
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
 
   - command:
     - buildah
@@ -145,6 +182,10 @@ spec:
     volumeMounts:
     - mountPath: /var/lib/containers
       name: varlibcontainers
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
+
   - command:
     - buildah
     - push
@@ -160,6 +201,10 @@ spec:
     volumeMounts:
     - mountPath: /var/lib/containers
       name: varlibcontainers
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
+
   - image: registry.redhat.io/rhel8/buildah@sha256:180c4d9849b6ab0e5465d30d4f3a77765cf0d852ca1cb1efb59d6e8c9f90d467
     name: digest-to-results
     resources: {}

@@ -4,7 +4,7 @@ metadata:
   name: devsecops-rh-v2
 spec:
   params:
-  - default: https://{{ .Values.global.app.petclinic.repo }}
+  - default: {{ .Values.global.app.petclinic.repo }}
     description: The application git repository
     name: APP_SOURCE_GIT
     type: string
@@ -12,7 +12,7 @@ spec:
     description: The application git revision
     name: APP_SOURCE_REVISION
     type: string
-  - default: https://{{ .Values.global.app.petclinic.configRepo }} 
+  - default: {{ .Values.global.app.petclinic.configRepo }} 
     description: The application manifests git repository
     name: APP_MANIFESTS_GIT
     type: string
@@ -24,7 +24,7 @@ spec:
     description: The namespace for Stage environments
     name: DEV_NAMESPACE
     type: string
-  - default: {{ .Values.global.app.gatlingImage }}
+  - default: {{ .Values.global.app.gatling.repo }}
     description: The application test cases git repository
     name: APP_TESTS_GIT
     type: string
@@ -39,11 +39,11 @@ spec:
   - description: Copy FROM path
     name: FROM_PATH
     type: string
-    default: from
+    default: environments/dev
   - description: Copy TO path
     name: TO_PATH
     type: string
-    default: to
+    default: environments/staging
   tasks:
   - name: create-promote-pull-request
     params:
@@ -167,7 +167,8 @@ spec:
     - name: PATH_CONTEXT
       value: spring-petclinic/target
     - name: IMAGE_NAME
-      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      #jrickard - value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}/spring-petclinic
     - name: IMAGE_TAG
       value: $(params.APP_IMAGE_TAG)
     runAfter:
@@ -181,7 +182,8 @@ spec:
   - name: image-scan
     params:
     - name: image
-      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      #jrickard - value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}/spring-petclinic
     - name: rox_api_token
       value: acs-api-token
     - name: output_format
@@ -196,11 +198,13 @@ spec:
   - name: image-check
     params:
     - name: image
-      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      #jrickard - value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}/spring-petclinic
     - name: rox_api_token
-      value: roxsecrets
-    - name: rox_central_endpoint
-      value: roxsecrets
+      value: acs-api-token
+# jrickard removed
+#    - name: rox_central_endpoint
+#      value: roxsecrets
     - name: image_digest
       value: $(tasks.build-image.results.IMAGE_DIGEST)
     runAfter:
@@ -213,9 +217,10 @@ spec:
     - name: GIT_REPOSITORY
       value: $(params.APP_MANIFESTS_GIT)
     - name: rox_api_token
-      value: roxsecrets
-    - name: rox_central_endpoint
-      value: roxsecrets
+      value: acs-api-token
+# jrickard removed
+#    - name: rox_central_endpoint
+#      value: roxsecrets
     - name: file
       value: deployment.yaml
     - name: deployment_files_path
@@ -239,7 +244,8 @@ spec:
     - name: CURRENT_IMAGE
       value: {{ .Values.global.app.petclinic.image }}
     - name: NEW_IMAGE
-      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      #jrickard-value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}/spring-petclinic
     - name: NEW_DIGEST
       value: $(tasks.build-image.results.IMAGE_DIGEST)
     - name: KUSTOMIZATION_PATH
@@ -254,15 +260,6 @@ spec:
     workspaces:
     - name: workspace
       workspace: workspace
-  - name: wait-application
-    params:
-    - name: application-name
-      value: dev-spring-petclinic
-    runAfter:
-    - update-deployment
-    taskRef:
-      kind: Task
-      name: argocd-task-sync-and-wait
   - name: perf-tests-clone
     params:
     - name: url
@@ -272,7 +269,7 @@ spec:
     - name: deleteExisting
       value: "true"
     runAfter:
-    - wait-application
+    - update-deployment
     taskRef:
       kind: ClusterTask
       name: git-clone

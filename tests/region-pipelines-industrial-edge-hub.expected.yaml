@@ -13,7 +13,16 @@ secrets:
   - name: acs-api-token
   - name: quay-pull-secret
 ---
-# Source: pipelines/templates/app-pipeline/tasks/task-mvn-cm.yaml
+# Source: pipelines/templates/app-pipeline/configmaps/argocd-en-cm.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-env-configmap
+  namespace: devsecops-ci
+data:
+  ARGOCD_SERVER: development-gitops-server.mypattern-development.svc:443
+---
+# Source: pipelines/templates/app-pipeline/configmaps/maven-configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -73,16 +82,19 @@ provisioner:
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 ---
-# Source: pipelines/templates/app-pipeline/pvcs/pipeline-build-pvc.yaml
+# Source: pipelines/templates/app-pipeline/pvcs/pipeline-pvc.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: petclinic-build-workspace
+  name: pipeline-pvc
+  namespace: devsecops-ci
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
 spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: default-rwo-vp
+  storageClassName: gp3-csi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
@@ -105,6 +117,25 @@ rules:
   - imagestreamimports
   verbs:
   - create
+---
+# Source: pipelines/templates/app-pipeline/jobs/link-secret-to-pipeline-sa.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: link-secret-to-sa
+  namespace: 
+  annotations:
+    argocd.argoproj.io/hook: "PostSync"
+spec:
+  template:
+    spec:
+      containers:
+      - name: secrets-link
+        image: image-registry.openshift-image-registry.svc:5000/openshift/cli
+        command: ["oc", "secret", "link", "pipeline", "git-secret"]
+      restartPolicy: Never
+      serviceAccount: pipeline
+  backoffLimit: 4
 ---
 # Source: pipelines/templates/app-pipeline/tasks/task-crda-scan.yaml
 apiVersion: tekton.dev/v1beta1
@@ -313,14 +344,14 @@ metadata:
   name: spring-petclinic
   namespace: devsecops-ci
 ---
-# Source: pipelines/templates/app-pipeline/devsecops-rh.yaml
+# Source: pipelines/templates/app-pipeline/devsecops-rh-fixed.yaml
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: devsecops-rh-v2
+  name: devsecops-rh-v2-fixed
 spec:
   params:
-  - default: https://https://github.com/hybrid-cloud-demos/spring-petclinic
+  - default: https://github.com/hybrid-cloud-demos/spring-petclinic
     description: The application git repository
     name: APP_SOURCE_GIT
     type: string
@@ -328,7 +359,7 @@ spec:
     description: The application git revision
     name: APP_SOURCE_REVISION
     type: string
-  - default: https://https://github.com/hybrid-cloud-demos/spring-petclinic-config 
+  - default: https://github.com/hybrid-cloud-demos/spring-petclinic-config 
     description: The application manifests git repository
     name: APP_MANIFESTS_GIT
     type: string
@@ -340,7 +371,7 @@ spec:
     description: The namespace for Stage environments
     name: DEV_NAMESPACE
     type: string
-  - default: 
+  - default: https://github.com/hybrid-cloud-patterns/spring-petclinic-gatling
     description: The application test cases git repository
     name: APP_TESTS_GIT
     type: string
@@ -355,11 +386,11 @@ spec:
   - description: Copy FROM path
     name: FROM_PATH
     type: string
-    default: from
+    default: environments/dev
   - description: Copy TO path
     name: TO_PATH
     type: string
-    default: to
+    default: environments/staging
   tasks:
   - name: create-promote-pull-request
     params:
@@ -483,21 +514,23 @@ spec:
     - name: PATH_CONTEXT
       value: spring-petclinic/target
     - name: IMAGE_NAME
-      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      #jrickard - value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/devel/spring-petclinic
     - name: IMAGE_TAG
       value: $(params.APP_IMAGE_TAG)
     runAfter:
     - syft-sbom
     taskRef:
       kind: Task
-      name: s2i-java-11
+      name: s2i-java-11-fixed
     workspaces:
     - name: source
       workspace: workspace
   - name: image-scan
     params:
     - name: image
-      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      #jrickard - value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/devel/spring-petclinic
     - name: rox_api_token
       value: acs-api-token
     - name: output_format
@@ -512,11 +545,13 @@ spec:
   - name: image-check
     params:
     - name: image
-      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      #jrickard - value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/devel/spring-petclinic
     - name: rox_api_token
-      value: roxsecrets
-    - name: rox_central_endpoint
-      value: roxsecrets
+      value: acs-api-token
+# jrickard removed
+#    - name: rox_central_endpoint
+#      value: roxsecrets
     - name: image_digest
       value: $(tasks.build-image.results.IMAGE_DIGEST)
     runAfter:
@@ -529,9 +564,10 @@ spec:
     - name: GIT_REPOSITORY
       value: $(params.APP_MANIFESTS_GIT)
     - name: rox_api_token
-      value: roxsecrets
-    - name: rox_central_endpoint
-      value: roxsecrets
+      value: acs-api-token
+# jrickard removed
+#    - name: rox_central_endpoint
+#      value: roxsecrets
     - name: file
       value: deployment.yaml
     - name: deployment_files_path
@@ -555,7 +591,8 @@ spec:
     - name: CURRENT_IMAGE
       value: quay.io/hybridcloudpatterns/spring-petclinic:latest
     - name: NEW_IMAGE
-      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      #jrickard-value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/devel/spring-petclinic
     - name: NEW_DIGEST
       value: $(tasks.build-image.results.IMAGE_DIGEST)
     - name: KUSTOMIZATION_PATH
@@ -570,15 +607,6 @@ spec:
     workspaces:
     - name: workspace
       workspace: workspace
-  - name: wait-application
-    params:
-    - name: application-name
-      value: dev-spring-petclinic
-    runAfter:
-    - update-deployment
-    taskRef:
-      kind: Task
-      name: argocd-task-sync-and-wait
   - name: perf-tests-clone
     params:
     - name: url
@@ -588,7 +616,339 @@ spec:
     - name: deleteExisting
       value: "true"
     runAfter:
-    - wait-application
+    - update-deployment
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: workspace
+  - name: pentesting-test
+    params:
+    - name: APP_URL
+      value: http://spring-petclinic.$(params.DEV_NAMESPACE).svc.cluster.local:8080
+    runAfter:
+    - perf-tests-clone
+    taskRef:
+      kind: Task
+      name: zap-proxy
+    workspaces:
+    - name: workspace
+      workspace: workspace
+  - name: performance-test
+    params:
+    - name: APP_URL
+      value: http://spring-petclinic.$(params.DEV_NAMESPACE).svc.cluster.local:8080
+    runAfter:
+    - perf-tests-clone
+    taskRef:
+      kind: Task
+      name: gatling
+    workspaces:
+    - name: simulations
+      subPath: spring-petclinic-gatling
+      workspace: workspace
+  - name: crda-scan
+    params:
+    - name: manifest
+      value: pom.xml
+    runAfter:
+    - source-clone
+    taskRef:
+      kind: ClusterTask
+      name: crda-scan
+    workspaces:
+    - name: source
+      workspace: workspace
+  - name: syft-sbom
+    params:
+    - name: APP_PATH
+      value: $(workspaces.source.path)
+    runAfter:
+    - release-app
+    taskRef:
+      kind: Task
+      name: syft-sbom
+    workspaces:
+    - name: source
+      workspace: workspace
+  workspaces:
+  - name: workspace
+  - name: maven-settings
+---
+# Source: pipelines/templates/app-pipeline/devsecops-rh.yaml
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: devsecops-rh-v2
+spec:
+  params:
+  - default: https://github.com/hybrid-cloud-demos/spring-petclinic
+    description: The application git repository
+    name: APP_SOURCE_GIT
+    type: string
+  - default: main
+    description: The application git revision
+    name: APP_SOURCE_REVISION
+    type: string
+  - default: https://github.com/hybrid-cloud-demos/spring-petclinic-config 
+    description: The application manifests git repository
+    name: APP_MANIFESTS_GIT
+    type: string
+  - default: latest
+    description: The application image tag to build
+    name: APP_IMAGE_TAG
+    type: string
+  - default: devsecops-dev
+    description: The namespace for Stage environments
+    name: DEV_NAMESPACE
+    type: string
+  - default: https://github.com/hybrid-cloud-patterns/spring-petclinic-gatling
+    description: The application test cases git repository
+    name: APP_TESTS_GIT
+    type: string
+  - description: Git username to update GitOps files
+    name: GIT_USERNAME
+    type: string
+    default: PLAINTEXT
+  - description: Git password to update GitOps files
+    name: GIT_PASSWORD
+    type: string
+    default: openshift
+  - description: Copy FROM path
+    name: FROM_PATH
+    type: string
+    default: environments/dev
+  - description: Copy TO path
+    name: TO_PATH
+    type: string
+    default: environments/staging
+  tasks:
+  - name: create-promote-pull-request
+    params:
+      - name: GIT_REPOSITORY
+        value: $(params.APP_MANIFESTS_GIT)
+      - name: GIT_USERNAME
+        value: $(params.GIT_USERNAME)
+      - name: GIT_PASSWORD
+        value: $(params.GIT_PASSWORD)
+      - name: COPY_FROM_PATH
+        value: $(params.FROM_PATH)
+      - name: COPY_TO_PATH
+        value: $(params.TO_PATH)
+    runAfter:
+      - pentesting-test
+      - performance-test
+    taskRef:
+      kind: Task
+      name: create-promote-pull-request
+    workspaces:
+      - name: workspace
+        workspace: workspace
+  - name: source-clone
+    params:
+    - name: url
+      value: $(params.APP_SOURCE_GIT)
+    - name: revision
+      value: $(params.APP_SOURCE_REVISION)
+    - name: depth
+      value: "0"
+    - name: subdirectory
+      value: spring-petclinic
+    - name: deleteExisting
+      value: "true"
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: workspace
+  - name: unit-tests
+    params:
+    - name: GOALS
+      value:
+      - package
+      - -f
+      - spring-petclinic
+    runAfter:
+    - crda-scan
+    taskRef:
+      kind: Task
+      name: maven
+    workspaces:
+    - name: source
+      workspace: workspace
+    - name: maven-settings
+      workspace: maven-settings
+  - name: code-analysis
+    params:
+    - name: GOALS
+      value:
+      - install
+      - sonar:sonar
+      - -f
+      - spring-petclinic
+      - -Dsonar.host.url=http://sonarqube:9000
+      - -Dsonar.userHome=/tmp/sonar
+      - -DskipTests=true
+    runAfter:
+    - crda-scan
+    taskRef:
+      kind: Task
+      name: maven
+    workspaces:
+    - name: source
+      workspace: workspace
+    - name: maven-settings
+      workspace: maven-settings
+  - name: dependency-report
+    params:
+    - name: SOURCE_DIR
+      value: spring-petclinic
+    runAfter:
+    - crda-scan
+    taskRef:
+      kind: Task
+      name: dependency-report
+    workspaces:
+    - name: source
+      workspace: workspace
+    - name: maven-settings
+      workspace: maven-settings
+  - name: release-app
+    params:
+    - name: GOALS
+      value:
+      - deploy
+      - -f
+      - spring-petclinic
+      - -DskipTests=true
+      - -DaltDeploymentRepository=nexus::default::http://nexus:8081/repository/maven-releases/
+      - -DaltSnapshotDeploymentRepository=nexus::default::http://nexus:8081/repository/maven-snapshots/
+    runAfter:
+    - code-analysis
+    - unit-tests
+    - dependency-report
+    taskRef:
+      kind: Task
+      name: maven
+    workspaces:
+    - name: source
+      workspace: workspace
+    - name: maven-settings
+      workspace: maven-settings
+  - name: build-image
+    params:
+    - name: TLSVERIFY
+      value: "false"
+    - name: MAVEN_MIRROR_URL
+      value: http://nexus:8081/repository/maven-public/
+    - name: PATH_CONTEXT
+      value: spring-petclinic/target
+    - name: IMAGE_NAME
+      #jrickard - value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/devel/spring-petclinic
+    - name: IMAGE_TAG
+      value: $(params.APP_IMAGE_TAG)
+    runAfter:
+    - syft-sbom
+    taskRef:
+      kind: Task
+      name: s2i-java-11
+    workspaces:
+    - name: source
+      workspace: workspace
+  - name: image-scan
+    params:
+    - name: image
+      #jrickard - value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/devel/spring-petclinic
+    - name: rox_api_token
+      value: acs-api-token
+    - name: output_format
+      value: table
+    - name: image_digest
+      value: $(tasks.build-image.results.IMAGE_DIGEST)
+    runAfter:
+    - build-image
+    taskRef:
+      kind: ClusterTask
+      name: rox-image-scan
+  - name: image-check
+    params:
+    - name: image
+      #jrickard - value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/devel/spring-petclinic
+    - name: rox_api_token
+      value: acs-api-token
+# jrickard removed
+#    - name: rox_central_endpoint
+#      value: roxsecrets
+    - name: image_digest
+      value: $(tasks.build-image.results.IMAGE_DIGEST)
+    runAfter:
+    - build-image
+    taskRef:
+      kind: ClusterTask
+      name: rox-image-check
+  - name: deploy-check
+    params:
+    - name: GIT_REPOSITORY
+      value: $(params.APP_MANIFESTS_GIT)
+    - name: rox_api_token
+      value: acs-api-token
+# jrickard removed
+#    - name: rox_central_endpoint
+#      value: roxsecrets
+    - name: file
+      value: deployment.yaml
+    - name: deployment_files_path
+      value: app
+    runAfter:
+    - build-image
+    taskRef:
+      kind: ClusterTask
+      name: rox-deployment-check
+    workspaces:
+    - name: workspace
+      workspace: workspace
+  - name: update-deployment
+    params:
+    - name: GIT_REPOSITORY
+      value: $(params.APP_MANIFESTS_GIT)
+    - name: GIT_USERNAME
+      value: gogs
+    - name: GIT_PASSWORD
+      value: gogs
+    - name: CURRENT_IMAGE
+      value: quay.io/hybridcloudpatterns/spring-petclinic:latest
+    - name: NEW_IMAGE
+      #jrickard-value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/devel/spring-petclinic
+    - name: NEW_DIGEST
+      value: $(tasks.build-image.results.IMAGE_DIGEST)
+    - name: KUSTOMIZATION_PATH
+      value: environments/dev
+    runAfter:
+    - image-scan
+    - image-check
+    - deploy-check
+    taskRef:
+      kind: Task
+      name: git-update-deployment
+    workspaces:
+    - name: workspace
+      workspace: workspace
+  - name: perf-tests-clone
+    params:
+    - name: url
+      value: $(params.APP_TESTS_GIT)
+    - name: subdirectory
+      value: spring-petclinic-gatling
+    - name: deleteExisting
+      value: "true"
+    runAfter:
+    - update-deployment
     taskRef:
       kind: ClusterTask
       name: git-clone
@@ -764,7 +1124,7 @@ spec:
     - name: PATH_CONTEXT
       value: spring-petclinic/target
     - name: IMAGE_NAME
-      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/devel//spring-petclinic
     - name: IMAGE_TAG
       value: $(params.APP_IMAGE_TAG)
     runAfter:
@@ -778,7 +1138,7 @@ spec:
   - name: image-scan
     params:
     - name: image
-      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/devel//spring-petclinic
     - name: rox_api_token
       value: acs-api-token
     - name: output_format
@@ -793,7 +1153,7 @@ spec:
   - name: image-check
     params:
     - name: image
-      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/devel//spring-petclinic
     - name: rox_api_token
       value: acs-api-token
     - name: image_digest
@@ -832,7 +1192,7 @@ spec:
     - name: CURRENT_IMAGE
       value: quay.io/hybridcloudpatterns/spring-petclinic:latest
     - name: NEW_IMAGE
-      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/openshift_AUTOMATED/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.apps.hub.example.com/devel//spring-petclinic
     - name: NEW_DIGEST
       value: $(tasks.build-image.results.IMAGE_DIGEST)
     - name: KUSTOMIZATION_PATH
@@ -847,15 +1207,6 @@ spec:
     workspaces:
     - name: workspace
       workspace: workspace
-  - name: wait-application
-    params:
-    - name: application-name
-      value: dev-spring-petclinic
-    runAfter:
-    - update-deployment
-    taskRef:
-      kind: Task
-      name: argocd-task-sync-and-wait
   - name: perf-tests-clone
     params:
     - name: url
@@ -865,7 +1216,7 @@ spec:
     - name: deleteExisting
       value: "true"
     runAfter:
-    - wait-application
+    - update-deployment
     taskRef:
       kind: ClusterTask
       name: git-clone
@@ -912,52 +1263,6 @@ spec:
   workspaces:
   - name: workspace
   - name: maven-settings
----
-# Source: pipelines/templates/app-pipeline/tasks/task-argo-sync-and-wait.yaml
-apiVersion: tekton.dev/v1beta1
-kind: Task
-metadata:
-  name: argocd-task-sync-and-wait
-  labels:
-    app.kubernetes.io/version: "0.1"
-  annotations:
-    tekton.dev/pipelines.minVersion: "0.12.1"
-    tekton.dev/tags: deploy
-    tekton.dev/displayName: "argocd"
-spec:
-  description: >-
-    This task syncs (deploys) an Argo CD application and waits for it to be healthy.
-
-    To do so, it requires the address of the Argo CD server and some form of
-    authentication either a username/password or an authentication token.
-
-  params:
-    - name: application-name
-      description: name of the application to sync
-    - name: revision
-      description: the revision to sync to
-      default: HEAD
-    - name: flags
-      default: --
-    - name: argocd-version
-      default: v2.2.5
-  stepTemplate:
-    envFrom:
-      - configMapRef:
-          name: argocd-env-configmap  # used for server address
-      - secretRef:
-          name: argocd-env-secret  # used for authentication (username/password or auth token)
-  steps:
-    - name: login-sync-wait
-      image: quay.io/rcarrata/argocd:$(params.argocd-version)
-      script: |
-        if [ -z $ARGOCD_AUTH_TOKEN ]; then
-          yes | argocd login $ARGOCD_SERVER --username=$ARGOCD_USERNAME --password=$ARGOCD_PASSWORD ;
-        fi
-
-        argocd app sync $(params.application-name) --revision $(params.revision) $(params.flags) && sleep 3
-
-        argocd app wait $(params.application-name) --health $(params.flags)
 ---
 # Source: pipelines/templates/app-pipeline/tasks/task-create-promote-pull-request.yaml
 apiVersion: tekton.dev/v1beta1
@@ -1358,7 +1663,7 @@ spec:
         git commit -m "[ci] Image digest updated"
 
         git remote add auth-origin $(echo $(params.GIT_REPOSITORY) | sed -E "s#http://(.*)#http://$(params.GIT_USERNAME):$(params.GIT_PASSWORD)@\1#g")
-        git push auth-origin master
+        git push auth-origin main
 
         RESULT_SHA="$(git rev-parse HEAD | tr -d '\n')"
         EXIT_CODE="$?"
@@ -1731,6 +2036,10 @@ spec:
     - mountPath: /env-params
       name: envparams
     workingDir: /env-params
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
+
   - command:
     - s2i
     - build
@@ -1751,6 +2060,10 @@ spec:
     - mountPath: /env-params
       name: envparams
     workingDir: $(workspaces.source.path)
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
+
   - command:
     - buildah
     - bud
@@ -1773,16 +2086,42 @@ spec:
     - mountPath: /gen-source
       name: gen-source
     workingDir: /gen-source
-
-  - args:
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
+  - command:
+    - /bin/sh
+    - -c
+    args:
     - |-
       buildah from --storage-driver=vfs --tls-verify=$(params.TLSVERIFY) '$(params.IMAGE_NAME):$(params.IMAGE_TAG)' > imgname
+      buildah run --user=root --storage-driver=vfs `cat imgname` -- sh -c `dnf update -y`
       buildah run --user=root --storage-driver=vfs `cat imgname` -- sh -c 'rpm -e $(rpm -qa *dnf*) $(rpm -qa *libsolv*) $(rpm -qa *hawkey*) $(rpm -qa yum*) $(rpm -qa *dnf*) $(rpm -qa *subscription-manager*)'
       buildah run --user=root --storage-driver=vfs `cat imgname` -- sh -c 'rpm -e $(rpm -qa *rpm*)'
       buildah commit --storage-driver=vfs --tls-verify=$(params.TLSVERIFY) `cat imgname` '$(params.IMAGE_NAME):$(params.IMAGE_TAG)'
-    command:
+    image: registry.redhat.io/rhel8/buildah@sha256:180c4d9849b6ab0e5465d30d4f3a77765cf0d852ca1cb1efb59d6e8c9f90d467
+    name: update
+    resources: {}
+    volumeMounts:
+    - mountPath: /var/lib/containers
+      name: varlibcontainers
+    - mountPath: /gen-source
+      name: gen-source
+    workingDir: /gen-source
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
+
+  - command:
     - /bin/sh
     - -c
+    args:
+    - |-
+      buildah from --storage-driver=vfs --tls-verify=$(params.TLSVERIFY) '$(params.IMAGE_NAME):$(params.IMAGE_TAG)' > imgname
+      buildah run --user=root --storage-driver=vfs `cat imgname` -- sh -c `dnf update -y`
+      buildah run --user=root --storage-driver=vfs `cat imgname` -- sh -c 'rpm -e $(rpm -qa *dnf*) $(rpm -qa *libsolv*) $(rpm -qa *hawkey*) $(rpm -qa yum*) $(rpm -qa *dnf*) $(rpm -qa *subscription-manager*)'
+      buildah run --user=root --storage-driver=vfs `cat imgname` -- sh -c 'rpm -e $(rpm -qa *rpm*)'
+      buildah commit --storage-driver=vfs --tls-verify=$(params.TLSVERIFY) `cat imgname` '$(params.IMAGE_NAME):$(params.IMAGE_TAG)'
     image: registry.redhat.io/rhel8/buildah@sha256:180c4d9849b6ab0e5465d30d4f3a77765cf0d852ca1cb1efb59d6e8c9f90d467
     name: remove-package-mgr
     resources: {}
@@ -1792,6 +2131,9 @@ spec:
     - mountPath: /gen-source
       name: gen-source
     workingDir: /gen-source
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
 
   - command:
     - buildah
@@ -1808,6 +2150,10 @@ spec:
     volumeMounts:
     - mountPath: /var/lib/containers
       name: varlibcontainers
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
+
   - command:
     - buildah
     - push
@@ -1823,6 +2169,10 @@ spec:
     volumeMounts:
     - mountPath: /var/lib/containers
       name: varlibcontainers
+    securityContext:
+      capabilities:
+        add: ["SETFCAP"]
+
   - image: registry.redhat.io/rhel8/buildah@sha256:180c4d9849b6ab0e5465d30d4f3a77765cf0d852ca1cb1efb59d6e8c9f90d467
     name: digest-to-results
     resources: {}
@@ -1881,7 +2231,6 @@ spec:
       name: IMAGE_TAG
       type: string
       default: "latest"
-
   results:
   - name: IMAGE_DIGEST
     description: Digest of the image just built.
@@ -1911,6 +2260,9 @@ spec:
         - mountPath: /env-params
           name: envparams
       workingDir: /env-params
+      securityContext:
+        capabilities:
+          add: ["SETFCAP"]
     - command:
         - s2i
         - build
@@ -1932,6 +2284,9 @@ spec:
         - mountPath: /env-params
           name: envparams
       workingDir: $(workspaces.source.path)
+      securityContext:
+        capabilities:
+          add: ["SETFCAP"]
     - command:
         - buildah
         - bud
@@ -1949,6 +2304,9 @@ spec:
         registry.redhat.io/rhel8/buildah@sha256:180c4d9849b6ab0e5465d30d4f3a77765cf0d852ca1cb1efb59d6e8c9f90d467
       name: build
       resources: {}
+      securityContext:
+        capabilities:
+          add: ["SETFCAP"]
       volumeMounts:
         - mountPath: /var/lib/containers
           name: varlibcontainers
@@ -1970,6 +2328,9 @@ spec:
       volumeMounts:
         - mountPath: /var/lib/containers
           name: varlibcontainers
+      securityContext:
+        capabilities:
+          add: ["SETFCAP"]
     - command:
         - buildah
         - push
@@ -1985,6 +2346,9 @@ spec:
       volumeMounts:
         - mountPath: /var/lib/containers
           name: varlibcontainers
+      securityContext:
+        capabilities:
+          add: ["SETFCAP"]
     - name: digest-to-results
       image: registry.redhat.io/rhel8/buildah@sha256:180c4d9849b6ab0e5465d30d4f3a77765cf0d852ca1cb1efb59d6e8c9f90d467
       script: cat $(workspaces.source.path)/image-digest | tee /tekton/results/IMAGE_DIGEST

@@ -1,0 +1,330 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: devsecops-rh-v2-fixed
+spec:
+  params:
+  - default: {{ .Values.global.app.petclinic.repo }}
+    description: The application git repository
+    name: APP_SOURCE_GIT
+    type: string
+  - default: main
+    description: The application git revision
+    name: APP_SOURCE_REVISION
+    type: string
+  - default: {{ .Values.global.app.petclinic.configRepo }} 
+    description: The application manifests git repository
+    name: APP_MANIFESTS_GIT
+    type: string
+  - default: latest
+    description: The application image tag to build
+    name: APP_IMAGE_TAG
+    type: string
+  - default: devsecops-dev
+    description: The namespace for Stage environments
+    name: DEV_NAMESPACE
+    type: string
+  - default: {{ .Values.global.app.gatling.repo }}
+    description: The application test cases git repository
+    name: APP_TESTS_GIT
+    type: string
+  - description: Git username to update GitOps files
+    name: GIT_USERNAME
+    type: string
+    default: {{ .Values.global.git.username }}
+  - description: Git password to update GitOps files
+    name: GIT_PASSWORD
+    type: string
+    default: openshift
+  - description: Copy FROM path
+    name: FROM_PATH
+    type: string
+    default: environments/dev
+  - description: Copy TO path
+    name: TO_PATH
+    type: string
+    default: environments/staging
+  tasks:
+  - name: create-promote-pull-request
+    params:
+      - name: GIT_REPOSITORY
+        value: $(params.APP_MANIFESTS_GIT)
+      - name: GIT_USERNAME
+        value: $(params.GIT_USERNAME)
+      - name: GIT_PASSWORD
+        value: $(params.GIT_PASSWORD)
+      - name: COPY_FROM_PATH
+        value: $(params.FROM_PATH)
+      - name: COPY_TO_PATH
+        value: $(params.TO_PATH)
+    runAfter:
+      - pentesting-test
+      - performance-test
+    taskRef:
+      kind: Task
+      name: create-promote-pull-request
+    workspaces:
+      - name: workspace
+        workspace: workspace
+  - name: source-clone
+    params:
+    - name: url
+      value: $(params.APP_SOURCE_GIT)
+    - name: revision
+      value: $(params.APP_SOURCE_REVISION)
+    - name: depth
+      value: "0"
+    - name: subdirectory
+      value: spring-petclinic
+    - name: deleteExisting
+      value: "true"
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: workspace
+  - name: unit-tests
+    params:
+    - name: GOALS
+      value:
+      - package
+      - -f
+      - spring-petclinic
+    runAfter:
+    - crda-scan
+    taskRef:
+      kind: Task
+      name: maven
+    workspaces:
+    - name: source
+      workspace: workspace
+    - name: maven-settings
+      workspace: maven-settings
+  - name: code-analysis
+    params:
+    - name: GOALS
+      value:
+      - install
+      - sonar:sonar
+      - -f
+      - spring-petclinic
+      - -Dsonar.host.url=http://sonarqube:9000
+      - -Dsonar.userHome=/tmp/sonar
+      - -DskipTests=true
+    runAfter:
+    - crda-scan
+    taskRef:
+      kind: Task
+      name: maven
+    workspaces:
+    - name: source
+      workspace: workspace
+    - name: maven-settings
+      workspace: maven-settings
+  - name: dependency-report
+    params:
+    - name: SOURCE_DIR
+      value: spring-petclinic
+    runAfter:
+    - crda-scan
+    taskRef:
+      kind: Task
+      name: dependency-report
+    workspaces:
+    - name: source
+      workspace: workspace
+    - name: maven-settings
+      workspace: maven-settings
+  - name: release-app
+    params:
+    - name: GOALS
+      value:
+      - deploy
+      - -f
+      - spring-petclinic
+      - -DskipTests=true
+      - -DaltDeploymentRepository=nexus::default::http://nexus:8081/repository/maven-releases/
+      - -DaltSnapshotDeploymentRepository=nexus::default::http://nexus:8081/repository/maven-snapshots/
+    runAfter:
+    - code-analysis
+    - unit-tests
+    - dependency-report
+    taskRef:
+      kind: Task
+      name: maven
+    workspaces:
+    - name: source
+      workspace: workspace
+    - name: maven-settings
+      workspace: maven-settings
+  - name: build-image
+    params:
+    - name: TLSVERIFY
+      value: "false"
+    - name: MAVEN_MIRROR_URL
+      value: http://nexus:8081/repository/maven-public/
+    - name: PATH_CONTEXT
+      value: spring-petclinic/target
+    - name: IMAGE_NAME
+      #jrickard - value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}/spring-petclinic
+    - name: IMAGE_TAG
+      value: $(params.APP_IMAGE_TAG)
+    runAfter:
+    - syft-sbom
+    taskRef:
+      kind: Task
+      name: s2i-java-11-fixed
+    workspaces:
+    - name: source
+      workspace: workspace
+  - name: image-scan
+    params:
+    - name: image
+      #jrickard - value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}/spring-petclinic
+    - name: rox_api_token
+      value: acs-api-token
+    - name: output_format
+      value: table
+    - name: image_digest
+      value: $(tasks.build-image.results.IMAGE_DIGEST)
+    runAfter:
+    - build-image
+    taskRef:
+      kind: ClusterTask
+      name: rox-image-scan
+  - name: image-check
+    params:
+    - name: image
+      #jrickard - value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}/spring-petclinic
+    - name: rox_api_token
+      value: acs-api-token
+# jrickard removed
+#    - name: rox_central_endpoint
+#      value: roxsecrets
+    - name: image_digest
+      value: $(tasks.build-image.results.IMAGE_DIGEST)
+    runAfter:
+    - build-image
+    taskRef:
+      kind: ClusterTask
+      name: rox-image-check
+  - name: deploy-check
+    params:
+    - name: GIT_REPOSITORY
+      value: $(params.APP_MANIFESTS_GIT)
+    - name: rox_api_token
+      value: acs-api-token
+# jrickard removed
+#    - name: rox_central_endpoint
+#      value: roxsecrets
+    - name: file
+      value: deployment.yaml
+    - name: deployment_files_path
+      value: app
+    runAfter:
+    - build-image
+    taskRef:
+      kind: ClusterTask
+      name: rox-deployment-check
+    workspaces:
+    - name: workspace
+      workspace: workspace
+  - name: update-deployment
+    params:
+    - name: GIT_REPOSITORY
+      value: $(params.APP_MANIFESTS_GIT)
+    - name: GIT_USERNAME
+      value: gogs
+    - name: GIT_PASSWORD
+      value: gogs
+    - name: CURRENT_IMAGE
+      value: {{ .Values.global.app.petclinic.image }}
+    - name: NEW_IMAGE
+      #jrickard-value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/openshift_{{ .Values.devel.namespace }}/spring-petclinic
+      value: quay-registry-quay-quay-enterprise.{{ .Values.global.hubClusterDomain }}/{{ .Values.global.clusterGroup.name }}/spring-petclinic
+    - name: NEW_DIGEST
+      value: $(tasks.build-image.results.IMAGE_DIGEST)
+    - name: KUSTOMIZATION_PATH
+      value: environments/dev
+    runAfter:
+    - image-scan
+    - image-check
+    - deploy-check
+    taskRef:
+      kind: Task
+      name: git-update-deployment
+    workspaces:
+    - name: workspace
+      workspace: workspace
+  - name: perf-tests-clone
+    params:
+    - name: url
+      value: $(params.APP_TESTS_GIT)
+    - name: subdirectory
+      value: spring-petclinic-gatling
+    - name: deleteExisting
+      value: "true"
+    runAfter:
+    - update-deployment
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: workspace
+  - name: pentesting-test
+    params:
+    - name: APP_URL
+      value: http://spring-petclinic.$(params.DEV_NAMESPACE).svc.cluster.local:8080
+    runAfter:
+    - perf-tests-clone
+    taskRef:
+      kind: Task
+      name: zap-proxy
+    workspaces:
+    - name: workspace
+      workspace: workspace
+  - name: performance-test
+    params:
+    - name: APP_URL
+      value: http://spring-petclinic.$(params.DEV_NAMESPACE).svc.cluster.local:8080
+    runAfter:
+    - perf-tests-clone
+    taskRef:
+      kind: Task
+      name: gatling
+    workspaces:
+    - name: simulations
+      subPath: spring-petclinic-gatling
+      workspace: workspace
+  - name: crda-scan
+    params:
+    - name: manifest
+      value: pom.xml
+    runAfter:
+    - source-clone
+    taskRef:
+      kind: ClusterTask
+      name: crda-scan
+    workspaces:
+    - name: source
+      workspace: workspace
+  - name: syft-sbom
+    params:
+    - name: APP_PATH
+      value: $(workspaces.source.path)
+    runAfter:
+    - release-app
+    taskRef:
+      kind: Task
+      name: syft-sbom
+    workspaces:
+    - name: source
+      workspace: workspace
+  workspaces:
+  - name: workspace
+  - name: maven-settings

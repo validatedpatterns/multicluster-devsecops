@@ -67,7 +67,7 @@ spec:
         git commit -m "[ci] Image digest updated"
 
         git remote add auth-origin $(echo $(params.GIT_REPOSITORY) | sed -E "s#http://(.*)#http://$(params.GIT_USERNAME):$(params.GIT_PASSWORD)@\1#g")
-        git push auth-origin master
+        git push auth-origin main
 
         RESULT_SHA="$(git rev-parse HEAD | tr -d '\n')"
         EXIT_CODE="$?"
