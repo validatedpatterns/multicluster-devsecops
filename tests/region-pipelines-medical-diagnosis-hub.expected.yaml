@@ -1,4 +1,20 @@
 ---
+# Source: pipelines/templates/app-pipeline/rbac/pipeline-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+imagePullSecrets:
+- name: image-registry-credentials
+metadata:
+  name: pipeline
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+    argocd.argoproj.io/syncOptions: ServerSideApply=true
+secrets:
+  - name: quay-api-token
+  - name: acs-api-token
+  - name: git-secret
+  - name: quay-pull-secret
+---
 # Source: pipelines/templates/app-pipeline/rbac/registry-credential-sa.yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -117,25 +133,6 @@ rules:
   - imagestreamimports
   verbs:
   - create
----
-# Source: pipelines/templates/app-pipeline/jobs/link-secret-to-pipeline-sa.yaml
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: link-secret-to-sa
-  namespace: 
-  annotations:
-    argocd.argoproj.io/hook: "PostSync"
-spec:
-  template:
-    spec:
-      containers:
-      - name: secrets-link
-        image: image-registry.openshift-image-registry.svc:5000/openshift/cli
-        command: ["oc", "secret", "link", "pipeline", "git-secret"]
-      restartPolicy: Never
-      serviceAccount: pipeline
-  backoffLimit: 4
 ---
 # Source: pipelines/templates/app-pipeline/tasks/task-crda-scan.yaml
 apiVersion: tekton.dev/v1beta1
