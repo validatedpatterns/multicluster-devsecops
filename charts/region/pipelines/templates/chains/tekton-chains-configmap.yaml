@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: chains-config
   namespace: openshift-pipelines
+  annotations:
+    argocd.argoproj.io/sync-options: PruneLast=true
 data:
   artifacts.oci.storage: 'oci'
   artifacts.taskrun.format: tekton

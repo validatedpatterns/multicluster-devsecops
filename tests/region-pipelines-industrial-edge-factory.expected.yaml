@@ -10,7 +10,6 @@ metadata:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
     argocd.argoproj.io/syncOptions: ServerSideApply=true
 secrets:
-  - name: quay-api-token
   - name: acs-api-token
   - name: git-secret
   - name: quay-pull-secret
@@ -70,6 +69,8 @@ kind: ConfigMap
 metadata:
   name: chains-config
   namespace: openshift-pipelines
+  annotations:
+    argocd.argoproj.io/sync-options: PruneLast=true
 data:
   artifacts.oci.storage: 'oci'
   artifacts.taskrun.format: tekton
