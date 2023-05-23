@@ -192,11 +192,6 @@ clusterGroup:
         jsonPointers:
         - /imagePullSecrets
         - /secrets
-    acs-integration:
-      name: acs-integration
-      namespace: stackrox
-      project: ci
-      path: charts/region/acs
 
     nexus:
       name: nexus
@@ -233,21 +228,6 @@ clusterGroup:
       namespace: devsecops-ci
       project: ci
       path: charts/region/roxctl
-
-    #Adding jchraibi #advanced-devsecops to pattern framework
-    staging-spring-petclinic:
-      name: staging-spring-petclinic
-      namespace: devsecops-qa
-      project: spring-petclinic
-      path: charts/region/stage/spring-petclinic-config
-
-    
-    dev-spring-petclinic:
-      name: dev-spring-petclinic
-      namespace: devsecops-dev
-      project: spring-petclinic
-      path: charts/region/spring-petclinic-config
-
 
   imperative: {}
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
