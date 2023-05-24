@@ -48,10 +48,6 @@ clusterGroup:
   # From Development
   - argo-rollouts
   - openshift-pipelines
-  - devsecops-ci
-  - devsecops-dev
-  - devsecops-qa
-
   
 #  subscriptions:  OpenShift Operator subscriptions from OLM/OperatorHub
 #  - name: the Operator package name (required)
@@ -170,11 +166,6 @@ clusterGroup:
       path: charts/hub/cli-tools
 
     # From Development
-    acs-secured:
-      name: acs-secured
-      namespace: stackrox
-      project: secured
-      path: charts/hub/acs/secured
 
     argo-rollouts:
       name: argo-rollouts
