@@ -166,6 +166,11 @@ clusterGroup:
       path: charts/hub/cli-tools
 
     # From Development
+    all-in-one:
+      name: single-cluster-devsecops
+      namespace: devsecops-ci
+      project: hub
+      path: charts/hub/all-in-one
 
     argo-rollouts:
       name: argo-rollouts
