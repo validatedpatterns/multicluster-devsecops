@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "6"
+  name: hub-devel-copy-acs-token
+  namespace: stackrox
+spec:
+  template:
+    spec:
+      containers:
+      - image: {{ .Values.job.image }}
+        command:
+        - /bin/bash
+        - -c
+        - |
+          # copy acs-api-token secret into pipeline namespace
+          oc get secret acs-api-token --namespace=stackrox -oyaml | grep -v '\s*namespace:\s' |oc apply --namespace=devsecops-ci -f -
+        name: copy-acs-token
+      dnsPolicy: ClusterFirst
+      activeDeadlineSeconds: 900
+      restartPolicy: Never
+      serviceAccountName: create-cluster-init
+      terminationGracePeriodSeconds: 60
