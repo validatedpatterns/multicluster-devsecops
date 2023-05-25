@@ -5,7 +5,7 @@ metadata:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/sync-wave: "6"
   name: hub-devel-copy-acs-token
-  namespace: devsecops-ci
+  namespace: stackrox
 spec:
   template:
     spec:
