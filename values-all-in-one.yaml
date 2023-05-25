@@ -168,7 +168,7 @@ clusterGroup:
     # From Development
     all-in-one:
       name: single-cluster-devsecops
-      namespace: devsecops-ci
+      namespace: stackrox
       project: hub
       path: charts/all-in-one
 
