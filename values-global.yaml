@@ -35,4 +35,4 @@ global:
   opp: false
 
 main:
-  clusterGroupName: all-in-one
+  clusterGroupName: hub
