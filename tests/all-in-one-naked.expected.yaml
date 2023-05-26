@@ -1,0 +1,72 @@
+---
+# Source: all-in-one/templates/rbac/serviceaccount-all-in-one.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: all-in-one-sa
+  labels:
+    helm.sh/chart: all-in-one-0.1.0
+    app.kubernetes.io/name: all-in-one
+    app.kubernetes.io/instance: all-in-one
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: all-in-one/templates/rbac/role-all-in-one.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+  name: all-in-one-role
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - create
+      - list
+---
+# Source: all-in-one/templates/rbac/rolebinding-all-in-one.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: all-in-one-binding
+  annotations:
+    argocd.argoproj.io/sync-wave: "-5"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: all-in-one-role
+subjects:
+  - kind: ServiceAccount
+    name: all-in-one-sa
+    namespace: stackrox
+---
+# Source: all-in-one/templates/job-copy-acs-token.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "6"
+  name: hub-devel-copy-acs-token
+  namespace: stackrox
+spec:
+  template:
+    spec:
+      containers:
+      - image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          # copy acs-api-token secret into pipeline namespace
+          oc get secret acs-api-token --namespace=stackrox -oyaml | grep -v '\s*namespace:\s' |oc apply --namespace=devsecops-ci -f -
+        name: copy-acs-token
+      dnsPolicy: ClusterFirst
+      activeDeadlineSeconds: 900
+      restartPolicy: Never
+      serviceAccountName: all-in-one-sa
+      terminationGracePeriodSeconds: 60
