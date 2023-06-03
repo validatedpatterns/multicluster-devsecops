@@ -12,3 +12,12 @@ subjects:
   - kind: ServiceAccount
     name: all-in-one-sa
     namespace: stackrox
+  - kind: ServiceAccount
+    name: all-in-one-sa
+    namespace: devsecops-ci
+  - kind: ServiceAccount
+    name: all-in-one-sa
+    namespace: devsecops-dev
+  - kind: ServiceAccount
+    name: all-in-one-sa
+    namespace: quay-enterprise
