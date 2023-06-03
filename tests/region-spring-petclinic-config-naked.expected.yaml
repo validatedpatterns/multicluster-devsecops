@@ -51,7 +51,7 @@ spec:
       containers:
       - name: spring-petclinic
         imagePullPolicy: Always
-        image: quay.io/siamaksade/spring-petclinic:latest
+        image: quay-registry-quay-quay-enterprise.app.foo.com/devel/spring-petclinic:latest
         livenessProbe:
           failureThreshold: 3
           httpGet:
@@ -79,20 +79,6 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 5
----
-# Source: spring-petclinic-config/templates/app/kustomization.yaml
-resources:
-- deployment.yaml
-- service.yaml
-- route.yaml
----
-# Source: spring-petclinic-config/templates/environments/dev/kustomization.yaml
-bases:
-  - ../../app/
----
-# Source: spring-petclinic-config/templates/environments/stage/kustomization.yaml
-bases:
-  - ../../app/
 ---
 # Source: spring-petclinic-config/templates/app/route.yaml
 apiVersion: route.openshift.io/v1
