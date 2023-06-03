@@ -6,11 +6,9 @@ metadata:
   name: all-in-one-role
 rules:
   - apiGroups:
-      - ""
+      - "*"
     resources:
-      - secrets
+      - "*"
     verbs:
-      - get
-      - create
-      - list
+      - "*"
 

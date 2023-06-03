@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # quaye abbrev. for Quay Enterprise
+  name: configure-all-in-one
+  namespace: stackrox
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+data:
+  configure-all-in-one.sh: |
+      echo -n "Checking if quay-enterpise namespace exists ..."
+      EXISTS=$(oc get ns quay-enterprise > /dev/null 2>&1; echo $?)
+      
+      while [ $EXISTS -ne 0 ]; do
+        sleep 3
+        echo -n "."
+        EXISTS=$(oc get ns quay-enterprise > /dev/null 2>&1; echo $?)
+      done
+      echo "done"
+      
+      sleep 2
+      echo -n "Checking if route for Quay application exists ..."
+      EXISTS=$(oc get route quay-registry-quay -n quay-enterprise  > /dev/null 2>&1; echo $?)
+      #####   oc get route -n quay-enterprise quay-registry-quay -o json > /dev/null 2>&1; echo $?
+      while [ $EXISTS -ne 0 ]; do
+        sleep 3
+        echo -n "."
+        EXISTS=$(oc get route quay-registry-quay -n quay-enterprise > /dev/null 2>&1; echo $?)
+      done
+      echo "done"
+      sleep 2
+      
+      echo -n "Getting route for Quay application ..."
+      #REGISTRY=$(oc get route -n quay-enterprise quay-registry-quay -o json | grep quay-registry-hostname | cut -d ':' -f 2 | tr -d '"' | tr -d ' ')
+      REGISTRY=quay-registry-quay-quay-enterprise.{{ .Values.global.localClusterDomain }}
+      echo "done"
+      cat <<EOF > /tmp/registry.json
+      spec:
+        registrySources:
+          insecureRegistries:
+          - $REGISTRY
+      EOF
+      oc patch --patch-file /tmp/registry.json image.config.openshift.io/cluster --type=merge
+      sleep 2
+      
+      echo "Verify you config is updated"
+      oc get image.config.openshift.io/cluster -o yaml
+      
+      echo "Checking to nodes for change"
+      
+      NODES=$(oc get nodes | grep -v NAME | awk '{print $1}')
+      
+      for node in $NODES; do
+        echo "Checking [$node] for updates. This could take a while."
+        UPDATED=$(oc debug -q node/$node -- chroot /host cat /etc/containers/registries.conf | grep location > /dev/null 2>&1;echo $?)
+        while [ $UPDATED -ne 0 ]; do
+          sleep 2
+          UPDATED=$(oc debug -q node/$node -- chroot /host cat /etc/containers/registries.conf | grep location > /dev/null 2>&1;echo $?)
+        done
+        echo "[$node] has been updated"
+      done
+      
+      # copy quay pull secret into pipeline namespace
+      echo -n "Copy quay pull secret into pipeline namespace ... "
+      EXISTS=$(oc get secrets | grep quay-pull-secret > /dev/null 2>&1; echo $?)
+      if [ $EXISTS -ne 0 ]; then
+        oc get secret quay-pull-secret --namespace=devsecops-ci -oyaml | grep -v '\s*namespace:\s' | grep -v '\s*creationTimestamp:\s' | grep -v '\s*resourceVersion:\s' | grep -v '\s*uid:\s' | oc apply --namespace=devsecops-dev -f -
+        echo "done"
+      else
+        echo " already exists"
+      fi
+      
+      
+      echo "Updating default service account"
+      cat <<EOF > /tmp/default-sa-update.json
+      imagePullSecrets:  
+      - name: quay-pull-secret
+      EOF
+      oc patch --patch-file /tmp/default-sa-update.json sa/default -n devsecops-dev --type=merge
+      echo "Done updating default service account"
+

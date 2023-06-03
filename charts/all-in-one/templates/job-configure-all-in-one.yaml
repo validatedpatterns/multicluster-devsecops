@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "6"
+  name: configure-all-in-one
+  namespace: stackrox
+spec:
+  template:
+    spec:
+      containers:
+      - image: {{ .Values.job.image }}
+        command:
+        - /bin/bash
+        - -c
+        - |
+          '/tmp/configure-all-in-one.sh'
+        name: configure-all-in-one
+        volumeMounts:
+          - mountPath: /tmp/configure-all-in-one.sh
+            name: configure-all-in-one
+            subPath: configure-all-in-one.sh
+      volumes:
+        - name: configure-all-in-one
+          configMap:
+            name: configure-all-in-one
+            defaultMode: 0755
+      dnsPolicy: ClusterFirst
+      activeDeadlineSeconds: 900
+      restartPolicy: Never
+      serviceAccountName: {{ include "all-in-one.serviceAccountName" . }}
+      terminationGracePeriodSeconds: 60
