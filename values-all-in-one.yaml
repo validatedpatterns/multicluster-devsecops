@@ -48,6 +48,7 @@ clusterGroup:
   # From Development
   - argo-rollouts
   - openshift-pipelines
+  - devsecops-dev
   
 #  subscriptions:  OpenShift Operator subscriptions from OLM/OperatorHub
 #  - name: the Operator package name (required)
@@ -90,6 +91,7 @@ clusterGroup:
   - secured
   - ci
   - test-app
+  - dev
   #Adding jchraibi #advanced-devsecops to pattern framework
   - spring-petclinic
   - rollouts
@@ -224,6 +226,12 @@ clusterGroup:
       namespace: devsecops-ci
       project: ci
       path: charts/region/roxctl
+
+    petclinic:
+      name: spring-petclinic
+      namespace: devsecops-dev
+      project: dev
+      path: charts/region/spring-petclinic-config
 
   imperative: {}
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
