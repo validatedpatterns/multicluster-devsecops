@@ -15,20 +15,17 @@ spec:
         - /bin/bash
         - -c
         - |
-          echo "Checking for acs-api-token existence"
-          EXISTS=$(oc get secret acs-api-token -n stackrox > /dev/null 2>&1;echo $?)
-          while [ $EXISTS -ne 0 ]; then
-            sleep 2
-            # copy acs-api-token secret into pipeline namespace
-            EXISTS=$(oc get secret acs-api-token -n stackrox > /dev/null 2>&1;echo $?)
-          done
-          EXISTS=$(oc get secret acs-api-token -n devsecops-ci > /dev/null 2>&1;echo $?)
-          if [ $EXISTS -ne 0 ]; then
-            oc get secret acs-api-token --namespace=stackrox -oyaml | grep -v '\s*namespace:\s' |oc apply --namespace=devsecops-ci -f -
-          else
-            echo "The acs-api-token secret already exists in namespace devsecops-ci"
-          fi
+          '/tmp/copy-acs-token.sh'
         name: copy-acs-token
+        volumeMounts:
+          - mountPath: /tmp/copy-acs-token.sh
+            name: copy-acs-token
+            subPath: copy-acs-token.sh
+      volumes:
+        - name: copy-acs-token
+          configMap:
+            name: copy-acs-token
+            defaultMode: 0755
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900
       restartPolicy: Never
