@@ -19,6 +19,6 @@ spec:
   centralEndpoint: central-stackrox.{{ .Values.global.hubClusterDomain }}:443
   perNode:
     collector:
-      collection: KernelModule
+      collection: EBPF
       imageFlavor: Regular
     taintToleration: TolerateTaints
