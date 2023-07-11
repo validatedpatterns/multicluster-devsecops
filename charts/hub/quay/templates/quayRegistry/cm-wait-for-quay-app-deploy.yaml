@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   # quaye abbrev. for Quay Enterprise
-  name: wait-for-quay-app-deploy
+  name: wait-for-quay-app
   namespace: {{ .Values.quay.namespace }}
   annotations:
     argocd.argoproj.io/hook: Sync
