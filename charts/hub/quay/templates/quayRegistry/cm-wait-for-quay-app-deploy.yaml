@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # quaye abbrev. for Quay Enterprise
+  name: wait-for-quay-app
+  namespace: {{ .Values.quay.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "6"
+data:
+  wait-on-quay-to-deploy.sh: |
+    echo -n "Waiting for the Quay Registry CR to be available ."
+    RC=$(oc wait QuayRegistry quay-registry --for=condition=Available=true > /dev/null 2>&1;echo $?)
+
+    while [ $RC -ne 0 ]; do
+      sleep 2
+      echo -n "."
+      RC=$(oc wait QuayRegistry quay-registry --for=condition=Available=true > /dev/null 2>&1;echo $?)
+    done
+    echo "done"
