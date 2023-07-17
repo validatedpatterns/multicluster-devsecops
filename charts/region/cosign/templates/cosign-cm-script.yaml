@@ -8,4 +8,5 @@ data:
     #!/bin/bash
     export COSIGN_PASSWORD=$(openssl rand -base64 32) 
     cosign generate-key-pair k8s://openshift-pipelines/signing-secrets
+    chmod 666 ./cosign-pub
     oc create secret generic cosign-pubkey --from-file=cosign.pub 
