@@ -25,12 +25,15 @@ rbac:
         namespace: openshift-pipelines
       resources:
         - secrets
+      resourceNames:
+        - cosign-pubkey
       verbs:
         - "get"
         - "list"
         - "patch"
         - "create"
         - "update"
+        - "delete"
   roleBindings:
     - name: cosign-mgmt
       scope:
