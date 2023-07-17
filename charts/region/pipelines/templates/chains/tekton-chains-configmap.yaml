@@ -5,6 +5,7 @@ metadata:
   namespace: openshift-pipelines
   annotations:
     argocd.argoproj.io/sync-options: PruneLast=true
+    argocd.argoproj.io/sync-options: ServerSideApply=true
 data:
   artifacts.oci.storage: 'oci'
   artifacts.taskrun.format: tekton
