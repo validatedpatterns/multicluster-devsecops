@@ -18,7 +18,7 @@ spec:
         name: create-cosign-pubkey
         volumeMounts:
           - mountPath: /tmp/cosign.sh
-            name: create-cosign-pubkey
+            name: cosign
             subPath: cosign.sh
       volumes:
         - name: cosign
