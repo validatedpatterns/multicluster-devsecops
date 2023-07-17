@@ -14,12 +14,19 @@ spec:
         - /bin/bash
         - -c
         - |
-          export COSIGN_PASSWORD=$(openssl rand -base64 32) 
-          cosign key-generate k8s://openshift-pipelines/signing-secrets
-          oc create secret generic cosign-pubkey --from-file=cosign.pub 
+           '/tmp/cosign.sh'
         name: create-cosign-pubkey
+        volumeMounts:
+          - mountPath: /tmp/cosign.sh
+            name: cosign-pubkey
+            subPath: cosign.sh
+      volumes:
+        - name: cosign
+          configMap:
+            name: create-cosign-pubkey
+            defaultMode: 0755
       dnsPolicy: ClusterFirst
       restartPolicy: Never
-      serviceAccount: pipeline
-      serviceAccountName: pipeline
+      serviceAccount: cosign-sa
+      serviceAccountName: cosign-sa
       terminationGracePeriodSeconds: 60

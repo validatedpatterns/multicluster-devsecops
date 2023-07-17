@@ -1,0 +1,11 @@
+apiVersion: batch/v1
+kind: ConfigMap
+metadata:
+  name: create-cosign-pubkey
+  namespace: openshift-pipelines
+data:
+  cosign.sh: |
+    #!/bin/bash
+    export COSIGN_PASSWORD=$(openssl rand -base64 32) 
+    cosign key-generate k8s://openshift-pipelines/signing-secrets
+    oc create secret generic cosign-pubkey --from-file=cosign.pub 

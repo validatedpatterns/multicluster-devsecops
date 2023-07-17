@@ -38,7 +38,7 @@ rbac:
         namespace: openshift-pipelines
       subjects:
         kind: ServiceAccount
-        name: pipelines
+        name: cosign-sa
         namespace: openshift-pipelines
         apiGroup: '""'
       roleRef:
