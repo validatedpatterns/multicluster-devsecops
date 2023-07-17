@@ -141,7 +141,7 @@ clusterGroup:
       namespace: devsecops-dev
       project: spring-petclinic
       kustomize: true
-      path: charts/region/spring-petclinic
+      path: charts/region/spring-petclinic/environments/dev
 
 #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
 #
