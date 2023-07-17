@@ -27,6 +27,7 @@ rbac:
         - secrets
       resourceNames:
         - cosign-pubkey
+        - signing-secrets
       verbs:
         - "get"
         - "list"
