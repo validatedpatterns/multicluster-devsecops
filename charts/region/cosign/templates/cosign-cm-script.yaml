@@ -6,6 +6,13 @@ metadata:
 data:
   cosign.sh: |
     #!/bin/bash
-    export COSIGN_PASSWORD=$(openssl rand -base64 32) 
-    cosign generate-key-pair k8s://openshift-pipelines/signing-secrets --output-file /tmp/cosign.pub
-    oc create secret generic cosign-pubkey --from-file=/tmp/cosign.pub 
+    # check for signing-secrets in openshift-pipelines
+    SECRET=$(oc get secret signing-secrets -n openshift-pipelines)
+    if [[ $? -ne 0 ]]
+      then
+        export COSIGN_PASSWORD=$(openssl rand -base64 32) 
+        cosign generate-key-pair k8s://openshift-pipelines/signing-secrets --output-file /tmp/cosign.pub
+        oc create secret generic cosign-pubkey --from-file=/tmp/cosign.pub 
+      else
+        echo "the signing-secrets secret exists in openshift-pipelines"
+    fi
