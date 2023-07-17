@@ -25,9 +25,6 @@ rbac:
         namespace: openshift-pipelines
       resources:
         - secrets
-      resourceNames:
-        - cosign-pubkey
-        - signing-secrets
       verbs:
         - "get"
         - "list"

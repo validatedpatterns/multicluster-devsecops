@@ -24,8 +24,8 @@ rules:
       - {{ . }}
 {{- end }}
 {{- if $value.resourceNames }}
-{{- range $value.resourceNames }}
     resourceNames:
+{{- range $value.resourceNames }}
       - {{ . }}
 {{- end }}
 {{- end }}
