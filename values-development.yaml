@@ -1,10 +1,4 @@
 # Possibly still not the right home...
-devel: 
-  image: chat-client:latest
-  npmbase: quay.io/hybridcloudpatterns/ubi-npm
-  namespace: devsecops-ci
-  roxCTLImage: registry.access.redhat.com/advanced-cluster-security/rhacs-roxctl-rhel8:3.71.0-5
-
 global:
   options:
     useCSV: False
@@ -135,18 +129,19 @@ clusterGroup:
       path: charts/region/roxctl
 
 #Adding jchraibi #advanced-devsecops to pattern framework
-    staging-spring-petclinic:
-      name: staging-spring-petclinic
-      namespace: devsecops-qa
-      project: spring-petclinic
-      path: charts/region/stage/spring-petclinic-config
+#    staging-spring-petclinic:
+#      name: staging-spring-petclinic
+#      namespace: devsecops-qa
+#      project: spring-petclinic
+#      path: charts/region/stage/spring-petclinic-config
 
     
     dev-spring-petclinic:
       name: dev-spring-petclinic
       namespace: devsecops-dev
       project: spring-petclinic
-      path: charts/region/spring-petclinic-config
+      kustomize: true
+      path: charts/region/spring-petclinic/environments/dev
 
 #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
 #
