@@ -16,11 +16,11 @@ Globally Regulators are increasing their focus on *Resiliency*, for example the 
 
 These regulations focus on the following five areas:
 
-1. Enhanced Risk Management: for example Business Continuity, Disaster Rocovery Planning and Cyber Risk Detection
-2. Incident Management and Reporting: NIS2 
-3. Digital Operations Resilince Testing: for example penetration testing, concentration risk
-4. Third Part ICT Risks
-5. Exit Strategy: including testing and war gaming
+1. *Enhanced Risk Management*: for example Business Continuity, Disaster Rocovery Planning and Cyber Risk Detection
+2. *Incident Management and Reporting*: NIS2 
+3. *Digital Operations Resilince Testing*: for example penetration testing, concentration risk
+4. *Third Part ICT Risks*
+5. *Exit Strategy*: including testing and war gaming
 
 The purpsoe of this Pattern is to provide a codified architecture that can be used to address some of the use cases that can be addressed using Red Hat and Cloud Native Technologies
 
