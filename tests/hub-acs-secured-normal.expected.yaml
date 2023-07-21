@@ -21,6 +21,6 @@ spec:
   centralEndpoint: central-stackrox.apps.hub.example.com:443
   perNode:
     collector:
-      collection: KernelModule
+      collection: EBPF
       imageFlavor: Regular
     taintToleration: TolerateTaints

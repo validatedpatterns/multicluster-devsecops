@@ -1,14 +1,19 @@
 ---
-# Source: pattern-clustergroup/templates/core/namespaces.yaml
+# Source: clustergroup/templates/core/namespaces.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: open-cluster-management
   labels:
     argocd.argoproj.io/managed-by: mypattern-example
-  name: open-cluster-management
+    kubernetes.io/os: "linux"
+    openshift.io/node-selector: ""
+  annotations:
+    openshift.io/cluster-monitoring: "true"
+    owner: "namespace owner"
 spec:
 ---
-# Source: pattern-clustergroup/templates/core/namespaces.yaml
+# Source: clustergroup/templates/core/namespaces.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -17,7 +22,16 @@ metadata:
   name: application-ci
 spec:
 ---
-# Source: pattern-clustergroup/templates/imperative/namespace.yaml
+# Source: clustergroup/templates/core/namespaces.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    argocd.argoproj.io/managed-by: mypattern-example
+  name: excludes-ci
+spec:
+---
+# Source: clustergroup/templates/imperative/namespace.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -26,7 +40,7 @@ metadata:
     argocd.argoproj.io/managed-by: mypattern-example
   name: imperative
 ---
-# Source: pattern-clustergroup/templates/plumbing/gitops-namespace.yaml
+# Source: clustergroup/templates/plumbing/gitops-namespace.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -39,14 +53,14 @@ metadata:
   name: mypattern-example
 spec: {}
 ---
-# Source: pattern-clustergroup/templates/imperative/serviceaccount.yaml
+# Source: clustergroup/templates/imperative/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: imperative-sa
   namespace: imperative
 ---
-# Source: pattern-clustergroup/templates/imperative/configmap.yaml
+# Source: clustergroup/templates/imperative/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -108,18 +122,23 @@ data:
         clusterPools:
           exampleAWSPool:
             baseDomain: blueprints.rhecoeng.com
-            clusters:
-            - one
+            controlPlane:
+              count: 1
+              platform:
+                aws:
+                  type: m5.xlarge
             name: aws-ap
             openshiftVersion: 4.10.18
             platform:
               aws:
                 region: ap-southeast-2
             size: 3
+            workers:
+              count: 0
           exampleAzurePool:
             baseDomain: blueprints.rhecoeng.com
             clusters:
-            - two
+            - Two
             - three
             name: azure-us
             openshiftVersion: 4.10.18
@@ -143,8 +162,17 @@ data:
         name: argo-edge
       name: example
       namespaces:
-      - open-cluster-management
+      - open-cluster-management:
+          annotations:
+            openshift.io/cluster-monitoring: "true"
+            owner: namespace owner
+          labels:
+            kubernetes.io/os: linux
+            openshift.io/node-selector: ""
       - application-ci
+      - excludes-ci
+      operatorgroupExcludes:
+      - excludes-ci
       projects:
       - datacenter
       subscriptions:
@@ -183,6 +211,7 @@ data:
       namespace: pattern-namespace
       opp: false
       options:
+        applicationRetryLimit: 20
         installPlanApproval: Automatic
         syncPolicy: Automatic
         useCSV: false
@@ -205,7 +234,7 @@ data:
       kind: ClusterSecretStore
       name: vault-backend
 ---
-# Source: pattern-clustergroup/templates/imperative/clusterrole.yaml
+# Source: clustergroup/templates/imperative/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -220,7 +249,7 @@ rules:
     - list
     - watch
 ---
-# Source: pattern-clustergroup/templates/imperative/rbac.yaml
+# Source: clustergroup/templates/imperative/rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -234,7 +263,7 @@ subjects:
     name: imperative-sa
     namespace: imperative
 ---
-# Source: pattern-clustergroup/templates/plumbing/argocd-super-role.yaml
+# Source: clustergroup/templates/plumbing/argocd-super-role.yaml
 # WARNING: ONLY USE THIS FOR MANAGING CLUSTERS NOT FOR REGULAR USERS
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -253,7 +282,7 @@ subjects:
     name: openshift-gitops-argocd-server
     namespace: openshift-gitops
 ---
-# Source: pattern-clustergroup/templates/plumbing/argocd-super-role.yaml
+# Source: clustergroup/templates/plumbing/argocd-super-role.yaml
 # WARNING: ONLY USE THIS FOR MANAGING CLUSTERS NOT FOR REGULAR USERS
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -278,7 +307,7 @@ subjects:
     name: example-gitops-argocd-dex-server
     namespace: mypattern-example
 ---
-# Source: pattern-clustergroup/templates/imperative/role.yaml
+# Source: clustergroup/templates/imperative/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -292,7 +321,7 @@ rules:
     verbs:
     - '*'
 ---
-# Source: pattern-clustergroup/templates/imperative/rbac.yaml
+# Source: clustergroup/templates/imperative/rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -307,7 +336,7 @@ subjects:
     name: imperative-sa
     namespace: imperative
 ---
-# Source: pattern-clustergroup/templates/imperative/job.yaml
+# Source: clustergroup/templates/imperative/job.yaml
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -381,7 +410,7 @@ spec:
               name: helm-values-configmap-example
           restartPolicy: Never
 ---
-# Source: pattern-clustergroup/templates/imperative/unsealjob.yaml
+# Source: clustergroup/templates/imperative/unsealjob.yaml
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -457,10 +486,10 @@ spec:
               name: helm-values-configmap-example
           restartPolicy: Never
 ---
-# Source: pattern-clustergroup/templates/core/subscriptions.yaml
+# Source: clustergroup/templates/core/subscriptions.yaml
 ---
 ---
-# Source: pattern-clustergroup/templates/plumbing/hosted-sites.yaml
+# Source: clustergroup/templates/plumbing/hosted-sites.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -481,7 +510,7 @@ spec:
   - '*'
 status: {}
 ---
-# Source: pattern-clustergroup/templates/plumbing/projects.yaml
+# Source: clustergroup/templates/plumbing/projects.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
@@ -502,7 +531,7 @@ spec:
   - '*'
 status: {}
 ---
-# Source: pattern-clustergroup/templates/plumbing/applications.yaml
+# Source: clustergroup/templates/plumbing/applications.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -524,7 +553,6 @@ spec:
       valueFiles:
       - "/values-global.yaml"
       - "/values-example.yaml"
-      # Watch the progress of https://issues.redhat.com/browse/GITOPS-891 and update accordingly
       parameters:
         - name: global.repoURL
           value: $ARGOCD_APP_SOURCE_REPO_URL
@@ -555,9 +583,10 @@ spec:
 ]
   syncPolicy:
     automated: {}
-    #  selfHeal: true
+    retry:
+      limit: 20
 ---
-# Source: pattern-clustergroup/templates/plumbing/applications.yaml
+# Source: clustergroup/templates/plumbing/applications.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -579,7 +608,6 @@ spec:
       valueFiles:
       - "/values-global.yaml"
       - "/values-example.yaml"
-      # Watch the progress of https://issues.redhat.com/browse/GITOPS-891 and update accordingly
       parameters:
         - name: global.repoURL
           value: $ARGOCD_APP_SOURCE_REPO_URL
@@ -601,9 +629,10 @@ spec:
           value: apps.region.example.com
   syncPolicy:
     automated: {}
-    #  selfHeal: true
+    retry:
+      limit: 20
 ---
-# Source: pattern-clustergroup/templates/plumbing/hosted-sites.yaml
+# Source: clustergroup/templates/plumbing/hosted-sites.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -663,7 +692,7 @@ spec:
     jsonPointers:
     - /status
 ---
-# Source: pattern-clustergroup/templates/plumbing/hosted-sites.yaml
+# Source: clustergroup/templates/plumbing/hosted-sites.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -723,7 +752,7 @@ spec:
     jsonPointers:
     - /status
 ---
-# Source: pattern-clustergroup/templates/plumbing/hosted-sites.yaml
+# Source: clustergroup/templates/plumbing/hosted-sites.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -783,7 +812,7 @@ spec:
     jsonPointers:
     - /status
 ---
-# Source: pattern-clustergroup/templates/plumbing/hosted-sites.yaml
+# Source: clustergroup/templates/plumbing/hosted-sites.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -843,7 +872,7 @@ spec:
     jsonPointers:
     - /status
 ---
-# Source: pattern-clustergroup/templates/plumbing/argocd.yaml
+# Source: clustergroup/templates/plumbing/argocd.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: ArgoCD
 metadata:
@@ -926,15 +955,17 @@ spec:
       requests:
         cpu: 500m
         memory: 2Gi
-  dex:
-    openShiftOAuth: true
-    resources:
-      limits:
-        cpu: 500m
-        memory: 256Mi
-      requests:
-        cpu: 250m
-        memory: 128Mi
+  sso:
+    provider: dex
+    dex:
+      openShiftOAuth: true
+      resources:
+        limits:
+          cpu: 500m
+          memory: 256Mi
+        requests:
+          cpu: 250m
+          memory: 128Mi
   initialSSHKnownHosts: {}
   rbac:
     defaultPolicy: role:admin
@@ -978,7 +1009,7 @@ spec:
     ca: {}
 status:
 ---
-# Source: pattern-clustergroup/templates/plumbing/argocd.yaml
+# Source: clustergroup/templates/plumbing/argocd.yaml
 apiVersion: console.openshift.io/v1
 kind: ConsoleLink
 metadata:
@@ -992,7 +1023,7 @@ spec:
   location: ApplicationMenu
   text: 'Example ArgoCD'
 ---
-# Source: pattern-clustergroup/templates/core/operatorgroup.yaml
+# Source: clustergroup/templates/core/operatorgroup.yaml
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
@@ -1002,7 +1033,7 @@ spec:
   targetNamespaces:
   - open-cluster-management
 ---
-# Source: pattern-clustergroup/templates/core/operatorgroup.yaml
+# Source: clustergroup/templates/core/operatorgroup.yaml
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
@@ -1012,7 +1043,7 @@ spec:
   targetNamespaces:
   - application-ci
 ---
-# Source: pattern-clustergroup/templates/core/subscriptions.yaml
+# Source: clustergroup/templates/core/subscriptions.yaml
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -1026,7 +1057,7 @@ spec:
   installPlanApproval: Automatic
   startingCSV: advanced-cluster-management.v2.4.1
 ---
-# Source: pattern-clustergroup/templates/core/subscriptions.yaml
+# Source: clustergroup/templates/core/subscriptions.yaml
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:

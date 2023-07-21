@@ -16,8 +16,17 @@ spec:
         - -c
         - |
           # wait for the operator QuayRegistry CR to be available
-          oc wait QuayRegistry quay-registry --for=condition=Available=true
+          /tmp/wait-on-quay-to-deploy.sh
         name: wait-for-quay-app
+        volumeMounts:
+          - mountPath: /tmp/wait-on-quay-to-deploy.sh
+            name: wait-for-quay-app
+            subPath: wait-on-quay-to-deploy.sh
+      volumes:
+        - name: wait-for-quay-app
+          configMap:
+            name: wait-for-quay-app
+            defaultMode: 0755
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900
       restartPolicy: Never
