@@ -26,15 +26,15 @@ The purpsoe of this Pattern is to provide a codified architecture that can be us
 
 ## Patter Use Cases
 
-# Enhanced Risk Management
+### Enhanced Risk Management
 
 1. Apply, remediate and report on compliance controls. This pattern applies the [CIS] {https://downloads.cisecurity.org/#/} benchmark.  
 
-# Incident Management and Reporting
+### Incident Management and Reporting
 
-# Digital Operations Resilince Testing
+### Digital Operations Resilince Testing
 
-# Third Part ICT Risks
+### Third Part ICT Risks
 
-# Exit Strategy
+### Exit Strategy
 
