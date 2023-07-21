@@ -23,7 +23,7 @@ spec:
       containers:
       - name: spring-petclinic
         imagePullPolicy: Always
-        image: quay-registry-quay-quay-enterprise.{{ .Values.global.localClusterDomain }}/{{ .Values.quay.org.name }}/{{ .Values.quay.repo }}:latest
+        image: quay.io/hybridcloudpatterns/spring-petclinic:latest
         livenessProbe:
           failureThreshold: 3
           httpGet:
