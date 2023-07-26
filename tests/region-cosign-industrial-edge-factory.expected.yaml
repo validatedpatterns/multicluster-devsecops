@@ -1,4 +1,32 @@
 ---
+# Source: cosign/templates/rbac/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cosign-sa
+  namespace: openshift-pipelines
+  annotations: {}
+---
+# Source: cosign/templates/cosign-cm-script.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: create-cosign-pubkey
+  namespace: openshift-pipelines
+data:
+  cosign.sh: |
+    #!/bin/bash
+    # check for signing-secrets in openshift-pipelines
+    SECRET=$(oc get secret signing-secrets -n openshift-pipelines)
+    if [[ $? -ne 0 ]]
+      then
+        export COSIGN_PASSWORD=$(openssl rand -base64 32) 
+        cosign generate-key-pair k8s://openshift-pipelines/signing-secrets --output-file /tmp/cosign.pub
+        oc create secret generic cosign-pubkey --from-file=/tmp/cosign.pub 
+      else
+        echo "the signing-secrets secret exists in openshift-pipelines"
+    fi
+---
 # Source: cosign/templates/rbac/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -19,6 +47,7 @@ rules:
       - patch
       - create
       - update
+      - delete
 ---
 # Source: cosign/templates/rbac/rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -31,7 +60,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "-15"
 subjects:
 - kind: ServiceAccount
-  name: pipelines
+  name: cosign-sa
   namespace: openshift-pipelines
   apiGroup: ""
 roleRef:
@@ -56,14 +85,21 @@ spec:
         - /bin/bash
         - -c
         - |
-          export COSIGN_PASSWORD=$(openssl rand -base64 32) 
-          cosign key-generate k8s://openshift-pipelines/signing-secrets
-          oc create secret generic cosign-pubkey --from-file=cosign.pub 
+           '/tmp/cosign.sh'
         name: create-cosign-pubkey
+        volumeMounts:
+          - mountPath: /tmp/cosign.sh
+            name: cosign
+            subPath: cosign.sh
+      volumes:
+        - name: cosign
+          configMap:
+            name: create-cosign-pubkey
+            defaultMode: 0755
       dnsPolicy: ClusterFirst
       restartPolicy: Never
-      serviceAccount: pipeline
-      serviceAccountName: pipeline
+      serviceAccount: cosign-sa
+      serviceAccountName: cosign-sa
       terminationGracePeriodSeconds: 60
 ---
 # Source: cosign/templates/buildconfig.yaml

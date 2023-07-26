@@ -197,6 +197,28 @@ data:
 
       echo "[INFO] Job finished"
 ---
+# Source: quay/templates/quayRegistry/cm-wait-for-quay-app-deploy.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # quaye abbrev. for Quay Enterprise
+  name: wait-for-quay-app
+  namespace: quay-enterprise
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "6"
+data:
+  wait-on-quay-to-deploy.sh: |
+    echo -n "Waiting for the Quay Registry CR to be available ."
+    RC=$(oc wait QuayRegistry quay-registry --for=condition=Available=true > /dev/null 2>&1;echo $?)
+
+    while [ $RC -ne 0 ]; do
+      sleep 2
+      echo -n "."
+      RC=$(oc wait QuayRegistry quay-registry --for=condition=Available=true > /dev/null 2>&1;echo $?)
+    done
+    echo "done"
+---
 # Source: quay/templates/rbac/quay-admin-role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -299,8 +321,17 @@ spec:
         - -c
         - |
           # wait for the operator QuayRegistry CR to be available
-          oc wait QuayRegistry quay-registry --for=condition=Available=true
+          /tmp/wait-on-quay-to-deploy.sh
         name: wait-for-quay-app
+        volumeMounts:
+          - mountPath: /tmp/wait-on-quay-to-deploy.sh
+            name: wait-for-quay-app
+            subPath: wait-on-quay-to-deploy.sh
+      volumes:
+        - name: wait-for-quay-app
+          configMap:
+            name: wait-for-quay-app
+            defaultMode: 0755
       dnsPolicy: ClusterFirst
       activeDeadlineSeconds: 900
       restartPolicy: Never
@@ -326,7 +357,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
 metadata:
   name: quay-pull-secret-placement-binding
-  namespace: openshift-operators
+  namespace: devsecops-ci
 placementRef:
   name: quay-pull-secret-placement
   kind: PlacementRule
@@ -342,7 +373,7 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: PlacementRule
 metadata:
   name: quay-pull-secret-placement
-  namespace: openshift-operators
+  namespace: devsecops-ci
 spec:
   # This will go to both devel and secured clusters
   clusterSelector:
@@ -411,7 +442,7 @@ apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
   name: policy-quay-pull-secret
-  namespace: openshift-operators
+  namespace: devsecops-ci
   annotations:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
     argocd.argoproj.io/sync-options: SkipPrune
@@ -434,6 +465,7 @@ spec:
             include:
               - default
               - openshift-operators
+              - devsecops-ci
           object-templates:
             - complianceType: mustonlyhave
               objectDefinition:

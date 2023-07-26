@@ -23,6 +23,12 @@ rules:
 {{- range $value.resources }}
       - {{ . }}
 {{- end }}
+{{- if $value.resourceNames }}
+    resourceNames:
+{{- range $value.resourceNames }}
+      - {{ . }}
+{{- end }}
+{{- end }}
     verbs:
 {{- range $value.verbs }}
       - {{ . }}
