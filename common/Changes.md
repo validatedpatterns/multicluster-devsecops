@@ -136,10 +136,7 @@
       caKeyPath: secret/data/hub/cluster_perth_ca
   ```
 
-## July 20, 2023
 
-* added ACM policy to install compliance operator on all OpenShift clusters
-* added ACM policy to add CIS policy scan and remidation to compliance operator for all OpenShift clusters
 
 
 
