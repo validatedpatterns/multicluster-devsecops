@@ -24,17 +24,37 @@ These regulations focus on the following five areas:
 
 The purpsoe of this Pattern is to provide a codified architecture that can be used to address some of the use cases that can be addressed using Red Hat and Cloud Native Technologies
 
-## Patter Use Cases
+## Pattern Use Cases
 
 ### Enhanced Risk Management
 
-1. Apply, remediate and report on compliance controls. This pattern applies the [CIS] {https://downloads.cisecurity.org/#/} benchmark.  
+1. Apply cross-cluster governance and application lifecycle management
+2. Apply, remediate and report on compliance controls. This pattern applies the [CIS] {https://downloads.cisecurity.org/#/} benchmark
+3. Securely manage secrets across the deployment
+4. CI/CD pipelines with security gates e.g. image scanning, signing and secure image storage
+5. Advanced securing monitoring and alerting
 
 ### Incident Management and Reporting
 
 ### Digital Operations Resilince Testing
 
+1. GitOps approach to control configuration and operations
+2. Centrally manage multiple clusters, including workloads
+
 ### Third Part ICT Risks
 
 ### Exit Strategy
 
+### Todo: continue to update as patter develops. 
+
+1. GitOps approach to manage hybrid and multi-cloud deployments across both private and public cloud
+2. 
+
+
+## Usecase demostrations
+
+1. Managed and Secured: a more controlled environment
+2. Development: where AppDev: Testing etc is happening
+3. Central Data Centre / Hub: the cloud / core
+
+### Todo: add demo for GitOps and resilience patter
