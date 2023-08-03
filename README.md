@@ -3,6 +3,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Start Here
+=======
 
 This is a WIP project to develop an Operational-Resilience Vaidated Pattern.  
 
@@ -57,4 +58,5 @@ The purpsoe of this Pattern is to provide a codified architecture that can be us
 2. Development: where AppDev: Testing etc is happening
 3. Central Data Centre / Hub: the cloud / core
 
-### Todo: add demo for GitOps and resilience patter
+### Todo: add demo for GitOps and resilience pattern
+
