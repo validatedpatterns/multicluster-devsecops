@@ -48,6 +48,7 @@ clusterGroup:
   - hub
   - opp
   - external-secrets
+  - compliance
   
   applications:
     acm:
@@ -119,6 +120,12 @@ clusterGroup:
       namespace: openshift
       project: hub
       path: charts/hub/cli-tools
+
+    acm-compliance-operator-policy:
+      name: acm-compliance-operator-policy
+      namespace: policies
+      project: compliance
+      path: charts/hub/acm/policies
 
   imperative: {}
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
