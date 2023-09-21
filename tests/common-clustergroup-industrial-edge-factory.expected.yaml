@@ -138,6 +138,7 @@ data:
       cicd:
         namespace: devsecops-ci
       clusterDomain: region.example.com
+      extraValueFiles: []
       git:
         account: PLAINTEXT
         dev_revision: main
@@ -422,7 +423,7 @@ spec:
       ignoreMissingValueFiles: true
       valueFiles:
       - "/values-global.yaml"
-      - "/values-factory.yaml"
+      - "/values-factory.yaml" 
       parameters:
         - name: global.repoURL
           value: $ARGOCD_APP_SOURCE_REPO_URL
