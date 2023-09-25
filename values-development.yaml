@@ -35,7 +35,7 @@ clusterGroup:
     - devsecops-dev
     - devsecops-qa
 # adding amq-streams for demo  
-  - lab-kafka
+   - lab-kafka
 
   subscriptions:
     rhacs-operator:
