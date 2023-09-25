@@ -34,6 +34,8 @@ clusterGroup:
     - devsecops-ci
     - devsecops-dev
     - devsecops-qa
+# adding amq-streams for demo  
+  - lab-kafka
 
   subscriptions:
     rhacs-operator:
@@ -48,6 +50,11 @@ clusterGroup:
       name: quay-bridge-operator
       namespace: openshift-operators
 
+# adding amq-streams for demo
+    amq-streams:
+      name: amq-streams
+      namespace: lab-kafka
+
   projects:
     - secured
     - ci
@@ -55,6 +62,8 @@ clusterGroup:
 #Adding jchraibi #advanced-devsecops to pattern framework
     - spring-petclinic
     - rollouts
+# adding amq-streams for demo
+    - lab-project
 
   applications:
     acs-secured:
@@ -127,6 +136,13 @@ clusterGroup:
       namespace: devsecops-ci
       project: ci
       path: charts/region/roxctl
+
+# adding kafka
+    kafka:
+      name: kafka
+      namespace: lab-kafka
+      project: lab-project
+      path: charts/all/kafka
 
 #Adding jchraibi #advanced-devsecops to pattern framework
 #    staging-spring-petclinic:

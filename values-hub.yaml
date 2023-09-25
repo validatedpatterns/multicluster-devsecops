@@ -15,8 +15,7 @@ clusterGroup:
   - devsecops-ci
   - openshift-storage
   - quay-enterprise
-# adding amq-streams for demo  
-  - lab-kafka
+
   
 #  subscriptions:  OpenShift Operator subscriptions from OLM/OperatorHub
 #  - name: the Operator package name (required)
@@ -43,12 +42,6 @@ clusterGroup:
       name: quay-operator
       namespace: openshift-operators
 
-# adding amq-streams for demo
-    amq-streams:
-      name: amq-streams
-      namespace: lab-kafka
-
-
 # The following section is used by
 # OpenShift GitOps (ArgoCD)
 # Projects are just ArgoCD groupings that can be filtered on.
@@ -57,8 +50,6 @@ clusterGroup:
   - opp
   - external-secrets
   - compliance
-# adding amq-streams for demo
-  - lab-project
   
   applications:
     acm:
@@ -136,14 +127,6 @@ clusterGroup:
       namespace: policies
       project: compliance
       path: charts/hub/acm/policies
-
-# adding kafka
-    kafka:
-      name: kafka
-      namespace: lab-kafka
-      project: lab-project
-      path: charts/all/kafka
-
 
   imperative: {}
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
