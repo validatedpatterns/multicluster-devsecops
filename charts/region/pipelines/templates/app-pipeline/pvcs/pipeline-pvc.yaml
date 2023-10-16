@@ -9,7 +9,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: gp3-csi
+  storageClassName: {{ .Values.cloudProvider.storageClass }}
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
