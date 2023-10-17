@@ -135,13 +135,17 @@ clusterGroup:
 #      project: spring-petclinic
 #      path: charts/region/stage/spring-petclinic-config
 
-    
+
     dev-spring-petclinic:
       name: dev-spring-petclinic
       namespace: devsecops-dev
       project: spring-petclinic
       kustomize: true
       path: charts/region/spring-petclinic/environments/dev
+
+  sharedValueFiles:
+    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+E   - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
 
 #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
 #

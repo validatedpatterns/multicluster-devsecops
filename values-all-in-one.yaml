@@ -32,10 +32,6 @@ clusterGroup:
   name: hub
   isHubCluster: true
 
-  sharedValueFiles:
-    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml'
-
 # Namespaces that are expected to be created.
 # The pattern will apply these namespaces
 # and creates an operator group for that namespace
@@ -251,6 +247,10 @@ clusterGroup:
       # per playbook timeout in seconds
       # timeout: 234
       # verbosity: "-v"
+
+  sharedValueFiles:
+    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml'
 
 # This section is used by ACM
   managedClusterGroups:

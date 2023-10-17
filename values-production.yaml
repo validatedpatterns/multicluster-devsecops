@@ -39,3 +39,7 @@ clusterGroup:
       namespace: openshift-operators
       project: secured
       path: charts/region/quay
+
+  sharedValueFiles:
+    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+E   - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:

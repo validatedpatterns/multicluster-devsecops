@@ -135,6 +135,10 @@ clusterGroup:
       # timeout: 234
       # verbosity: "-v"
 
+  sharedValueFiles:
+    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+E   - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E: line too long (115 > 80 characters)
+
 # This section is used by ACM
   managedClusterGroups:
   - name: development
