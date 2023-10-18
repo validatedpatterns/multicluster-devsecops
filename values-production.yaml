@@ -41,5 +41,5 @@ clusterGroup:
       path: charts/region/quay
 
   sharedValueFiles:
-    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:

@@ -249,8 +249,8 @@ clusterGroup:
       # verbosity: "-v"
 
   sharedValueFiles:
-    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml'
 
 # This section is used by ACM
   managedClusterGroups:

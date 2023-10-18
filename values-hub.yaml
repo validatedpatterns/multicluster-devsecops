@@ -136,8 +136,8 @@ clusterGroup:
       # verbosity: "-v"
 
   sharedValueFiles:
-    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E: line too long (115 > 80 characters)
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E: line too long (115 > 80 characters)
 
 # This section is used by ACM
   managedClusterGroups:
