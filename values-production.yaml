@@ -42,4 +42,4 @@ clusterGroup:
 
   sharedValueFiles:
     - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-E   - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
+    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:

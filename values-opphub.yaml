@@ -107,7 +107,8 @@ clusterGroup:
 
   sharedValueFiles:
     - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-E   - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
+    - '/cluster-overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
+
 # This section is used by ACM
   managedClusterGroups:
   - name: devel
