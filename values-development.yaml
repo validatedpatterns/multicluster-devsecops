@@ -56,6 +56,10 @@ clusterGroup:
     - spring-petclinic
     - rollouts
 
+  sharedValueFiles:
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
+
   applications:
     acs-secured:
       name: acs-secured
@@ -142,10 +146,6 @@ clusterGroup:
       project: spring-petclinic
       kustomize: true
       path: charts/region/spring-petclinic/environments/dev
-
-  sharedValueFiles:
-    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
 
 #  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
 #

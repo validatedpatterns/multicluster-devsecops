@@ -48,6 +48,10 @@ clusterGroup:
   - opp
   - golang-external-secrets
 
+  sharedValueFiles:
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
+
   applications:
     acm:
       name: acm   #arbitary
@@ -104,10 +108,6 @@ clusterGroup:
       namespace: openshift
       project: hub
       path: charts/hub/cli-tools
-
-  sharedValueFiles:
-    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
 
 # This section is used by ACM
   managedClusterGroups:

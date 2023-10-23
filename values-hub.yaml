@@ -48,7 +48,11 @@ clusterGroup:
   - hub
   - opp
   - external-secrets
-  
+
+  sharedValueFiles:
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E: line too long (115 > 80 characters)
+
   applications:
     acm:
       name: acm   #arbitary
@@ -134,10 +138,6 @@ clusterGroup:
       # per playbook timeout in seconds
       # timeout: 234
       # verbosity: "-v"
-
-  sharedValueFiles:
-    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E: line too long (115 > 80 characters)
 
 # This section is used by ACM
   managedClusterGroups:

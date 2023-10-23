@@ -27,6 +27,10 @@ clusterGroup:
     - app
     - secured
 
+  sharedValueFiles:
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
+
   applications:
     acs-secured:
       name: acs-secured
@@ -39,7 +43,3 @@ clusterGroup:
       namespace: openshift-operators
       project: secured
       path: charts/region/quay
-
-  sharedValueFiles:
-    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
