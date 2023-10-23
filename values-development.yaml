@@ -56,6 +56,10 @@ clusterGroup:
     - spring-petclinic
     - rollouts
 
+  sharedValueFiles:
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
+
   applications:
     acs-secured:
       name: acs-secured
@@ -135,7 +139,7 @@ clusterGroup:
 #      project: spring-petclinic
 #      path: charts/region/stage/spring-petclinic-config
 
-    
+
     dev-spring-petclinic:
       name: dev-spring-petclinic
       namespace: devsecops-dev

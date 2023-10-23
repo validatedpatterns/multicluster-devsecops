@@ -95,7 +95,11 @@ clusterGroup:
   #Adding jchraibi #advanced-devsecops to pattern framework
   - spring-petclinic
   - rollouts
-  
+
+  sharedValueFiles:
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml'
+
   applications:
     acm:
       name: acm   #arbitary

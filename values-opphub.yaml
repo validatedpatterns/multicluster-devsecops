@@ -48,6 +48,10 @@ clusterGroup:
   - opp
   - golang-external-secrets
 
+  sharedValueFiles:
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E:
+
   applications:
     acm:
       name: acm   #arbitary

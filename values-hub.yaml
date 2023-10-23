@@ -48,7 +48,11 @@ clusterGroup:
   - hub
   - opp
   - external-secrets
-  
+
+  sharedValueFiles:
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E: line too long (115 > 80 characters)
+
   applications:
     acm:
       name: acm   #arbitary
