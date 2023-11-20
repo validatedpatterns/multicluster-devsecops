@@ -1,6 +1,8 @@
 clusterGroup:
   name: hub
   isHubCluster: true
+
+cloudProvider:
   storageClass: gp2
 
 # Namespaces that are expected to be created.
