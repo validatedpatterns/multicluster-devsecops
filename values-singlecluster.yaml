@@ -1,0 +1,173 @@
+clusterGroup:
+  name: singlecluster
+  isHubCluster: true
+ 
+# Namespaces that are expected to be created.
+# The pattern will apply these namespaces
+# and creates an operator group for that namespace
+  namespaces:
+  - vault
+  - golang-external-secrets
+  - rhacs-operator
+  - stackrox
+  - policies
+  - openshift-storage
+  - quay-enterprise
+  - openshift-pipelines
+  - devsecops-ci
+  - devsecops-dev
+  - devsecops-qa 
+ 
+#  subscriptions:  OpenShift Operator subscriptions from OLM/OperatorHub
+#  - name: the Operator package name (required)
+#    namespace: expected namespace as specified by Operator (defaults to openshift-operators)
+#    channel: operator channel from package manifest (required)
+#    csv: Operator CSV from package manifest.
+#         only used if global.options.useCSV: true in values-global.yaml
+ 
+  subscriptions:
+# If specific channels are required then uncomment channel line and add the name of the channel
+    acs:
+      name: rhacs-operator  #packageName
+      namespace: openshift-operators # operator namespace
+ 
+    odf:
+      name: odf-operator
+      namespace: openshift-storage
+ 
+    quay:
+      name: quay-operator
+      namespace: openshift-operators
+ 
+    openshift-pipelines:
+      name: openshift-pipelines-operator-rh
+      namespace: openshift-operators
+ 
+# The following section is used by
+# OpenShift GitOps (ArgoCD)
+# Projects are just ArgoCD groupings that can be filtered on.
+  projects:
+  - hub
+  - opp
+  - external-secrets
+ 
+  sharedValueFiles:
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
+    - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml' #   E: line too long (115 > 80 characters)
+ 
+  applications:
+    acs-central:
+      name: acs-central
+      namespace: stackrox
+      project: opp
+      path: charts/hub/acs/central
+ 
+    acs-secured:
+      name: acs-secured
+      namespace: stackrox
+      project: opp
+      path: charts/hub/acs/secured
+ 
+    storage:
+      name: storage
+      namespace: openshift-storage
+      project: opp
+      path: charts/hub/odf
+ 
+    quay-registry:
+      name: quay-registry
+      namespace: quay-enterprise
+      project: opp
+      path: charts/hub/quay
+ 
+    opp-policy:
+      name: opp-policy
+      namespace: openshift
+      project: opp
+      path: charts/hub/opp
+      ignoreDifferences:
+      - group: operators.openshift.io
+        kind: Console
+        jsonPointers: 
+          - /spec/plugins
+ 
+    vault:
+      name: vault
+      namespace: vault
+      project: hub
+      path: common/hashicorp-vault
+ 
+    golang-external-secrets:
+      name: golang-external-secrets
+      namespace: golang-external-secrets
+      project: external-secrets
+      path: common/golang-external-secrets
+ 
+    external-secrets:
+      name: external-secrets
+      namespace: devsecops-ci
+      project: external-secrets
+      path: charts/hub/external-secrets
+ 
+    cli-tools:
+      name: cli-tools
+      namespace: openshift
+      project: hub
+      path: charts/hub/cli-tools
+ 
+  imperative: {}
+    # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
+    # The default schedule is every 10 minutes: imperative.schedule
+    # Total timeout of all jobs is 1h: imperative.activeDeadlineSeconds
+    # imagePullPolicy is set to always: imperative.imagePullPolicy
+    # For additional overrides that apply to the jobs, please refer to
+    # https://hybrid-cloud-patterns.io/imperative-actions/#additional-job-customizations
+    #jobs:
+    #- name: regional-ca
+      # ansible playbook to be run
+      # playbook: common/ansible/playbooks/hello-world/hello-world.yaml
+      # per playbook timeout in seconds
+      # timeout: 234
+      # verbosity: "-v"
+ 
+# This section is used by ACM
+  managedClusterGroups:
+  - name: development
+    helmOverrides:
+    - name: clusterGroup.isHubCluster
+      value: "false"
+    clusterSelector:
+      matchLabels:
+        clusterGroup: devel
+      matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
+ 
+  - name: production
+    helmOverrides:
+    - name: clusterGroup.isHubCluster
+      value: "false"
+    clusterSelector:
+      matchLabels:
+        clusterGroup: prod
+      matchExpressions:
+      - key: vendor
+        operator: In
+        values:
+          - OpenShift
+ 
+#
+#   Additional applications
+#   Be sure to include additional resources your apps will require
+#   +X machines
+#   +Y RAM
+#   +Z CPU
+#  - name: vendor-app
+#    namespace: default
+#    project: vendor
+#    path: path/to/myapp
+#    repoURL: https://github.com/vendor/applications.git
+#    targetRevision: main
+ 

@@ -35,4 +35,5 @@ global:
   opp: false
 
 main:
-  clusterGroupName: hub
+  clusterGroupName: singlecluster
+  no-acm: true
