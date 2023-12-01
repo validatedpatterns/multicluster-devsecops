@@ -1,3 +1,4 @@
+{{ if eq .Values.global.no-acm "false" }}
 apiVersion: policy.open-cluster-management.io/v1beta1
 kind: PolicySet
 metadata:
@@ -16,3 +17,4 @@ spec:
   - policy-ocm-observability
   - policy-odf-status
   - policy-quay-status
+  {{ end }}
