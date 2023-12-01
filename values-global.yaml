@@ -1,6 +1,7 @@
 ---
 global:
   pattern: multicluster-devsecops
+  no-acm: true
 
   cicd:
     namespace: devsecops-ci
@@ -36,4 +37,5 @@ global:
 
 main:
   clusterGroupName: singlecluster
-  no-acm: true
+
+
