@@ -130,34 +130,7 @@ clusterGroup:
       # timeout: 234
       # verbosity: "-v"
  
-# This section is used by ACM
-  managedClusterGroups:
-  - name: development
-    helmOverrides:
-    - name: clusterGroup.isHubCluster
-      value: "false"
-    clusterSelector:
-      matchLabels:
-        clusterGroup: devel
-      matchExpressions:
-      - key: vendor
-        operator: In
-        values:
-          - OpenShift
- 
-  - name: production
-    helmOverrides:
-    - name: clusterGroup.isHubCluster
-      value: "false"
-    clusterSelector:
-      matchLabels:
-        clusterGroup: prod
-      matchExpressions:
-      - key: vendor
-        operator: In
-        values:
-          - OpenShift
- 
+
 #
 #   Additional applications
 #   Be sure to include additional resources your apps will require
