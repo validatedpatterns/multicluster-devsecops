@@ -1,5 +1,5 @@
 clusterGroup:
-  name: singlecluster
+  name: hub
   isHubCluster: true
  
 # Namespaces that are expected to be created.
