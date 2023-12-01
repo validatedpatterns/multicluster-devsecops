@@ -80,16 +80,16 @@ clusterGroup:
       project: opp
       path: charts/hub/quay
  
-    opp-policy:
-      name: opp-policy
-      namespace: openshift
-      project: opp
-      path: charts/hub/opp
-      ignoreDifferences:
-      - group: operators.openshift.io
-        kind: Console
-        jsonPointers: 
-          - /spec/plugins
+#    opp-policy:
+#      name: opp-policy
+#      namespace: openshift
+#      project: opp
+#      path: charts/hub/opp
+#      ignoreDifferences:
+#      - group: operators.openshift.io
+#        kind: Console
+#        jsonPointers: 
+#          - /spec/plugins
  
     vault:
       name: vault
