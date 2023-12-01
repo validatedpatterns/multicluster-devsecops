@@ -1,4 +1,4 @@
-{{ if eq .Values.global.no-acm "false" }}
+{{ if .Values.global.acm }}
 apiVersion: policy.open-cluster-management.io/v1beta1
 kind: PolicySet
 metadata:

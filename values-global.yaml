@@ -1,7 +1,7 @@
 ---
 global:
   pattern: multicluster-devsecops
-  no-acm: true
+  amc: true
 
   cicd:
     namespace: devsecops-ci
