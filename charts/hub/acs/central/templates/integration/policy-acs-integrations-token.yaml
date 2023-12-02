@@ -1,4 +1,4 @@
-{{- if $.Values.global.acm }}
+{{ if .Values.global.acm }}
 {{- if $.Values.acs.integrations }}
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
