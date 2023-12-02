@@ -1,3 +1,4 @@
+{{- if $.Values.global.acm }}
 apiVersion: policy.open-cluster-management.io/v1
 kind: Policy
 metadata:
@@ -43,3 +44,4 @@ spec:
               numberMisscheduled: 0
         remediationAction: inform
         severity: medium
+{{- end }}
