@@ -48,7 +48,6 @@ clusterGroup:
 # Projects are just ArgoCD groupings that can be filtered on.
   projects:
   - hub
-  - opp
   - external-secrets
  
   sharedValueFiles:
@@ -59,25 +58,25 @@ clusterGroup:
     acs-central:
       name: acs-central
       namespace: stackrox
-      project: opp
+      project: hub
       path: charts/hub/acs/central
  
     acs-secured:
       name: acs-secured
       namespace: stackrox
-      project: opp
+      project: hub
       path: charts/hub/acs/secured
  
     storage:
       name: storage
       namespace: openshift-storage
-      project: opp
+      project: hub
       path: charts/hub/odf
  
     quay-registry:
       name: quay-registry
       namespace: quay-enterprise
-      project: opp
+      project: hub
       path: charts/hub/quay
  
 #    opp-policy:
@@ -114,7 +113,18 @@ clusterGroup:
       namespace: openshift
       project: hub
       path: charts/hub/cli-tools
- 
+
+    pipelines:
+      name: pipelines
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/pipelines
+      ignoreDifferences:
+      - kind: ServiceAccount
+        jsonPointers:
+        - /imagePullSecrets
+        - /secrets
+   
   imperative: {}
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
     # The default schedule is every 10 minutes: imperative.schedule
