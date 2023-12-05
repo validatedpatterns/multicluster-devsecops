@@ -67,4 +67,4 @@ spec:
     - status: 'True'
       type: ManagedClusterConditionAvailable
 {{- end }}
-{{- end }}
+{{ end }}
