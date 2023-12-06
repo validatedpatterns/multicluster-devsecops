@@ -46,4 +46,4 @@ spec:
                 type: Available
         remediationAction: inform
         severity: medium
-        {{ end }}
+{{ end }}
