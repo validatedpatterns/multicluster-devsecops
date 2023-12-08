@@ -124,7 +124,49 @@ clusterGroup:
         jsonPointers:
         - /imagePullSecrets
         - /secrets
-   
+
+    nexus:
+      name: nexus
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/nexus
+
+    reports-repo:
+      name: reports-repo
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/reports
+
+    sonarqube:
+      name: sonarqube
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/sonarqube
+
+    cosign:
+      name: cosign
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/cosign
+
+    rekor:
+      name: rekor
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/rekor
+
+    roxctl:
+      name: roxctl
+      namespace: devsecops-ci
+      project: ci
+      path: charts/region/roxctl
+
+    petclinic:
+      name: spring-petclinic
+      namespace: devsecops-dev
+      project: dev
+      path: charts/region/spring-petclinic-config
+
   imperative: {}
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
     # The default schedule is every 10 minutes: imperative.schedule
