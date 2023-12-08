@@ -49,6 +49,8 @@ clusterGroup:
   projects:
   - hub
   - external-secrets
+  - ci
+  - dev
  
   sharedValueFiles:
     - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
