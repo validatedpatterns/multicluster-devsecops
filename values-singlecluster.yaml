@@ -163,11 +163,6 @@ clusterGroup:
       project: ci
       path: charts/region/roxctl
 
-    petclinic:
-      name: spring-petclinic
-      namespace: devsecops-dev
-      project: dev
-      path: charts/region/spring-petclinic-config
 
   imperative: {}
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
