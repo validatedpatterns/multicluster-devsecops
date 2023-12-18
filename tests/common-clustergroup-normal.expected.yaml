@@ -17,9 +17,18 @@ spec:
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: application-ci
   labels:
     argocd.argoproj.io/managed-by: mypattern-example
-  name: application-ci
+spec:
+---
+# Source: clustergroup/templates/core/namespaces.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: exclude-targetns
+  labels:
+    argocd.argoproj.io/managed-by: mypattern-example
 spec:
 ---
 # Source: clustergroup/templates/core/namespaces.yaml
@@ -28,7 +37,34 @@ kind: Namespace
 metadata:
   labels:
     argocd.argoproj.io/managed-by: mypattern-example
-  name: excludes-ci
+  name: include-ci
+spec:
+---
+# Source: clustergroup/templates/core/namespaces.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    argocd.argoproj.io/managed-by: mypattern-example
+  name: exclude-og
+spec:
+---
+# Source: clustergroup/templates/core/namespaces.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: totally-exclude-og
+  labels:
+    argocd.argoproj.io/managed-by: mypattern-example
+spec:
+---
+# Source: clustergroup/templates/core/namespaces.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: include-default-og
+  labels:
+    argocd.argoproj.io/managed-by: mypattern-example
 spec:
 ---
 # Source: clustergroup/templates/imperative/namespace.yaml
@@ -87,12 +123,15 @@ data:
           namespace: application-ci
           path: charts/datacenter/pipelines
           project: datacenter
+      argoCD:
+        configManagementPlugins: []
+        initContainers: []
       imperative:
         activeDeadlineSeconds: 3600
         clusterRoleName: imperative-cluster-role
         clusterRoleYaml: ""
         cronJobName: imperative-cronjob
-        image: registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8:latest
+        image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
         imagePullPolicy: Always
         insecureUnsealVaultInsideClusterSchedule: '*/5 * * * *'
         jobName: imperative-job
@@ -171,10 +210,22 @@ data:
           labels:
             kubernetes.io/os: linux
             openshift.io/node-selector: ""
-      - application-ci
-      - excludes-ci
+      - application-ci:
+          operatorGroup: true
+          targetNamespaces:
+          - application-ci
+          - other-namespace
+      - exclude-targetns:
+          operatorGroup: true
+          targetNamespaces: null
+      - include-ci
+      - exclude-og
+      - totally-exclude-og:
+          operatorGroup: false
+      - include-default-og:
+          operatorGroup: true
       operatorgroupExcludes:
-      - excludes-ci
+      - exclude-og
       projects:
       - datacenter
       sharedValueFiles:
@@ -366,7 +417,7 @@ spec:
             # git init happens in /git/repo so that we can set the folder to 0770 permissions
             # reason for that is ansible refuses to create temporary folders in there            
             - name: git-init
-              image: registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8:latest
+              image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
               imagePullPolicy: Always
               env:
                 - name: HOME
@@ -374,12 +425,33 @@ spec:
               command:
               - 'sh'
               - '-c'
-              - "mkdir /git/{repo,home};git clone --single-branch --branch main --depth 1 -- https://github.com/pattern-clone/mypattern /git/repo;chmod 0770 /git/{repo,home}"
+              - >-
+                if ! oc get secrets -n openshift-gitops vp-private-repo-credentials &> /dev/null; then
+                  URL="https://github.com/pattern-clone/mypattern";
+                else
+                  if ! oc get secrets -n openshift-gitops vp-private-repo-credentials -o go-template='{{index .data.sshPrivateKey | base64decode}}' &>/dev/null; then
+                    U="$(oc get secret -n openshift-gitops vp-private-repo-credentials -o go-template='{{index .data.username | base64decode }}')";
+                    P="$(oc get secret -n openshift-gitops vp-private-repo-credentials -o go-template='{{index .data.password | base64decode }}')";
+                    URL=$(echo https://github.com/pattern-clone/mypattern | sed -E "s/(https?:\/\/)/\1${U}:${P}@/");
+                    echo "USER/PASS: ${URL}";
+                  else
+                    S="$(oc get secret -n openshift-gitops vp-private-repo-credentials -o go-template='{{index .data.sshPrivateKey | base64decode }}')";
+                    mkdir -p --mode 0700 "${HOME}/.ssh";
+                    echo "${S}" > "${HOME}/.ssh/id_rsa";
+                    chmod 0600 "${HOME}/.ssh/id_rsa";
+                    URL=$(echo https://github.com/pattern-clone/mypattern | sed -E "s/(https?:\/\/)/\1git@/");
+                    git config --global core.sshCommand "ssh -i "${HOME}/.ssh/id_rsa" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no";
+                    echo "SSH: ${URL}";
+                  fi;
+                fi;
+                mkdir /git/{repo,home};
+                git clone --single-branch --branch main --depth 1 -- "${URL}" /git/repo;
+                chmod 0770 /git/{repo,home};
               volumeMounts:
               - name: git
                 mountPath: "/git"
             - name: test
-              image: registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8:latest
+              image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
               imagePullPolicy: Always
               env:
                 - name: HOME
@@ -402,7 +474,7 @@ spec:
                   subPath: values.yaml
           containers:            
             - name: "done"
-              image: registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8:latest
+              image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
               imagePullPolicy: Always
               command:
                 - 'sh'
@@ -440,7 +512,7 @@ spec:
             # git init happens in /git/repo so that we can set the folder to 0770 permissions
             # reason for that is ansible refuses to create temporary folders in there            
             - name: git-init
-              image: registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8:latest
+              image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
               imagePullPolicy: Always
               env:
                 - name: HOME
@@ -448,12 +520,33 @@ spec:
               command:
               - 'sh'
               - '-c'
-              - "mkdir /git/{repo,home};git clone --single-branch --branch main --depth 1 -- https://github.com/pattern-clone/mypattern /git/repo;chmod 0770 /git/{repo,home}"
+              - >-
+                if ! oc get secrets -n openshift-gitops vp-private-repo-credentials &> /dev/null; then
+                  URL="https://github.com/pattern-clone/mypattern";
+                else
+                  if ! oc get secrets -n openshift-gitops vp-private-repo-credentials -o go-template='{{index .data.sshPrivateKey | base64decode}}' &>/dev/null; then
+                    U="$(oc get secret -n openshift-gitops vp-private-repo-credentials -o go-template='{{index .data.username | base64decode }}')";
+                    P="$(oc get secret -n openshift-gitops vp-private-repo-credentials -o go-template='{{index .data.password | base64decode }}')";
+                    URL=$(echo https://github.com/pattern-clone/mypattern | sed -E "s/(https?:\/\/)/\1${U}:${P}@/");
+                    echo "USER/PASS: ${URL}";
+                  else
+                    S="$(oc get secret -n openshift-gitops vp-private-repo-credentials -o go-template='{{index .data.sshPrivateKey | base64decode }}')";
+                    mkdir -p --mode 0700 "${HOME}/.ssh";
+                    echo "${S}" > "${HOME}/.ssh/id_rsa";
+                    chmod 0600 "${HOME}/.ssh/id_rsa";
+                    URL=$(echo https://github.com/pattern-clone/mypattern | sed -E "s/(https?:\/\/)/\1git@/");
+                    git config --global core.sshCommand "ssh -i "${HOME}/.ssh/id_rsa" -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no";
+                    echo "SSH: ${URL}";
+                  fi;
+                fi;
+                mkdir /git/{repo,home};
+                git clone --single-branch --branch main --depth 1 -- "${URL}" /git/repo;
+                chmod 0770 /git/{repo,home};
               volumeMounts:
               - name: git
                 mountPath: "/git"
             - name: unseal-playbook
-              image: registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8:latest
+              image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
               imagePullPolicy: Always
               env:
                 - name: HOME
@@ -478,7 +571,7 @@ spec:
                   subPath: values.yaml
           containers:            
             - name: "done"
-              image: registry.redhat.io/ansible-automation-platform-23/ee-supported-rhel8:latest
+              image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
               imagePullPolicy: Always
               command:
                 - 'sh'
@@ -588,6 +681,8 @@ spec:
           value: apps.hub.example.com
         - name: global.localClusterDomain
           value: apps.region.example.com
+        - name: global.privateRepo
+          value: 
   ignoreDifferences: [
   {
     "group": "internal.open-cluster-management.io",
@@ -652,6 +747,8 @@ spec:
           value: apps.hub.example.com
         - name: global.localClusterDomain
           value: apps.region.example.com
+        - name: global.privateRepo
+          value: 
   syncPolicy:
     automated: {}
     retry:
@@ -934,36 +1031,6 @@ spec:
       return hs
 
   applicationInstanceLabelKey: argocd.argoproj.io/instance
-  # Not the greatest way to pass git/quay info to sub-applications, but it will do until
-  # we can support helmChart with kustomize
-  # The other option is to pass them in as environment variables eg. BLUEPRINT_VERSION
-  configManagementPlugins: |
-    - name: kustomize-version
-      generate:
-        command: ["sh", "-c"]
-        args: ["kustomize version 1>&2 && exit 1"]
-    - name: kustomize-with-helm
-      generate:
-        command: ["kustomize"]
-        args: ["build", "--enable-helm"]
-    - name: helm-with-kustomize
-      init:
-        command: ["/bin/sh", "-c"]
-        args: ["helm dependency build"]
-      generate:
-        command: ["/bin/bash", "-c"]
-        args: ["helm template . --name-template ${ARGOCD_APP_NAME:0:52}
-            -f $(git rev-parse --show-toplevel)/values-global.yaml
-            -f $(git rev-parse --show-toplevel)/values-example.yaml
-            --set global.repoURL=$ARGOCD_APP_SOURCE_REPO_URL
-            --set global.targetRevision=$ARGOCD_APP_SOURCE_TARGET_REVISION
-            --set global.namespace=$ARGOCD_APP_NAMESPACE
-            --set global.pattern=mypattern
-            --set global.clusterDomain=region.example.com
-            --set global.hubClusterDomain=apps.hub.example.com
-            --set global.localClusterDomain=apps.region.example.com
-            --set clusterGroup.name=example
-            --post-renderer ./kustomize"]
   applicationSet:
     resources:
       limits:
@@ -1053,21 +1120,42 @@ spec:
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
-  name: open-cluster-management-operator-group
-  namespace: open-cluster-management
-spec:
-  targetNamespaces:
-  - open-cluster-management
----
-# Source: clustergroup/templates/core/operatorgroup.yaml
-apiVersion: operators.coreos.com/v1
-kind: OperatorGroup
-metadata:
   name: application-ci-operator-group
   namespace: application-ci
 spec:
   targetNamespaces:
   - application-ci
+  - other-namespace
+---
+# Source: clustergroup/templates/core/operatorgroup.yaml
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: exclude-targetns-operator-group
+  namespace: exclude-targetns
+spec:
+  targetNamespaces:
+---
+# Source: clustergroup/templates/core/operatorgroup.yaml
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: include-ci-operator-group
+  namespace: include-ci
+spec:
+  targetNamespaces:
+  - include-ci
+---
+# Source: clustergroup/templates/core/operatorgroup.yaml
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: include-default-og-operator-group
+  namespace: include-default-og
+spec:
+  targetNamespaces:
+  - include-default-og
 ---
 # Source: clustergroup/templates/core/subscriptions.yaml
 apiVersion: operators.coreos.com/v1alpha1
