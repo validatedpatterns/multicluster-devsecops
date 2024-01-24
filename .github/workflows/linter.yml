@@ -36,8 +36,8 @@ jobs:
 
       - name: Setup helm
         uses: azure/setup-helm@v3
-        # with:
-        #   version: '<version>' # default is latest stable
+        with:
+          version: 'v3.13.2'
         id: install
 
       ################################
