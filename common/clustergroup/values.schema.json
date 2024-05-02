@@ -65,6 +65,10 @@
         "clusterGroupName": {
           "type": "string"
         },
+        "experimentalCapabilities": {
+          "type": "string",
+          "description": "String to enable certain experimental capabilities in the operator and the framework."
+        },
         "git": {
           "type": "object",
           "additionalProperties": false,
@@ -153,12 +157,27 @@
         },
         "options": {
           "$ref": "#/definitions/Options"
+        },
+        "secretStore": {
+          "$ref": "#/definitions/GlobalSecretStore"
         }
       },
       "required": [
         "options"
       ],
       "title": "Global"
+    },
+    "GlobalSecretStore": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "backend": {
+          "type": "string",
+          "description": "Name of the secrets backend",
+          "default": "vault"
+        }
+      },
+      "title": "GlobalSecretsStore"
     },
     "GlobalGit": {
       "type": "object",
@@ -239,7 +258,14 @@
             "description": "Templated value file paths."
 	},
         "namespaces": {
-          "type": "array",
+          "anyOf": [
+            {
+              "type": "array"
+            },
+            {
+              "type": "object"
+            }
+          ],
           "description": "This is the array of namespaces that the VP framework will create.  In addition, operator groups will also be created for each namespace.",
           "items": {
             "$ref": "#/definitions/Namespaces"
@@ -297,7 +323,14 @@
           }
         },
         "projects": {
-          "type": "array",
+          "anyOf": [
+            {
+              "type": "array"
+            },
+            {
+              "type": "object"
+            }
+          ],
           "description": "The list of projects that will be created in the ArgoCD instances.",
           "items": {
             "type": "string"
@@ -336,9 +369,6 @@
           "items": {
             "$ref": "#/definitions/ManagedClusterGroup"
           }
-        },
-        "externalClusters": {
-          "type": "array"
         }
       },
       "required": [

@@ -7,11 +7,15 @@ main:
     revision: main
 
   gitops:
-    channel: "gitops-1.11"
+    channel: "gitops-1.12"
     operatorSource: redhat-operators
 
   multiSourceConfig:
     enabled: false
+
+  # String to enable certain experimental capabilities in the operator and the
+  # framework. Not needed unless you know exactly what you're doing.
+  experimentalCapabilities: ""
 
   patternsOperator:
     channel: fast

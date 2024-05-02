@@ -1,9 +1,5 @@
 rh_internal_registry: registry-proxy.engineering.redhat.com
-iib_image: "{{ lookup('env', 'INDEX_IMAGE') }}"
-
-external_registry: "{{ lookup('env', 'REGISTRY') }}"
-external_registry_token: "{{ lookup('env', 'REGISTRY_TOKEN') }}"
-external_registry_email: noemail@localhost
+iib_images: "{{ lookup('env', 'INDEX_IMAGES') }}"
 
 kubeadminpass: "{{ lookup('env', 'KUBEADMINPASS') }}"
 
