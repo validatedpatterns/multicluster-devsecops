@@ -1,4 +1,5 @@
 NAME ?= $(shell basename "`pwd`")
+
 ifneq ($(origin TARGET_SITE), undefined)
   TARGET_SITE_OPT=--set main.clusterGroupName=$(TARGET_SITE)
 endif
@@ -55,11 +56,12 @@ help: ## This help message
 show: ## show the starting template without installing it
 	helm template common/operator-install/ --name-template $(NAME) $(HELM_OPTS)
 
-preview-all:
+preview-all: ## (EXPERIMENTAL) Previews all applications on hub and managed clusters
+	@echo "NOTE: This is just a tentative approximation of rendering all hub and managed clusters templates"
 	@common/scripts/preview-all.sh $(TARGET_REPO) $(TARGET_BRANCH)
 
 preview-%:
-	CLUSTERGROUP?=$(shell yq ".main.clusterGroupName" values-global.yaml)
+	$(eval CLUSTERGROUP ?= $(shell yq ".main.clusterGroupName" values-global.yaml))
 	@common/scripts/preview.sh $(CLUSTERGROUP) $* $(TARGET_REPO) $(TARGET_BRANCH)
 
 .PHONY: operator-deploy
@@ -77,15 +79,41 @@ uninstall: ## runs helm uninstall
 	@oc delete csv -n openshift-operators $(CSV)
 
 .PHONY: load-secrets
-load-secrets: ## loads the secrets into the vault
+load-secrets: ## loads the secrets into the backend determined by values-global setting
+	common/scripts/process-secrets.sh $(NAME)
+
+.PHONY: legacy-load-secrets
+legacy-load-secrets: ## loads the secrets into vault (only)
 	common/scripts/vault-utils.sh push_secrets $(NAME)
+
+.PHONY: secrets-backend-vault
+secrets-backend-vault: ## Edits values files to use default Vault+ESO secrets config
+	common/scripts/set-secret-backend.sh vault
+	common/scripts/manage-secret-app.sh vault present
+	common/scripts/manage-secret-app.sh golang-external-secrets present
+	common/scripts/manage-secret-namespace.sh validated-patterns-secrets absent
+	@git diff --exit-code || echo "Secrets backend set to vault, please review changes, commit, and push to activate in the pattern"
+
+.PHONY: secrets-backend-kubernetes
+secrets-backend-kubernetes: ## Edits values file to use Kubernetes+ESO secrets config
+	common/scripts/set-secret-backend.sh kubernetes
+	common/scripts/manage-secret-namespace.sh validated-patterns-secrets present
+	common/scripts/manage-secret-app.sh vault absent
+	common/scripts/manage-secret-app.sh golang-external-secrets present
+	@git diff --exit-code || echo "Secrets backend set to kubernetes, please review changes, commit, and push to activate in the pattern"
+
+.PHONY: secrets-backend-none
+secrets-backend-none: ## Edits values files to remove secrets manager + ESO
+	common/scripts/set-secret-backend.sh none
+	common/scripts/manage-secret-app.sh vault absent
+	common/scripts/manage-secret-app.sh golang-external-secrets absent
+	common/scripts/manage-secret-namespace.sh validated-patterns-secrets absent
+	@git diff --exit-code || echo "Secrets backend set to none, please review changes, commit, and push to activate in the pattern"
 
 .PHONY: load-iib
 load-iib: ## CI target to install Index Image Bundles
 	@set -e; if [ x$(INDEX_IMAGES) != x ]; then \
-		for IIB in $(shell echo $(INDEX_IMAGES) | tr ',' '\n'); do \
-			INDEX_IMAGE="$${IIB}" ansible-playbook common/ansible/playbooks/iib-ci/iib-ci.yaml; \
-		done; \
+		ansible-playbook common/ansible/playbooks/iib-ci/iib-ci.yaml; \
 	else \
 		echo "No INDEX_IMAGES defined. Bailing out"; \
 		exit 1; \
@@ -99,14 +127,9 @@ load-iib: ## CI target to install Index Image Bundles
 .PHONY: validate-origin
 validate-origin: ## verify the git origin is available
 	@echo "Checking repository:"
-	@echo -n "  $(TARGET_REPO) - branch $(TARGET_BRANCH): "
-	@if [ ! -f /run/.containerenv ]; then\
-		git ls-remote --exit-code --heads $(TARGET_REPO) $(TARGET_BRANCH) >/dev/null &&\
-				echo "OK" ||\
-				(echo "NOT FOUND"; exit 1);\
-	else\
-		echo "Running inside a container: Skipping git ssh checks";\
-	fi
+	@echo -n "  $(TARGET_REPO) - branch '$(TARGET_BRANCH)': "
+	@git ls-remote --exit-code --heads $(TARGET_REPO) $(TARGET_BRANCH) >/dev/null &&\
+		echo "OK" || (echo "NOT FOUND"; exit 1)
 
 .PHONY: validate-cluster
 validate-cluster: ## Do some cluster validations before installing
@@ -130,15 +153,19 @@ validate-schema: ## validates values files against schema in common/clustergroup
 
 .PHONY: validate-prereq
 validate-prereq: ## verify pre-requisites
-	@echo "Checking prerequisites:"
-	@for t in $(EXECUTABLES); do if ! which $$t > /dev/null 2>&1; then echo "No $$t in PATH"; exit 1; fi; done
-	@echo "  Check for '$(EXECUTABLES)': OK"
-	@echo -n "  Check for python-kubernetes: "
-	@if ! ansible -m ansible.builtin.command -a "{{ ansible_python_interpreter }} -c 'import kubernetes'" localhost > /dev/null 2>&1; then echo "Not found"; exit 1; fi
-	@echo "OK"
-	@echo -n "  Check for kubernetes.core collection: "
-	@if ! ansible-galaxy collection list | grep kubernetes.core > /dev/null 2>&1; then echo "Not found"; exit 1; fi
-	@echo "OK"
+	@if [ ! -f /run/.containerenv ]; then\
+	  echo "Checking prerequisites:";\
+	  for t in $(EXECUTABLES); do if ! which $$t > /dev/null 2>&1; then echo "No $$t in PATH"; exit 1; fi; done;\
+	  echo "  Check for '$(EXECUTABLES)': OK";\
+	  echo -n "  Check for python-kubernetes: ";\
+	  if ! ansible -m ansible.builtin.command -a "{{ ansible_python_interpreter }} -c 'import kubernetes'" localhost > /dev/null 2>&1; then echo "Not found"; exit 1; fi;\
+	  echo "OK";\
+	  echo -n "  Check for kubernetes.core collection: ";\
+	  if ! ansible-galaxy collection list | grep kubernetes.core > /dev/null 2>&1; then echo "Not found"; exit 1; fi;\
+	  echo "OK";\
+	else\
+	  echo "Skipping prerequisites check as we're running inside a container";\
+	fi
 
 .PHONY: argo-healthcheck
 argo-healthcheck: ## Checks if all argo applications are synced
