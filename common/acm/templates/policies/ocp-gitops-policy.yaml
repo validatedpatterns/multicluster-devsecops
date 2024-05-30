@@ -140,7 +140,7 @@ spec:
                       - -c
                       - cat /var/run/kube-root-ca/ca.crt /var/run/trusted-ca/ca-bundle.crt > /tmp/ca-bundles/ca-bundle.crt
                         || true
-                      image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+                      image: registry.redhat.io/ubi9/ubi-minimal:latest
                       name: fetch-ca
                       resources: {}
                       volumeMounts:
@@ -195,6 +195,11 @@ spec:
                         memory: 128Mi
                     route:
                       enabled: true
+                      {{- if and (.Values.global.argocdServer) (.Values.global.argocdServer.route) (.Values.global.argocdServer.route.tls) }}
+                      tls:
+                        insecureEdgeTerminationPolicy: {{ default "Redirect" .Values.global.argocdServer.route.tls.insecureEdgeTerminationPolicy }}
+                        termination: {{ default "reencrypt" .Values.global.argocdServer.route.tls.termination }}
+                      {{- end }}
                     service:
                       type: ""
                   sso:
