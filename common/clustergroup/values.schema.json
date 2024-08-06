@@ -230,6 +230,10 @@
           "deprecated": true,
           "description": "This is used to approval strategy for the subscriptions of OpenShift Operators being installed. You can choose Automatic or Manual updates. NOTE: This setting is now available in the subcriptions description in the values file."
         },
+        "autoApproveManualInstallPlans": {
+          "type": "boolean",
+          "description": "This is used to approve automatically those subscriptions of OpenShift Operators that are in Manual with a startingCSV version. You can choose True or False. Defaults: False."
+        },
         "applicationRetryLimit": {
           "type": "integer",
           "description": "Number of failed sync attempt retries; unlimited number of attempts if less than 0"
@@ -261,6 +265,10 @@
             "type": "array",
             "description": "Templated value file paths."
 	},
+        "scheduler": {
+          "type": "object",
+          "description": "If set, it will become the spec of the scheduler/cluster in the managed cluster."
+        },
         "namespaces": {
           "anyOf": [
             {
@@ -273,6 +281,20 @@
           "description": "This is the array of namespaces that the VP framework will create.  In addition, operator groups will also be created for each namespace.",
           "items": {
             "$ref": "#/definitions/Namespaces"
+          }
+        },
+        "nodes": {
+          "anyOf": [
+            {
+              "type": "array"
+            },
+            {
+              "type": "object"
+            }
+          ],
+          "description": "Description of those nodes which ArgoCD will control the labels and/or annotations.",
+          "items": {
+            "$ref": "#/definitions/Nodes"
           }
         },
         "indexImages": {
@@ -393,28 +415,51 @@
           "type": "string"
         }
       ],
-	  "description": "Description of the applications that will be created in the ArgoCD instances. The Application CRD is the Kubernetes resource object representing a deployed application instance in an environment. Two ways of defining applications: Using a list or using a dictionary.",
-	  "additionalProperties": true,
-	  "properties": {
-         "name": {
-		    "type": "string",
-		    "description": "Name of the namespace."
-          },
-	      "labels": {
-		    "type": "array",
-		    "items": {
-		      "$ref": "#/definitions/NameValue"
-		    }
-	      },
-	      "annotations": {
-		    "type": "array",
-		    "items": {
-		      "$ref": "#/definitions/NameValue"
-		    }
-	      }
+      "description": "Description of the applications that will be created in the ArgoCD instances. The Application CRD is the Kubernetes resource object representing a deployed application instance in an environment. Two ways of defining applications: Using a list or using a dictionary.",
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+	  "type": "string",
+	  "description": "Name of the namespace."
+        },
+	"labels": {
+	  "type": "array",
+	  "items": {
+            "$ref": "#/definitions/NameValue"
 	  }
+	},
+	"annotations": {
+          "type": "array",
+	  "items": {
+	    "$ref": "#/definitions/NameValue"
+	  }
+	}
+      }
     },
-	"NameValue": {
+    "Nodes": {
+      "type": "object",
+      "description": "Description of those nodes which ArgoCD will control the labels and/or annotations.",
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the node."
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NameValue"
+          }
+        },
+	"annotations": {
+          "type": "array",
+	  "items": {
+	    "$ref": "#/definitions/NameValue"
+	  }
+	}
+      }
+    },
+    "NameValue": {
       "type": "object",
       "description": "Description of the applications that will be created in the ArgoCD instances. The Application CRD is the Kubernetes resource object representing a deployed application instance in an environment. Two ways of defining applications: Using a list or using a dictionary.",
       "additionalProperties": true,
@@ -427,8 +472,8 @@
           "type": "string",
           "description": "Name of the namespace."
         }
-	  }
-	},
+      }
+    },
     "Applications": {
       "type": "object",
       "description": "Description of the applications that will be created in the ArgoCD instances. The Application CRD is the Kubernetes resource object representing a deployed application instance in an environment. Two ways of defining applications: Using a list or using a dictionary.",
@@ -540,6 +585,26 @@
         "initContainers": {
           "type": "array",
           "description": "A list of initContainers to add to the repo-server if needed"
+        },
+        "resourceTrackingMethod": {
+          "type": "string",
+          "description": "ResourceTrackingMethod defines how Argo CD should track resources that it manages",
+          "enum": [
+            "annotation",
+            "label",
+            "annotation+label"
+          ]
+        },
+        "resourceExclusions": {
+          "type": "string",
+          "description": "ResourceExclusions is used to completely ignore entire classes of resource group/kinds."
+        },
+        "resourceHealthChecks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ArgoCDResourceHealthChecks"
+          },
+          "description": "ResourceHealthChecks customizes resource health check behavior."
         }
       }
     },
@@ -572,6 +637,21 @@
         "name",
         "image"
       ]
+    },
+    "ArgoCDResourceHealthChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "check": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        }
+      }
     },
     "IndexImages": {
       "type": "object",
@@ -758,6 +838,12 @@
             "$ref": "#/definitions/ClusterPools"
           }
         },
+        "clusterDeployments": {
+          "type": "object",
+          "items": {
+            "$ref": "#/definitions/ClusterDeployments"
+          }
+        },
         "clusterSelector": {
           "type": "object",
           "additionalProperties": true
@@ -804,6 +890,32 @@
         "clusters"
       ],
       "title": "ClusterPools"
+    },
+    "ClusterDeployments": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "openshiftVersion": {
+          "type": "string"
+        },
+        "baseDomain": {
+          "type": "string"
+        },
+        "platform": {
+          "type": "object",
+          "$ref": "#/definitions/ClusterPoolsPlatform"
+        }
+      },
+      "required": [
+        "name",
+        "openshiftVersion",
+        "baseDomain",
+        "platform"
+      ],
+      "title": "ClusterDeployments"
     },
     "ClusterPoolsPlatform": {
       "type": "object",
