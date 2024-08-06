@@ -10,7 +10,6 @@ global:
     installPlanApproval: Automatic
     applicationRetryLimit: 20
 
-
 enabled: "all"
 
 # Note that sometimes changing helm values might require a hard refresh (https://github.com/helm/helm/issues/3486)
@@ -20,9 +19,42 @@ clusterGroup:
   targetCluster: in-cluster
   sharedValueFiles: []
 
+#  scheduler:
+#    mastersSchedulable: true
+#    defaultNodeSelector: type=user-node,region=east
+#    profile: HighNodeUtilization 
+
   argoCD:
     initContainers: []
     configManagementPlugins: []
+    # resource tracking can be set to annotation, label, or annotation+label
+    resourceTrackingMethod: label
+    resourceHealthChecks:
+      - kind: PersistentVolumeClaim
+        check: |
+          hs = {}
+          if obj.status ~= nil then
+            if obj.status.phase ~= nil then
+              if obj.status.phase == "Pending" then
+                hs.status = "Healthy"
+                hs.message = obj.status.phase
+                return hs
+              elseif obj.status.phase == "Bound" then
+                hs.status = "Healthy"
+                hs.message = obj.status.phase
+                return hs
+              end
+            end
+          end
+          hs.status = "Progressing"
+          hs.message = "Waiting for PVC"
+          return hs
+    resourceExclusions: |
+      - apiGroups:
+        - tekton.dev
+        kinds:
+        - TaskRun
+        - PipelineRun
 
   imperative:
     jobs: []
@@ -73,6 +105,12 @@ clusterGroup:
 #          - OpenShift
 #
 #  - open-cluster-management
+#
+  nodes: []
+#  nodes:
+#  - m-m00.mycluster.domain.tld:
+#      labels:
+#        cluster.ocs.openshift.io/openshift-storage: ""
 #
   subscriptions: {}
 #  - name: advanced-cluster-management

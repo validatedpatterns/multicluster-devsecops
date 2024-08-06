@@ -1,4 +1,3 @@
-{{- $hasInitContainerCapability := and (.Values.global.experimentalCapabilities) (has "initcontainers" (splitList "," .Values.global.experimentalCapabilities)) }}
 
 {{- if (eq .Values.enabled "all") }}
 {{- $namespace := print $.Values.global.pattern "-" $.Values.clusterGroup.name }}
@@ -37,6 +36,7 @@ spec:
       hs.message = "Waiting for PVC"
       return hs
 
+  resourceTrackingMethod: {{ $.Values.clusterGroup.argoCD.resourceTrackingMethod}}
   applicationInstanceLabelKey: argocd.argoproj.io/instance
   applicationSet:
     resources:
@@ -70,12 +70,11 @@ spec:
   rbac:
     defaultPolicy: role:admin
   repo:
-{{- if $hasInitContainerCapability }}
     initContainers:
     - command:
       - bash
       - -c
-      - cat /var/run/kube-root-ca/ca.crt /var/run/trusted-ca/ca-bundle.crt > /tmp/ca-bundles/ca-bundle.crt || true
+      - cat /var/run/kube-root-ca/ca.crt /var/run/trusted-ca/ca-bundle.crt /var/run/trusted-hub/hub-kube-root-ca.crt > /tmp/ca-bundles/ca-bundle.crt || true
       image: {{ $.Values.clusterGroup.imperative.image }}
       name: fetch-ca
       resources: {}
@@ -84,6 +83,8 @@ spec:
         name: kube-root-ca
       - mountPath: /var/run/trusted-ca
         name: trusted-ca-bundle
+      - mountPath: /var/run/trusted-hub
+        name: trusted-hub-bundle
       - mountPath: /tmp/ca-bundles
         name: ca-bundles
     resources:
@@ -104,16 +105,15 @@ spec:
         name: trusted-ca-bundle
         optional: true
       name: trusted-ca-bundle
+    - configMap:
+        name: trusted-hub-bundle
+        optional: true
+      name: trusted-hub-bundle
     - emptyDir: {}
       name: ca-bundles
 {{- if len $.Values.clusterGroup.argoCD.initContainers }}
 {{ $.Values.clusterGroup.argoCD.initContainers | toPrettyJson }}
 {{- end }}
-{{- else }}
-{{- if len $.Values.clusterGroup.argoCD.initContainers }}
-    initContainers: {{ $.Values.clusterGroup.argoCD.initContainers | toPrettyJson }}
-{{- end }}
-{{- end }}{{/* if $hasInitContainerCapability */}}
 {{- if len $.Values.clusterGroup.argoCD.configManagementPlugins }}
     sidecarContainers:
 {{- range $cmp := $.Values.clusterGroup.argoCD.configManagementPlugins }}
@@ -157,12 +157,9 @@ spec:
       requests:
         cpu: 250m
         memory: 256Mi
-  resourceExclusions: |
-    - apiGroups:
-      - tekton.dev
-      kinds:
-      - TaskRun
-      - PipelineRun
+{{- if $.Values.clusterGroup.argoCD.resourceExclusions }}
+  resourceExclusions: {{- $.Values.clusterGroup.argoCD.resourceExclusions | toYaml | indent 2 }}
+{{- end }}
 {{- if .Values.global.excludeESO }}
     - apiGroups:
       - external-secrets.io
