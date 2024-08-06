@@ -133,6 +133,33 @@ data:
       argoCD:
         configManagementPlugins: []
         initContainers: []
+        resourceExclusions: |
+          - apiGroups:
+            - tekton.dev
+            kinds:
+            - TaskRun
+            - PipelineRun
+        resourceHealthChecks:
+        - check: |
+            hs = {}
+            if obj.status ~= nil then
+              if obj.status.phase ~= nil then
+                if obj.status.phase == "Pending" then
+                  hs.status = "Healthy"
+                  hs.message = obj.status.phase
+                  return hs
+                elseif obj.status.phase == "Bound" then
+                  hs.status = "Healthy"
+                  hs.message = obj.status.phase
+                  return hs
+                end
+              end
+            end
+            hs.status = "Progressing"
+            hs.message = "Waiting for PVC"
+            return hs
+          kind: PersistentVolumeClaim
+        resourceTrackingMethod: label
       imperative:
         activeDeadlineSeconds: 3600
         adminClusterRoleName: imperative-admin-cluster-role
@@ -170,6 +197,14 @@ data:
       - acmlabels:
         - name: clusterGroup
           value: region
+        clusterDeployments:
+          myFirstCluster:
+            baseDomain: blueprints.rhecoeng.com
+            name: aws-cd-one-w-pool
+            openshiftVersion: 4.10.18
+            platform:
+              aws:
+                region: ap-southeast-1
         clusterPools:
           exampleAWSPool:
             baseDomain: blueprints.rhecoeng.com
@@ -202,6 +237,15 @@ data:
           value: "false"
         name: acm-provision-edge
         targetRevision: main
+      - clusterDeployments:
+          mySecondCluster:
+            baseDomain: blueprints.rhecoeng.com
+            name: aws-cd-two-wo-pool
+            openshiftVersion: 4.10.18
+            platform:
+              aws:
+                region: ap-southeast-3
+        name: acm-provision-on-deploy
       - helmOverrides:
         - name: clusterGroup.isHubCluster
           value: "false"
@@ -234,10 +278,22 @@ data:
           operatorGroup: false
       - include-default-og:
           operatorGroup: true
+      nodes:
+      - m-m00.cluster.example.tld:
+          labels:
+            cluster.ocs.openshift.io/openshift-storage: ""
+      - m-m01.cluster.example.tld:
+          labels:
+            cluster.ocs.openshift.io/openshift-storage: ""
+      - m-m02.cluster.example.tld:
+          labels:
+            cluster.ocs.openshift.io/openshift-storage: ""
       operatorgroupExcludes:
       - exclude-og
       projects:
       - datacenter
+      scheduler:
+        mastersSchedulable: true
       sharedValueFiles:
       - /values/aws.yaml
       - /values/4.12.yaml
@@ -482,6 +538,27 @@ spec:
           initContainers:
             # git init happens in /git/repo so that we can set the folder to 0770 permissions
             # reason for that is ansible refuses to create temporary folders in there            
+            - name: fetch-ca
+              image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
+              imagePullPolicy: Always
+              env:
+                - name: HOME
+                  value: /git/home
+              command:
+              - 'sh'
+              - '-c'
+              - >-
+                cat /var/run/kube-root-ca/ca.crt /var/run/trusted-ca/ca-bundle.crt /var/run/trusted-hub/hub-kube-root-ca.crt > /tmp/ca-bundles/ca-bundle.crt || true;
+                ls -l /tmp/ca-bundles/
+              volumeMounts:
+              - mountPath: /var/run/kube-root-ca
+                name: kube-root-ca
+              - mountPath: /var/run/trusted-ca
+                name: trusted-ca-bundle
+              - mountPath: /var/run/trusted-hub
+                name: trusted-hub-bundle
+              - mountPath: /tmp/ca-bundles
+                name: ca-bundles            
             - name: git-init
               image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
               imagePullPolicy: Always
@@ -491,6 +568,8 @@ spec:
               volumeMounts:
               - name: git
                 mountPath: "/git"
+              - name: ca-bundles
+                mountPath: /etc/pki/tls/certs
               command:
               - 'sh'
               - '-c'
@@ -517,8 +596,9 @@ spec:
                 if [ -n "${OUT}" ]; then export HTTPS_PROXY="${OUT}"; fi;
                 OUT="$(oc get proxy.config.openshift.io/cluster -o jsonpath='{.spec.noProxy}' 2>/dev/null)";
                 if [ -n "${OUT}" ]; then export NO_PROXY="${OUT}"; fi;
+                if [ "main" = "HEAD" ]; then BRANCH=""; else BRANCH="--branch main"; fi;
                 mkdir /git/{repo,home};
-                git clone --recurse-submodules --single-branch --branch main --depth 1 -- "${URL}" /git/repo;
+                git clone --recurse-submodules --single-branch ${BRANCH} --depth 1 -- "${URL}" /git/repo;
                 chmod 0770 /git/{repo,home};
             - name: test
               image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
@@ -542,6 +622,14 @@ spec:
                 - name: values-volume
                   mountPath: /values/values.yaml
                   subPath: values.yaml
+                - mountPath: /var/run/kube-root-ca
+                  name: kube-root-ca
+                - mountPath: /var/run/trusted-ca
+                  name: trusted-ca-bundle
+                - mountPath: /var/run/trusted-hub
+                  name: trusted-hub-bundle
+                - mountPath: /tmp/ca-bundles
+                  name: ca-bundles
           containers:            
             - name: "done"
               image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
@@ -558,6 +646,19 @@ spec:
             - name: values-volume
               configMap:
                 name: helm-values-configmap-example
+            - configMap:
+                name: kube-root-ca.crt
+              name: kube-root-ca
+            - configMap:
+                name: trusted-ca-bundle
+                optional: true
+              name: trusted-ca-bundle
+            - configMap:
+                name: trusted-hub-bundle
+                optional: true
+              name: trusted-hub-bundle
+            - name: ca-bundles
+              emptyDir: {}
           restartPolicy: Never
 ---
 # Source: clustergroup/templates/imperative/unsealjob.yaml
@@ -581,6 +682,27 @@ spec:
           initContainers:
             # git init happens in /git/repo so that we can set the folder to 0770 permissions
             # reason for that is ansible refuses to create temporary folders in there            
+            - name: fetch-ca
+              image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
+              imagePullPolicy: Always
+              env:
+                - name: HOME
+                  value: /git/home
+              command:
+              - 'sh'
+              - '-c'
+              - >-
+                cat /var/run/kube-root-ca/ca.crt /var/run/trusted-ca/ca-bundle.crt /var/run/trusted-hub/hub-kube-root-ca.crt > /tmp/ca-bundles/ca-bundle.crt || true;
+                ls -l /tmp/ca-bundles/
+              volumeMounts:
+              - mountPath: /var/run/kube-root-ca
+                name: kube-root-ca
+              - mountPath: /var/run/trusted-ca
+                name: trusted-ca-bundle
+              - mountPath: /var/run/trusted-hub
+                name: trusted-hub-bundle
+              - mountPath: /tmp/ca-bundles
+                name: ca-bundles            
             - name: git-init
               image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
               imagePullPolicy: Always
@@ -590,6 +712,8 @@ spec:
               volumeMounts:
               - name: git
                 mountPath: "/git"
+              - name: ca-bundles
+                mountPath: /etc/pki/tls/certs
               command:
               - 'sh'
               - '-c'
@@ -616,8 +740,9 @@ spec:
                 if [ -n "${OUT}" ]; then export HTTPS_PROXY="${OUT}"; fi;
                 OUT="$(oc get proxy.config.openshift.io/cluster -o jsonpath='{.spec.noProxy}' 2>/dev/null)";
                 if [ -n "${OUT}" ]; then export NO_PROXY="${OUT}"; fi;
+                if [ "main" = "HEAD" ]; then BRANCH=""; else BRANCH="--branch main"; fi;
                 mkdir /git/{repo,home};
-                git clone --recurse-submodules --single-branch --branch main --depth 1 -- "${URL}" /git/repo;
+                git clone --recurse-submodules --single-branch ${BRANCH} --depth 1 -- "${URL}" /git/repo;
                 chmod 0770 /git/{repo,home};
             - name: unseal-playbook
               image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
@@ -643,6 +768,14 @@ spec:
                 - name: values-volume
                   mountPath: /values/values.yaml
                   subPath: values.yaml
+                - mountPath: /var/run/kube-root-ca
+                  name: kube-root-ca
+                - mountPath: /var/run/trusted-ca
+                  name: trusted-ca-bundle
+                - mountPath: /var/run/trusted-hub
+                  name: trusted-hub-bundle
+                - mountPath: /tmp/ca-bundles
+                  name: ca-bundles
           containers:            
             - name: "done"
               image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
@@ -659,6 +792,19 @@ spec:
             - name: values-volume
               configMap:
                 name: helm-values-configmap-example
+            - configMap:
+                name: kube-root-ca.crt
+              name: kube-root-ca
+            - configMap:
+                name: trusted-ca-bundle
+                optional: true
+              name: trusted-ca-bundle
+            - configMap:
+                name: trusted-hub-bundle
+                optional: true
+              name: trusted-hub-bundle
+            - name: ca-bundles
+              emptyDir: {}
           restartPolicy: Never
 ---
 # Source: clustergroup/templates/core/operatorgroup.yaml
@@ -743,9 +889,9 @@ spec:
       - "/values/4.12.yaml"
       parameters:
         - name: global.repoURL
-          value: $ARGOCD_APP_SOURCE_REPO_URL
+          value: https://github.com/pattern-clone/mypattern
         - name: global.targetRevision
-          value: $ARGOCD_APP_SOURCE_TARGET_REVISION
+          value: main
         - name: global.namespace
           value: $ARGOCD_APP_NAMESPACE
         - name: global.pattern
@@ -758,6 +904,12 @@ spec:
           value: "aws"
         - name: global.hubClusterDomain
           value: apps.hub.example.com
+        - name: global.multiSourceSupport
+          value: 
+        - name: global.multiSourceRepoUrl
+          value: 
+        - name: global.multiSourceTargetRevision
+          value: 
         - name: global.localClusterDomain
           value: apps.region.example.com
         - name: global.privateRepo
@@ -813,9 +965,9 @@ spec:
       - "/values/4.12/aws.yaml"
       parameters:
         - name: global.repoURL
-          value: $ARGOCD_APP_SOURCE_REPO_URL
+          value: https://github.com/pattern-clone/mypattern
         - name: global.targetRevision
-          value: $ARGOCD_APP_SOURCE_TARGET_REVISION
+          value: main
         - name: global.namespace
           value: $ARGOCD_APP_NAMESPACE
         - name: global.pattern
@@ -828,6 +980,12 @@ spec:
           value: "aws"
         - name: global.hubClusterDomain
           value: apps.hub.example.com
+        - name: global.multiSourceSupport
+          value: 
+        - name: global.multiSourceRepoUrl
+          value: 
+        - name: global.multiSourceTargetRevision
+          value: 
         - name: global.localClusterDomain
           value: apps.region.example.com
         - name: global.privateRepo
@@ -1115,6 +1273,7 @@ spec:
       hs.message = "Waiting for PVC"
       return hs
 
+  resourceTrackingMethod: label
   applicationInstanceLabelKey: argocd.argoproj.io/instance
   applicationSet:
     resources:
@@ -1148,6 +1307,47 @@ spec:
   rbac:
     defaultPolicy: role:admin
   repo:
+    initContainers:
+    - command:
+      - bash
+      - -c
+      - cat /var/run/kube-root-ca/ca.crt /var/run/trusted-ca/ca-bundle.crt /var/run/trusted-hub/hub-kube-root-ca.crt > /tmp/ca-bundles/ca-bundle.crt || true
+      image: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
+      name: fetch-ca
+      resources: {}
+      volumeMounts:
+      - mountPath: /var/run/kube-root-ca
+        name: kube-root-ca
+      - mountPath: /var/run/trusted-ca
+        name: trusted-ca-bundle
+      - mountPath: /var/run/trusted-hub
+        name: trusted-hub-bundle
+      - mountPath: /tmp/ca-bundles
+        name: ca-bundles
+    resources:
+      limits:
+        cpu: "1"
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+    volumeMounts:
+    - mountPath: /etc/pki/tls/certs
+      name: ca-bundles
+    volumes:
+    - configMap:
+        name: kube-root-ca.crt
+      name: kube-root-ca
+    - configMap:
+        name: trusted-ca-bundle
+        optional: true
+      name: trusted-ca-bundle
+    - configMap:
+        name: trusted-hub-bundle
+        optional: true
+      name: trusted-hub-bundle
+    - emptyDir: {}
+      name: ca-bundles
     resources:
       limits:
         cpu: "1"
@@ -1155,7 +1355,7 @@ spec:
       requests:
         cpu: 250m
         memory: 256Mi
-  resourceExclusions: |
+  resourceExclusions:  |
     - apiGroups:
       - tekton.dev
       kinds:
@@ -1201,6 +1401,33 @@ spec:
   location: ApplicationMenu
   text: 'Example ArgoCD'
 ---
+# Source: clustergroup/templates/core/nodes.yaml
+apiVersion: v1
+kind: Node
+metadata:
+  name: m-m00.cluster.example.tld
+  labels:
+    argocd.argoproj.io/managed-by: mypattern-example
+    cluster.ocs.openshift.io/openshift-storage: ""
+---
+# Source: clustergroup/templates/core/nodes.yaml
+apiVersion: v1
+kind: Node
+metadata:
+  name: m-m01.cluster.example.tld
+  labels:
+    argocd.argoproj.io/managed-by: mypattern-example
+    cluster.ocs.openshift.io/openshift-storage: ""
+---
+# Source: clustergroup/templates/core/nodes.yaml
+apiVersion: v1
+kind: Node
+metadata:
+  name: m-m02.cluster.example.tld
+  labels:
+    argocd.argoproj.io/managed-by: mypattern-example
+    cluster.ocs.openshift.io/openshift-storage: ""
+---
 # Source: clustergroup/templates/core/operatorgroup.yaml
 ---
 apiVersion: operators.coreos.com/v1
@@ -1220,8 +1447,6 @@ kind: OperatorGroup
 metadata:
   name: exclude-targetns-operator-group
   namespace: exclude-targetns
-spec:
-  targetNamespaces:
 ---
 # Source: clustergroup/templates/core/operatorgroup.yaml
 ---
@@ -1243,6 +1468,14 @@ metadata:
 spec:
   targetNamespaces:
   - include-default-og
+---
+# Source: clustergroup/templates/core/scheduler.yaml
+apiVersion: config.openshift.io/v1
+kind: Scheduler
+metadata:
+  name: cluster
+spec:
+  mastersSchedulable: true
 ---
 # Source: clustergroup/templates/core/subscriptions.yaml
 apiVersion: operators.coreos.com/v1alpha1
