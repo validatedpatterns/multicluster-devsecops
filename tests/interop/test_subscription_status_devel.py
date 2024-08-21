@@ -1,7 +1,4 @@
 import logging
-import os
-import re
-import subprocess
 
 import pytest
 from validatedpatterns_tests.interop import subscription
