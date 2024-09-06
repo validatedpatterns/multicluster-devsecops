@@ -81,6 +81,10 @@
             "revision"
           ],
           "properties": {
+            "repoUpstreamURL": {
+              "type": "string",
+              "description": "Upstream URL of the pattern's git repository. When set an in-cluster gitea instance gets spawned and repoURL is ignored"
+            },
             "repoURL": {
               "type": "string",
               "description": "URL of the pattern's git repository"
@@ -93,21 +97,43 @@
         },
         "gitops": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "channel": {
               "type": "string",
               "description": "The channel from which to install the gitops operator"
+            },
+            "operatorSource": {
+              "type": "string",
+              "description": "The catalog source from which to install the gitops operator"
+            }
+          }
+        },
+        "patternsOperator": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "channel": {
+              "type": "string",
+              "description": "The channel from which to install the patterns operator"
+            },
+            "source": {
+              "type": "string",
+              "description": "The catalog source from which to install the patterns operator"
             }
           }
         },
         "multiSourceConfig": {
           "type": "object",
-          "additionalProperties": false,
+          "additionalProperties": true,
           "properties": {
             "enabled": {
               "type": "boolean",
-              "description": "Enable the experimental support for multi source"
+              "description": "Enable the experimental support for multi source for the clustergroup chart"
+            },
+            "helmRepoUrl": {
+              "type": "string",
+              "description": "The helm repo URL for the clustergroup chart"
             }
           }
         },

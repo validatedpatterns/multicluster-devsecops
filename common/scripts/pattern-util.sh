@@ -38,7 +38,8 @@ else
     MYNAME=$(id -n -u)
     MYUID=$(id -u)
     MYGID=$(id -g)
-    PODMAN_ARGS="--passwd-entry ${MYNAME}:x:${MYUID}:${MYGID}:/pattern-home:/bin/bash --user ${MYUID}:${MYGID} --userns keep-id:uid=${MYUID},gid=${MYGID}"
+    PODMAN_ARGS="--passwd-entry ${MYNAME}:x:${MYUID}:${MYGID}::/pattern-home:/bin/bash --user ${MYUID}:${MYGID} --userns keep-id:uid=${MYUID},gid=${MYGID}"
+
 fi
 
 if [ -n "$KUBECONFIG" ]; then
@@ -73,7 +74,14 @@ podman run -it --rm --pull=newer \
 	--security-opt label=disable \
 	-e EXTRA_HELM_OPTS \
 	-e EXTRA_PLAYBOOK_OPTS \
+	-e VALUES_SECRET \
 	-e KUBECONFIG \
+	-e K8S_AUTH_HOST \
+	-e K8S_AUTH_VERIFY_SSL \
+	-e K8S_AUTH_SSL_CA_CERT \
+	-e K8S_AUTH_USERNAME \
+	-e K8S_AUTH_PASSWORD \
+	-e K8S_AUTH_TOKEN \
 	${PKI_HOST_MOUNT_ARGS} \
 	-v "${HOME}":"${HOME}" \
 	-v "${HOME}":/pattern-home \

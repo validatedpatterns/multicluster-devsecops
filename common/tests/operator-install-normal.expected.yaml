@@ -7,7 +7,7 @@ metadata:
   namespace: openshift-operators
 data:
   gitops.catalogSource: redhat-operators
-  gitops.channel: gitops-1.12
+  gitops.channel: gitops-1.13
 
   # gitops.sourceNamespace: GitOpsDefaultCatalogSourceNamespace
   # gitops.installApprovalPlan: GitOpsDefaultApprovalPlan
@@ -22,7 +22,7 @@ metadata:
   namespace: openshift-operators
 spec:
   clusterGroupName: example
-  gitSpec:
+  gitSpec: 
     targetRepo: https://github.com/pattern-clone/mypattern
     targetRevision: main 
   multiSourceConfig:
