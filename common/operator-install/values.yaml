@@ -3,15 +3,21 @@ global:
 
 main:
   git:
+    # Uncommenting this will set the `originRepo` with the below value
+    # when `originRepo` is set, an in-cluster gitea will automatically be spawned.
+    # In this case `originRepo` will point to the upstream repository and `targetRepo`
+    # will point to the internal in-cluster gitea mirror
+    # repoUpstreamURL: https://github.com/validatedpatterns/multicloud-gitops
     repoURL: https://github.com/pattern-clone/mypattern
     revision: main
 
   gitops:
-    channel: "gitops-1.12"
+    channel: "gitops-1.13"
     operatorSource: redhat-operators
 
   multiSourceConfig:
     enabled: false
+    # helmRepoUrl: registry.internal.network/helm
 
   # String to enable certain experimental capabilities in the operator and the
   # framework. Not needed unless you know exactly what you're doing.
