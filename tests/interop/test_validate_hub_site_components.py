@@ -134,7 +134,7 @@ def test_validate_acm_self_registration_managed_clusters(openshift_dyn_client):
         logger.error(f"FAIL: {err_msg}")
         assert False, err_msg
     else:
-        logger.info(f"PASS: Edge site is self registered")
+        logger.info("PASS: Edge site is self registered")
 
 
 @pytest.mark.validate_argocd_applications_health_hub_site
