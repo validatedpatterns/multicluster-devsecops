@@ -17,37 +17,10 @@ def test_subscription_status_prod(openshift_dyn_client):
         "rhacs-operator": ["openshift-operators"],
     }
 
-    (
-        operator_versions,
-        missing_subs,
-        unhealthy_subs,
-        missing_installplans,
-        upgrades_pending,
-    ) = subscription.subscription_status(openshift_dyn_client, expected_subs)
-
-    if missing_subs:
-        logger.error(f"FAIL: The following subscriptions are missing: {missing_subs}")
-    if unhealthy_subs:
-        logger.error(
-            f"FAIL: The following subscriptions are unhealthy: {unhealthy_subs}"
-        )
-    if missing_installplans:
-        logger.error(
-            f"FAIL: The install plan for the following subscriptions is missing: {missing_installplans}"
-        )
-    if upgrades_pending:
-        logger.error(
-            f"FAIL: The following subscriptions are in UpgradePending state: {upgrades_pending}"
-        )
-
-    cluster_version = subscription.openshift_version(openshift_dyn_client)
-    logger.info(f"Openshift version:\n{cluster_version.instance.status.history}")
-
-    for line in operator_versions:
-        logger.info(line)
-
-    if missing_subs or unhealthy_subs or missing_installplans or upgrades_pending:
-        err_msg = "Subscription status check failed"
+    err_msg = subscription.subscription_status(
+        openshift_dyn_client, expected_subs, diff=False
+    )
+    if err_msg:
         logger.error(f"FAIL: {err_msg}")
         assert False, err_msg
     else:
