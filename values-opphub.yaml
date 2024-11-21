@@ -54,15 +54,16 @@ clusterGroup:
 
   applications:
     acm:
-      name: acm   #arbitary
+      name: acm
       namespace: open-cluster-management
       project: opp
-      path: common/acm
+      chart: acm
+      chartVersion: 0.1.*
       ignoreDifferences:
-      - group: internal.open-cluster-management.io
-        kind: ManagedClusterInfo
-        jsonPointers:
-          - /spec/loggingCA
+        - group: internal.open-cluster-management.io
+          kind: ManagedClusterInfo
+          jsonPointers:
+            - /spec/loggingCA
 
     opp:
       name: opp
@@ -74,34 +75,15 @@ clusterGroup:
       name: vault
       namespace: vault
       project: hub
-      chart: vault
-      repoURL: https://helm.releases.hashicorp.com
-      targetRevision: v0.19.0
-      overrides:
-      - name: global.openshift
-        value: "true"
-      - name: injector.enabled
-        value: "false"
-      - name: ui.enabled
-        value: "true"
-      - name: ui.serviceType
-        value: LoadBalancer
-      - name: server.route.enabled
-        value: "true"
-      - name: server.route.host
-        value: null
-      - name: server.route.tls.termination
-        value: edge
-      - name: server.image.repository
-        value: "registry.connect.redhat.com/hashicorp/vault"
-      - name: server.image.tag
-        value: "1.9.2-ubi"
+      chart: hashicorp-vault
+      chartVersion: 0.1.*
 
     golang-external-secrets:
       name: golang-external-secrets
       namespace: golang-external-secrets
-      project: golang-external-secrets
-      path: common/golang-external-secrets
+      project: hub
+      chart: golang-external-secrets
+      chartVersion: 0.1.*
 
     cli-tools:
       name: cli-tools
