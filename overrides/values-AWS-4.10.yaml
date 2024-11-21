@@ -1,3 +1,0 @@
-cloudProvider:
-  storageClass: gp2
-  provisioner: kubernetes.io/aws-ebs
