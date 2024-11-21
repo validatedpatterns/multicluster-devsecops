@@ -11,6 +11,16 @@ function version {
 if [ -z "$PATTERN_UTILITY_CONTAINER" ]; then
 	PATTERN_UTILITY_CONTAINER="quay.io/hybridcloudpatterns/utility-container"
 fi
+# If PATTERN_DISCONNECTED_HOME is set it will be used to populate both PATTERN_UTILITY_CONTAINER
+# and PATTERN_INSTALL_CHART automatically
+if [ -n "${PATTERN_DISCONNECTED_HOME}" ]; then
+    PATTERN_UTILITY_CONTAINER="${PATTERN_DISCONNECTED_HOME}/utility-container"
+    PATTERN_INSTALL_CHART="oci://${PATTERN_DISCONNECTED_HOME}/pattern-install"
+    echo "PATTERN_DISCONNECTED_HOME is set to ${PATTERN_DISCONNECTED_HOME}"
+    echo "Setting the following variables:"
+    echo "  PATTERN_UTILITY_CONTAINER: ${PATTERN_UTILITY_CONTAINER}"
+    echo "  PATTERN_INSTALL_CHART: ${PATTERN_INSTALL_CHART}"
+fi
 
 readonly commands=(podman)
 for cmd in ${commands[@]}; do is_available "$cmd"; done
@@ -71,22 +81,28 @@ fi
 # $HOME is mounted to /root because the UID in the container is 0 and that's where SSH looks for credentials
 
 podman run -it --rm --pull=newer \
-	--security-opt label=disable \
-	-e EXTRA_HELM_OPTS \
-	-e EXTRA_PLAYBOOK_OPTS \
-	-e VALUES_SECRET \
-	-e KUBECONFIG \
-	-e K8S_AUTH_HOST \
-	-e K8S_AUTH_VERIFY_SSL \
-	-e K8S_AUTH_SSL_CA_CERT \
-	-e K8S_AUTH_USERNAME \
-	-e K8S_AUTH_PASSWORD \
-	-e K8S_AUTH_TOKEN \
-	${PKI_HOST_MOUNT_ARGS} \
-	-v "${HOME}":"${HOME}" \
-	-v "${HOME}":/pattern-home \
-	${PODMAN_ARGS} \
-	${EXTRA_ARGS} \
-	-w "$(pwd)" \
-	"$PATTERN_UTILITY_CONTAINER" \
-	$@
+    --security-opt label=disable \
+    -e EXTRA_HELM_OPTS \
+    -e EXTRA_PLAYBOOK_OPTS \
+    -e TARGET_ORIGIN \
+    -e NAME \
+    -e TOKEN_SECRET \
+    -e TOKEN_NAMESPACE \
+    -e VALUES_SECRET \
+    -e KUBECONFIG \
+    -e PATTERN_INSTALL_CHART \
+    -e PATTERN_DISCONNECTED_HOME \
+    -e K8S_AUTH_HOST \
+    -e K8S_AUTH_VERIFY_SSL \
+    -e K8S_AUTH_SSL_CA_CERT \
+    -e K8S_AUTH_USERNAME \
+    -e K8S_AUTH_PASSWORD \
+    -e K8S_AUTH_TOKEN \
+    ${PKI_HOST_MOUNT_ARGS} \
+    -v "${HOME}":"${HOME}" \
+    -v "${HOME}":/pattern-home \
+    ${PODMAN_ARGS} \
+    ${EXTRA_ARGS} \
+    -w "$(pwd)" \
+    "$PATTERN_UTILITY_CONTAINER" \
+    $@

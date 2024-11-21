@@ -102,10 +102,11 @@ clusterGroup:
 
   applications:
     acm:
-      name: acm   #arbitary
+      name: acm
       namespace: open-cluster-management
       project: opp
-      path: common/acm
+      chart: acm
+      chartVersion: 0.1.*
       ignoreDifferences:
       - group: internal.open-cluster-management.io
         kind: ManagedClusterInfo
@@ -151,13 +152,15 @@ clusterGroup:
       name: vault
       namespace: vault
       project: hub
-      path: common/hashicorp-vault
+      chart: hashicorp-vault
+      chartVersion: 0.1.*
 
     golang-external-secrets:
       name: golang-external-secrets
       namespace: golang-external-secrets
       project: external-secrets
-      path: common/golang-external-secrets
+      chart: golang-external-secrets
+      chartVersion: 0.1.*
 
     external-secrets:
       name: external-secrets
