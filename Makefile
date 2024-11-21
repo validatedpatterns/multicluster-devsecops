@@ -17,6 +17,3 @@ install: operator-deploy post-install ## installs the pattern, inits the vault a
 post-install: ## Post-install tasks - vault init and load-secrets
 	make load-secrets
 	echo "Done"
-
-test:
-	@make -f common/Makefile PATTERN_OPTS="-f values-global.yaml -f values-hub.yaml" test
