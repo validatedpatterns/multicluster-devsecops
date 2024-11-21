@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: label-storage-nodes
-  namespace: {{ .Values.ocs.namespace }}
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
