@@ -1,3 +1,8 @@
+storageSystem:
+  deploy: true
+  inventory:
+    useSpecificNodes: false
+
 clusterGroup:
   name: hub
   isHubCluster: true
@@ -81,8 +86,9 @@ clusterGroup:
     storage:
       name: storage
       namespace: openshift-storage
-      project: opp
-      path: charts/hub/odf
+      chart: openshift-data-foundations
+      project: hub
+      chartVersion: 0.1.*
 
     quay-registry:
       name: quay-registry

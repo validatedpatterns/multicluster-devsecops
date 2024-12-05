@@ -28,6 +28,11 @@ global:
   git:
     taskImage: image-registry.openshift-image-registry.svc:5000/openshift/tools
 
+storageSystem:
+  deploy: true
+  inventory:
+    useSpecificNodes: False
+
 clusterGroup:
   name: hub
   isHubCluster: true
@@ -129,7 +134,8 @@ clusterGroup:
       name: storage
       namespace: openshift-storage
       project: opp
-      path: charts/hub/odf
+      chart: openshift-data-foundations
+      chartVersion: 0.1.*
 
     quay-registry:
       name: quay-registry
