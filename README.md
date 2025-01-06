@@ -5,7 +5,7 @@
 ## Start Here
 
 If you've followed a link to this repository, but are not really sure what it contains
-or how to use it, head over to [Multicluster Devsecops](https://hybrid-cloud-patterns.io/devsecops/)
+or how to use it, head over to [Multicluster Devsecops](https://validatedpatterns.io/devsecops/)
 for additional context and installation instructions
 
 ## Cluster requirements
