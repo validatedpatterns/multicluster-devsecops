@@ -8,6 +8,10 @@ endif
 # the command line. I.e. we can set things without having to tweak values files
 EXTRA_HELM_OPTS ?=
 
+# This variable can be set in order to pass additional ansible-playbook arguments from the
+# the command line. I.e. we can set -vvv for more verbose logging
+EXTRA_PLAYBOOK_OPTS ?=
+
 # INDEX_IMAGES=registry-proxy.engineering.redhat.com/rh-osbs/iib:394248
 # or
 # INDEX_IMAGES=registry-proxy.engineering.redhat.com/rh-osbs/iib:394248,registry-proxy.engineering.redhat.com/rh-osbs/iib:394249
@@ -18,7 +22,7 @@ TARGET_ORIGIN ?= origin
 # This is because we expect to use tokens for repo authentication as opposed to SSH keys
 TARGET_REPO=$(shell git ls-remote --get-url --symref $(TARGET_ORIGIN) | sed -e 's/.*URL:[[:space:]]*//' -e 's%^git@%%' -e 's%^https://%%' -e 's%:%/%' -e 's%^%https://%')
 # git branch --show-current is also available as of git 2.22, but we will use this for compatibility
-TARGET_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+TARGET_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
 
 UUID_FILE ?= ~/.config/validated-patterns/pattern-uuid
 UUID_HELM_OPTS ?=
@@ -111,7 +115,7 @@ secrets-backend-none: ## Edits values files to remove secrets manager + ESO
 .PHONY: load-iib
 load-iib: ## CI target to install Index Image Bundles
 	@set -e; if [ x$(INDEX_IMAGES) != x ]; then \
-		ansible-playbook rhvp.cluster_utils.iib_ci; \
+		ansible-playbook $(EXTRA_PLAYBOOK_OPTS) rhvp.cluster_utils.iib_ci; \
 	else \
 		echo "No INDEX_IMAGES defined. Bailing out"; \
 		exit 1; \
@@ -159,15 +163,20 @@ validate-cluster: ## Do some cluster validations before installing
 validate-schema: ## validates values files against schema in common/clustergroup
 	$(eval VAL_PARAMS := $(shell for i in ./values-*.yaml; do echo -n "$${i} "; done))
 	@echo -n "Validating clustergroup schema of: "
-	@set -e; for i in $(VAL_PARAMS); do echo -n " $$i"; helm template common/clustergroup $(HELM_OPTS) -f "$${i}" >/dev/null; done
+	@set -e; for i in $(VAL_PARAMS); do echo -n " $$i"; helm template oci://quay.io/hybridcloudpatterns/clustergroup $(HELM_OPTS) -f "$${i}" >/dev/null; done
 	@echo
 
 .PHONY: validate-prereq
 validate-prereq: ## verify pre-requisites
+	$(eval GLOBAL_PATTERN := $(shell yq -r .global.pattern values-global.yaml))
+	@if [ $(NAME) != $(GLOBAL_PATTERN) ]; then\
+		echo "";\
+		echo "WARNING: folder directory is \"$(NAME)\" and global.pattern is set to \"$(GLOBAL_PATTERN)\"";\
+		echo "this can create problems. Please make sure they are the same!";\
+		echo "";\
+	fi
 	@if [ ! -f /run/.containerenv ]; then\
 	  echo "Checking prerequisites:";\
-	  for t in $(EXECUTABLES); do if ! which $$t > /dev/null 2>&1; then echo "No $$t in PATH"; exit 1; fi; done;\
-	  echo "  Check for '$(EXECUTABLES)': OK";\
 	  echo -n "  Check for python-kubernetes: ";\
 	  if ! ansible -m ansible.builtin.command -a "{{ ansible_python_interpreter }} -c 'import kubernetes'" localhost > /dev/null 2>&1; then echo "Not found"; exit 1; fi;\
 	  echo "OK";\
@@ -188,16 +197,16 @@ validate-prereq: ## verify pre-requisites
 .PHONY: argo-healthcheck
 argo-healthcheck: ## Checks if all argo applications are synced
 	@echo "Checking argo applications"
-	$(eval APPS := $(shell oc get applications -A -o jsonpath='{range .items[*]}{@.metadata.namespace}{","}{@.metadata.name}{"\n"}{end}'))
+	$(eval APPS := $(shell oc get applications.argoproj.io -A -o jsonpath='{range .items[*]}{@.metadata.namespace}{","}{@.metadata.name}{"\n"}{end}'))
 	@NOTOK=0; \
 	for i in $(APPS); do\
 		n=`echo "$${i}" | cut -f1 -d,`;\
 		a=`echo "$${i}" | cut -f2 -d,`;\
-		STATUS=`oc get -n "$${n}" application/"$${a}" -o jsonpath='{.status.sync.status}'`;\
+		STATUS=`oc get -n "$${n}" applications.argoproj.io/"$${a}" -o jsonpath='{.status.sync.status}'`;\
 		if [[ $$STATUS != "Synced" ]]; then\
 			NOTOK=$$(( $${NOTOK} + 1));\
 		fi;\
-		HEALTH=`oc get -n "$${n}" application/"$${a}" -o jsonpath='{.status.health.status}'`;\
+		HEALTH=`oc get -n "$${n}" applications.argoproj.io/"$${a}" -o jsonpath='{.status.health.status}'`;\
 		if [[ $$HEALTH != "Healthy" ]]; then\
 			NOTOK=$$(( $${NOTOK} + 1));\
 		fi;\
@@ -214,7 +223,7 @@ argo-healthcheck: ## Checks if all argo applications are synced
 .PHONY: qe-tests
 qe-tests: ## Runs the tests that QE runs
 	@set -e; if [ -f ./tests/interop/run_tests.sh ]; then \
-		./tests/interop/run_tests.sh; \
+		pushd ./tests/interop; ./run_tests.sh; popd; \
 	else \
 		echo "No ./tests/interop/run_tests.sh found skipping"; \
 	fi
