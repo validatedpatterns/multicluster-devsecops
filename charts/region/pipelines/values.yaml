@@ -26,7 +26,7 @@ global:
   app:
     gatling:
       image: quay.io/hybridcloudpatterns/gatling:latest
-      repo: https://github.com/hybrid-cloud-patterns/spring-petclinic-gatling
+      repo: https://github.com/validatedpatterns/spring-petclinic-gatling
     zapImage: quay.io/hybridcloudpatterns/zap2docker-stable
     crdaImage: quay.io/jchraibi/crda-image:0.1
     petclinic:
