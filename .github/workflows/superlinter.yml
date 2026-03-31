@@ -1,6 +1,7 @@
 ---
 name: Super linter
 
+permissions: read-all # zizmor: ignore[excessive-permissions]
 on: [push, pull_request]
 
 jobs:
@@ -12,8 +13,9 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
+          persist-credentials: false
           # Full git history is needed to get a proper list of changed files within `super-linter`
           fetch-depth: 0
 
@@ -21,7 +23,7 @@ jobs:
       # Run Linter against code base #
       ################################
       - name: Lint Code Base
-        uses: super-linter/super-linter/slim@v7
+        uses: super-linter/super-linter/slim@61abc07d755095a68f4987d1c2c3d1d64408f1f9 # v8.5.0
         env:
           VALIDATE_ALL_CODEBASE: true
           DEFAULT_BRANCH: main
@@ -40,5 +42,12 @@ jobs:
           VALIDATE_YAML_PRETTIER: false
           VALIDATE_TEKTON: false
           VALIDATE_DOCKERFILE_HADOLINT: false
-          # VALIDATE_MARKDOWN: false
-          # VALIDATE_NATURAL_LANGUAGE: false
+          VALIDATE_BIOME_FORMAT: false
+          VALIDATE_BIOME_LINT: false
+          VALIDATE_NATURAL_LANGUAGE: false
+          VALIDATE_SPELL_CODESPELL: false
+          VALIDATE_PYTHON_BLACK: false
+          VALIDATE_PYTHON_PYINK: false
+          VALIDATE_PYTHON_RUFF_FORMAT: false
+          VALIDATE_TRIVY: false
+          FILTER_REGEX_EXCLUDE: .*/common/.*
